@@ -7,8 +7,6 @@
 #include <thread>
 #include <algorithm>
 #include "Camera.h"
-#include"SoundComponent.h"
-
 
 class Engine : virtual WindowContainer
 {

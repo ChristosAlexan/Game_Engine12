@@ -97,6 +97,15 @@
     <Filter Include="ECS\Source">
       <UniqueIdentifier>{a640336c-bc28-43ab-903c-3f328253976d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ECS\Entities">
+      <UniqueIdentifier>{ba269184-333f-4bce-b6dc-3e20235bc64e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Entities\Header">
+      <UniqueIdentifier>{0a50cc57-963e-4479-841e-7c4557050778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Entities\Source">
+      <UniqueIdentifier>{6f94d4b2-6cc6-48dd-92f9-ebc6e975216c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -144,9 +153,6 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>GFX\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SoundComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
@@ -163,9 +169,6 @@
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CubeEntity12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseEntity12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RectEntity12.cpp">
@@ -189,26 +192,35 @@
     <ClCompile Include="ErrorLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imgui.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_demo.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_draw.cpp">
+    <ClCompile Include="imgui_impl_win32.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
     <ClCompile Include="imgui_impl_dx12.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="imgui_tables.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="imgui_widgets.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="imgui_impl_win32.cpp">
+    <ClCompile Include="imgui_tables.cpp">
       <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseEntity12.cpp">
+      <Filter>ECS\Entities\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture12.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorAllocator.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -260,9 +272,6 @@
     <ClInclude Include="Frustum.h">
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoundComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DX12.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
@@ -288,9 +297,6 @@
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DynamicUploadBuffer.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseEntity12.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX12Includes.h">
@@ -338,29 +344,38 @@
     <ClInclude Include="ErrorLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imconfig.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui.h">
+    <ClInclude Include="imgui_impl_win32.h">
       <Filter>ImGui</Filter>
     </ClInclude>
     <ClInclude Include="imgui_impl_dx12.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_internal.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_rectpack.h">
+    <ClInclude Include="imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
     <ClInclude Include="imstb_textedit.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="imstb_truetype.h">
+    <ClInclude Include="imstb_rectpack.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_impl_win32.h">
+    <ClInclude Include="imgui_internal.h">
       <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseEntity12.h">
+      <Filter>ECS\Entities\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture12.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorAllocator.h">
+      <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

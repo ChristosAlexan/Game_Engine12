@@ -3,7 +3,7 @@
 #include <d3d12.h>
 #include "DX12.h"
 #include <stdexcept>
-
+#include "ErrorLogger.h"
 
 DX12::DX12()
 {
@@ -52,9 +52,12 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     CreateCommandObjects();
     CreateSwapChainAndRTVs(hwnd, width, height);
     CreateFenceAndSyncObjects();
+    CreateDescriptorHeaps();
     CreateDepthStencilBuffer(width, height);
     InitializeConstantBuffers();
     InitializeShaders();
+    if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), srvHeap.Get()))
+        ErrorLogger::Log("Failed to initialize ImGui!");
     CreateScene(camera, width, height);
 }
 
@@ -89,10 +92,7 @@ void DX12::CreateDeviceAndFactory()
         hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
             break;
     }
-
-    //if (!hr) {
-        //throw std::runtime_error("Failed to create D3D12 device");
-    //}
+    COM_ERROR_IF_FAILED(hr, "Failed to create device");
 }
 void DX12::CreateCommandObjects()
 {
@@ -104,21 +104,16 @@ void DX12::CreateCommandObjects()
     queueDesc.NodeMask = 0;
 
     HRESULT hr = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create command queue");
-    }
-
+    COM_ERROR_IF_FAILED(hr, "Failed to create command queue");
+ 
     // --- Create Command Allocator ---
     hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create command allocator");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create command allocator");
 
     // --- Create Command List ---
     hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create command list");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create command list");
+   
     commandList->Close();
 }
 
@@ -131,9 +126,8 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
     HRESULT hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create RTV descriptor heap");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
+  
     rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
     // --- Create Swap Chain ---
@@ -148,9 +142,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
 
     Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
     hr = factory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, &tempSwapChain);
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create swap chain");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create swap chain");
 
     tempSwapChain.As(&swapChain);
     frameIndex = swapChain->GetCurrentBackBufferIndex();
@@ -167,14 +159,13 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
 void DX12::CreateFenceAndSyncObjects()
 {
     HRESULT hr = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create fence");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create fence");
+
     fenceValue = 1;
 
     fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
     if (fenceEvent == nullptr) {
-        throw std::runtime_error("Failed to create fence event");
+        COM_ERROR_IF_FAILED(hr, "Failed to create fence event");
     }
 }
 
@@ -192,7 +183,7 @@ void DX12::CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc)
     );
     if (FAILED(hr)) {
         OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        throw std::runtime_error("Failed to serialize root signature");
+        COM_ERROR_IF_FAILED(hr, "Failed to serialize root signature");
     }
 
     // Create
@@ -202,10 +193,26 @@ void DX12::CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc)
         serializedRootSig->GetBufferSize(),
         IID_PPV_ARGS(&rootSignature)
     );
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create root signature");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create root signature");
+}
 
+void DX12::CreateDescriptorHeaps()
+{
+    HRESULT hr;
+    // --- Create SRV Descriptor Heap ---
+    D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+    heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    heapDesc.NumDescriptors = 64;
+    heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&srvHeap));
+    COM_ERROR_IF_FAILED(hr, "Failed to create srv descriptor heap");
+
+    // --- Create DSV Descriptor Heap ---
+    heapDesc.NumDescriptors = 1;
+    heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+    heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+    hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&dsvHeap));
+    COM_ERROR_IF_FAILED(hr, "Failed to create dsv descriptor heap");
 }
 
 void DX12::InitializeShaders()
@@ -247,25 +254,13 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob)
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
     hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create pipeline state");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to create pipeline state");
 }
 
 void DX12::CreateDepthStencilBuffer(int& width, int& height)
 {
     HRESULT hr;
     DXGI_FORMAT depthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-    // --- Create DSV Descriptor Heap ---
-    D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-    dsvHeapDesc.NumDescriptors = 1;
-    dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-    dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    hr = device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to create descriptor heap");
-    }
 
     CD3DX12_RESOURCE_DESC depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         depthFormat,
@@ -290,9 +285,7 @@ void DX12::CreateDepthStencilBuffer(int& width, int& height)
         &clearValue,
         IID_PPV_ARGS(&depthStencilBuffer)
     );
-    if (FAILED(hr)) {
-        throw std::runtime_error("Failed to commit resource");
-    }
+    COM_ERROR_IF_FAILED(hr, "Failed to commit resource");
 
     device->CreateDepthStencilView(
         depthStencilBuffer.Get(),
@@ -358,12 +351,13 @@ void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
     );
 
     
-
-    //m_rectEntity.Draw(commandList.Get(), dynamicCB.get(), camera);
-    //m_cubeEntity.Draw(commandList.Get(), dynamicCB.get(), camera);
-  
     m_sceneManager.RenderEntities(commandList.Get(), dynamicCB.get(), camera, dt);
 
+    ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
+    commandList->SetDescriptorHeaps(1, heaps);
+    
+    m_gui.BeginRender();
+    m_gui.EndRender(commandList.Get());
     // Transition back buffer to present
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[frameIndex].Get(),

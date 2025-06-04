@@ -1,50 +1,68 @@
 #include "GFXGui.h"
+#include "ErrorLogger.h"
 
 GFXGui::GFXGui()
 {
 }
 
-void GFXGui::Initialize(HWND hwnd)
+bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
 {
-
+	bool result;
 	//Setup ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
 	
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	io.ConfigFlags |= ImGuiConfigFlags_None;
-	//io.ConfigFlags |= ImGuiBackendFlags_PlatformHasViewports;
-	//io.ConfigFlags |= ImGuiBackendFlags_RendererHasViewports;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 
 
-	ImGui_ImplWin32_Init(hwnd);
-	//ImGui_ImplDX11_Init(device, deviceContext);
-	ImGui::StyleColorsDark();
+	result = ImGui_ImplWin32_Init(hwnd);
+
+	if (!result)
+	{
+		ErrorLogger::Log("Failed to initialize ImGui: Win32!");
+		return false;
+	}
+	
+	ImGui_ImplDX12_InitInfo init_info = {};
+	init_info.Device = device;
+	init_info.CommandQueue = cmdQueue;
+	init_info.NumFramesInFlight = 2;
+	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Or your render target format.
+	init_info.SrvDescriptorHeap = descriptorHeap;
+	init_info.LegacySingleSrvCpuDescriptor = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	init_info.LegacySingleSrvGpuDescriptor = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	init_info.SrvDescriptorAllocFn = nullptr;
+	init_info.SrvDescriptorFreeFn = nullptr;
+
+	result = ImGui_ImplDX12_Init(&init_info);
+
+	if (!result)
+	{
+		ErrorLogger::Log("Failed to initialize ImGui: DX12!");
+		return false;
+	}
+	EditorStyle();
+	//ImGui::StyleColorsDark();
+	return true;
 }
 
 
 void GFXGui::BeginRender()
 {
-#ifndef DX12_API
-	ImGui_ImplDX11_NewFrame();
-#else
-
-#endif // DX12_API
-
-
+	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
+	ImGui::ShowDemoWindow();
 }
 
-void GFXGui::EndRender()
+void GFXGui::EndRender(ID3D12GraphicsCommandList* cmdList)
 {
 	ImGui::Render();
-	//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
 }
 
 void GFXGui::EditorStyle()

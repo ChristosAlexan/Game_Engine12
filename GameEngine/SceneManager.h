@@ -8,6 +8,7 @@
 #include "RenderingECS.h"
 #include "DynamicUploadBuffer.h"
 #include "Camera.h"
+#include "AssetManager.h"
 
 namespace ECS
 {
@@ -29,12 +30,11 @@ namespace ECS
 	private:
 		ECS::EntityID m_NextEntityID = 0;
 		std::unordered_map<EntityID, std::string> entityNames;
-
-		std::unordered_map<uint32_t, Mesh12> m_meshes;
-		std::unordered_map<uint32_t, Material> m_materials;
-
+		//std::unordered_map<std::string, std::shared_ptr<Mesh12>> m_meshes;
+		//std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 		std::unordered_map<EntityID, TransformComponent> m_transformComponents;
-		std::unordered_map<EntityID, RenderComponent> m_renderComponents;
+		std::vector<std::pair<EntityID, RenderComponent>> m_renderComponents;
+		AssetManager m_assetManager;
 	};
 }
 

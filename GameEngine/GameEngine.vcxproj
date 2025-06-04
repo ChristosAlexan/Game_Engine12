@@ -224,14 +224,14 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\includes;..\Includes\PhysX</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;d3d11.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;assimp-vc143-mt.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;LowLevel_static_64.lib;LowLevelAABB_static_64.lib;LowLevelDynamics_static_64.lib;PhysX_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysXTask_static_64.lib;PhysXVehicle_static_64.lib;SampleBase_static_64.lib;SampleFramework_static_64.lib;SamplesToolkit_static_64.lib;SceneQuery_static_64.lib;SimulationController_static_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;nvToolsExt64_1.lib;fmod_vc.lib;fmodL_vc.lib;fsbank_vc.lib;fmodstudio_vc.lib;fmodstudioL_vc.lib;GFSDK_SSAO_D3D11.win64.lib;NvBlast.lib;NvBlastExtAssetUtils.lib;NvBlastExtAuthoring.lib;NvBlastExtSerialization.lib;NvBlastExtShaders.lib;NvBlastExtStress.lib;NvBlastExtTkSerialization.lib;NvBlastGlobals.lib;NvBlastTk.lib;UnitTests.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\Libraries</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
@@ -246,6 +246,7 @@
     <ClCompile Include="COMException.cpp" />
     <ClCompile Include="CubeEntity12.cpp" />
     <ClCompile Include="CubeShape12.cpp" />
+    <ClCompile Include="DescriptorAllocator.cpp" />
     <ClCompile Include="DX12.cpp" />
     <ClCompile Include="DXCShaderCompiler.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -269,7 +270,7 @@
     <ClCompile Include="RectShape12.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Shapes12.cpp" />
-    <ClCompile Include="SoundComponent.cpp" />
+    <ClCompile Include="Texture12.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="ConstantBufferTypes.h" />
     <ClInclude Include="CubeEntity12.h" />
     <ClInclude Include="CubeShape12.h" />
+    <ClInclude Include="DescriptorAllocator.h" />
     <ClInclude Include="DX12.h" />
     <ClInclude Include="DX12Includes.h" />
     <ClInclude Include="DXCShaderCompiler.h" />
@@ -322,8 +324,8 @@
     <ClInclude Include="RenderWindow.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shapes12.h" />
-    <ClInclude Include="SoundComponent.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="Texture12.h" />
     <ClInclude Include="TransformECS.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer12.h" />
@@ -979,6 +981,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.targets')" />
     <Import Project="..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.targets" Condition="Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.targets')" />
+    <Import Project="..\packages\directxtex_desktop_win10.2025.3.25.2\build\native\directxtex_desktop_win10.targets" Condition="Exists('..\packages\directxtex_desktop_win10.2025.3.25.2\build\native\directxtex_desktop_win10.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -988,5 +991,6 @@
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.615.1\build\native\Microsoft.Direct3D.D3D12.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.DXC.1.8.2502.8\build\native\Microsoft.Direct3D.DXC.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_win10.2025.3.25.2\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_win10.2025.3.25.2\build\native\directxtex_desktop_win10.targets'))" />
   </Target>
 </Project>

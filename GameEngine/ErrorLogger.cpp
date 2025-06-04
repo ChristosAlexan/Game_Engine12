@@ -1,5 +1,6 @@
 #include "ErrorLogger.h"
 #include <comdef.h>
+#include <stdexcept>
 
 void ErrorLogger::Log(std::string message)
 {

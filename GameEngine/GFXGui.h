@@ -11,9 +11,9 @@ class GFXGui
 public:
 	GFXGui();
 
-	void Initialize(HWND hwnd);
+	bool Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap);
 	void BeginRender();
-	void EndRender();
+	void EndRender(ID3D12GraphicsCommandList* cmdList);
 
 	void EditorStyle();
 };

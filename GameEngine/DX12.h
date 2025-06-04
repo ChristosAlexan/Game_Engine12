@@ -11,6 +11,7 @@
 #include "CubeEntity12.h"
 #include "rectEntity12.h"
 #include "SceneManager.h"
+#include "GFXGui.h"
 
 class DX12
 {
@@ -22,6 +23,7 @@ public:
 	void CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height);
 	void CreateFenceAndSyncObjects();
 	void CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc);
+	void CreateDescriptorHeaps();
 	void InitializeShaders();
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob);
 	void CreateDepthStencilBuffer(int& width, int& height);
@@ -47,6 +49,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
 
 	UINT frameIndex = 0;
@@ -61,5 +64,6 @@ private:
 	AppTimer timer;
 
 	ECS::SceneManager m_sceneManager;
+	GFXGui m_gui;
 };
 

@@ -23,14 +23,20 @@ namespace ECS
 	}
 	void SceneManager::AddRenderComponent(EntityID id, const RenderComponent& renderComponent)
 	{
-		m_renderComponents.emplace(id, renderComponent);
+		for (const auto& [existingID, _] : m_renderComponents)
+		{
+			if (existingID == id)
+				return; // already added
+		}
+
+		m_renderComponents.emplace_back(std::make_pair(id, renderComponent));
 	}
 
 	void SceneManager::RenderEntities(ID3D12GraphicsCommandList* cmdList, DynamicUploadBuffer* dynamicCB, Camera& camera, float& dt)
 	{
 		for (const auto& [entityID, renderComponent] : m_renderComponents)
 		{
-			TransformComponent tempTrans;
+			auto& tempTrans = m_transformComponents.at(entityID);
 			tempTrans.position = DirectX::XMFLOAT3((entityID + 1) * 2 + cos(dt), 0, (entityID + 1) * 2);
 			tempTrans.rotation = DirectX::XMFLOAT3((entityID + 1) * 2, (entityID + 1) * 2, (entityID + 1) * 2);
 			UpdateTransform(entityID, tempTrans, dt);
@@ -59,24 +65,20 @@ namespace ECS
 
 	void SceneManager::UpdateTransform(EntityID id, TransformComponent& trans, float dt)
 	{
-		auto& transform = m_transformComponents.at(id);
-		transform.position = trans.position;
-		transform.scale = trans.scale;
-		transform.rotation = trans.rotation;
+		trans.position = trans.position;
+		trans.scale = trans.scale;
+		trans.rotation = trans.rotation;
 	}
 
 	void SceneManager::Clear()
 	{
 	}
+	
 	ECS::EntityID SceneManager::CreateCubeEntity(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
 		EntityID id = CreateEntity();
-		MeshData cube = GenerateCubeMesh();
-		Mesh12 gpuMesh;
-		gpuMesh.Upload(device, cmdList, cube);
-		m_meshes.emplace(id, std::move(gpuMesh));
-
-
+		m_assetManager.GetOrLoadMesh("cube", device, cmdList);
+	
 		TransformComponent transformComponent;
 		transformComponent.position = DirectX::XMFLOAT3(1, 0, 5);
 		transformComponent.scale = DirectX::XMFLOAT3(1, 1, 1);
@@ -84,7 +86,7 @@ namespace ECS
 		AddTransformComponent(id, transformComponent);
 
 		RenderComponent renderComponent;
-		renderComponent.mesh = std::make_shared<Mesh12>(m_meshes[0]);
+		renderComponent.mesh = m_assetManager.m_meshes["cube"];
 		renderComponent.material = std::make_shared <Material>();
 		renderComponent.material->baseColor = DirectX::XMFLOAT4(1, 0, 0, 1);
 		AddRenderComponent(id, renderComponent);
