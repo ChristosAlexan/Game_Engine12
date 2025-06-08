@@ -1,7 +1,6 @@
 #pragma once
 #include "DX12Includes.h"
 #include "MeshManager.h"
-#include "MeshDataStorage.h"
 #include "ECSHeader.h"
 #include "MaterialECS.h"
 #include "TransformECS.h"
@@ -9,6 +8,7 @@
 #include "DynamicUploadBuffer.h"
 #include "Camera.h"
 #include "AssetManager.h"
+#include "MaterialManager.h"
 
 namespace ECS
 {
@@ -16,6 +16,8 @@ namespace ECS
 	{
 	public:
 		SceneManager();
+		void InitDescAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap);
+		void LoadMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 		void LoadAssets(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 		ECS::EntityID CreateEntity();  // Optional: overload to attach default components
 		void AddTransformComponent(EntityID id, const TransformComponent& transform);
@@ -35,7 +37,9 @@ namespace ECS
 		std::unordered_map<EntityID, TransformComponent> m_transformComponents;
 		std::vector<std::pair<EntityID, RenderComponent>> m_renderComponents;
 		AssetManager m_assetManager;
+		MaterialManager m_materialManager;
 	};
+
 }
 
 

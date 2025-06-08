@@ -1,16 +1,37 @@
 #include "SceneManager.h"
 #include "MeshGenerators.h"
 #include "ConstantBufferTypes.h"
+#include "DX12_GLOBALS.h"
 
 namespace ECS
 {
 	SceneManager::SceneManager()
 	{
 	}
+
+	void SceneManager::InitDescAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap)
+	{
+		g_descAllocator = std::make_unique<DescriptorAllocator>(device, heap, 512, true);
+	}
+
+	void SceneManager::LoadMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	{
+		MaterialDesc materialDesc = {};
+		materialDesc.albedoTexturePath = "Data/Textures/Tex1/plasticpattern1-albedo.png";
+		materialDesc.albedoTextureName = "defaultAlbedo";
+		materialDesc.normalTexturePath = "Data/Textures/Tex1/plasticpattern1-normal2b.png";
+		materialDesc.normalTextureName = "defaultNormal";
+		materialDesc.roughnessTexturePath = "Data/Textures/Tex1/plasticpattern1-roughness2.png";
+		materialDesc.roughnessTextureName = "defaultRougness";
+		materialDesc.metalnessTexturePath = "Data/Textures/Tex1/plasticpattern1-metalness.png";
+		materialDesc.metalnessTextureName = "defaultMetallic";
+
+		m_materialManager.GetOrCreateMaterial(materialDesc, device, cmdList, g_descAllocator.get());
+	}
 	void SceneManager::LoadAssets(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
-		CreateCubeEntity(device, cmdList);
-
+		for (int i = 0; i < 100; ++i)
+			CreateCubeEntity(device, cmdList);
 	}
 	ECS::EntityID SceneManager::CreateEntity()
 	{
@@ -56,9 +77,12 @@ namespace ECS
 
 			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 			psCB.color = renderComponent.material->baseColor;
+
+	
 			cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
 			cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
 
+			m_materialManager.Bindtextures(renderComponent.material.get(),  cmdList, 2);
 			renderComponent.mesh->Draw(cmdList);
 		}
 	}
@@ -86,8 +110,8 @@ namespace ECS
 		AddTransformComponent(id, transformComponent);
 
 		RenderComponent renderComponent;
-		renderComponent.mesh = m_assetManager.m_meshes["cube"];
-		renderComponent.material = std::make_shared <Material>();
+		renderComponent.mesh = m_assetManager.m_meshes.at("cube");
+		renderComponent.material = m_materialManager.m_materials.at("defaultMaterial");
 		renderComponent.material->baseColor = DirectX::XMFLOAT4(1, 0, 0, 1);
 		AddRenderComponent(id, renderComponent);
 

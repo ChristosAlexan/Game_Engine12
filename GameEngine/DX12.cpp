@@ -4,6 +4,9 @@
 #include "DX12.h"
 #include <stdexcept>
 #include "ErrorLogger.h"
+#include "DX12_GLOBALS.h"
+
+std::unique_ptr<DescriptorAllocator> g_descAllocator;
 
 DX12::DX12()
 {
@@ -13,13 +16,11 @@ DX12::DX12()
 void DX12::CreateScene(Camera& camera, int& width, int& height)
 {
     ResetCommandAllocator();
-    //m_rectEntity.Initialize(device.Get(), commandList.Get());
-    //m_cubeEntity.Initialize(device.Get(), commandList.Get());
-    
-    for(int i=0; i < 100; ++i)
-        m_sceneManager.CreateCubeEntity(device.Get(), commandList.Get());
-
+    m_sceneManager.LoadMaterials(device.Get(), commandList.Get());
+    m_sceneManager.LoadAssets(device.Get(), commandList.Get());
     SubmitCommand();
+  
+
     float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
     camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
     camera.SetPosition(0, 0, 0);
@@ -36,14 +37,20 @@ void DX12::SubmitCommand()
 {
     // Finish and execute upload
     commandList->Close();
-    ID3D12CommandList* lists[] = { commandList.Get() };
-    commandQueue->ExecuteCommandLists(1, lists);
+    ID3D12CommandList* commandLists[] = { commandList.Get() };
+    commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+    const UINT64 currentFence = fenceValue;
 
     // Ensure upload completes before rendering
     commandQueue->Signal(fence.Get(), fenceValue);
-    fence->SetEventOnCompletion(fenceValue, fenceEvent);
-    WaitForSingleObject(fenceEvent, INFINITE);
     fenceValue++;
+
+    if (fence->GetCompletedValue() < currentFence)
+    {
+        fence->SetEventOnCompletion(currentFence, fenceEvent);
+        WaitForSingleObject(fenceEvent, INFINITE);
+    }
+
 }
 
 void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
@@ -54,9 +61,11 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     CreateFenceAndSyncObjects();
     CreateDescriptorHeaps();
     CreateDepthStencilBuffer(width, height);
+    CreateSamplerStates();
     InitializeConstantBuffers();
     InitializeShaders();
-    if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), srvHeap.Get()))
+    m_sceneManager.InitDescAllocator(device.Get(), commandList.Get(), sharedHeap.Get());
+    if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), sharedHeap.Get()))
         ErrorLogger::Log("Failed to initialize ImGui!");
     CreateScene(camera, width, height);
 }
@@ -67,13 +76,13 @@ void DX12::CreateDeviceAndFactory()
     UINT dxgiFactoryFlags = 0;
   
 
-#if defined(_DEBUG)
-    ComPtr<ID3D12Debug> debugController;
+//#if defined(_DEBUG)
+    Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
     if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
         debugController->EnableDebugLayer();
         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
     }
-#endif
+//#endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));
 
@@ -169,6 +178,17 @@ void DX12::CreateFenceAndSyncObjects()
     }
 }
 
+void DX12::CreateSamplerStates()
+{
+    samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(
+        0,                                // shaderRegister (s0)
+        D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP, // addressU
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP, // addressV
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP  // addressW
+    );
+}
+
 void DX12::CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc)
 {
     // Serialize
@@ -202,9 +222,9 @@ void DX12::CreateDescriptorHeaps()
     // --- Create SRV Descriptor Heap ---
     D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
     heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    heapDesc.NumDescriptors = 64;
+    heapDesc.NumDescriptors = 2048;
     heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&srvHeap));
+    hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&sharedHeap));
     COM_ERROR_IF_FAILED(hr, "Failed to create srv descriptor heap");
 
     // --- Create DSV Descriptor Heap ---
@@ -252,6 +272,7 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob)
     psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     psoDesc.SampleDesc.Count = 1;
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
     hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState));
     COM_ERROR_IF_FAILED(hr, "Failed to create pipeline state");
@@ -298,12 +319,16 @@ void DX12::InitializeConstantBuffers()
 {
     dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 4 * 1024 * 1024); // 4 MB
 
-    CD3DX12_ROOT_PARAMETER rootParams[2];
-    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 for VS
-    rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 for PS
+    CD3DX12_DESCRIPTOR_RANGE srvRange;
+    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0); // t0–t4
 
+    CD3DX12_ROOT_PARAMETER rootParams[3];
+    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 VS
+    rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 PS
+    rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // SRV t0–t7
+ 
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
-    rootSigDesc.Init(_countof(rootParams), rootParams, 0, nullptr,
+    rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
     CreateRootSignature(rootSigDesc);
@@ -350,14 +375,16 @@ void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
         nullptr
     );
 
+
+    ID3D12DescriptorHeap* heaps[] = { sharedHeap.Get() };
+    commandList->SetDescriptorHeaps(1, heaps);
     
     m_sceneManager.RenderEntities(commandList.Get(), dynamicCB.get(), camera, dt);
 
-    ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
-    
     m_gui.BeginRender();
     m_gui.EndRender(commandList.Get());
+
     // Transition back buffer to present
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[frameIndex].Get(),
@@ -365,26 +392,10 @@ void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
         D3D12_RESOURCE_STATE_PRESENT
     );
     commandList->ResourceBarrier(1, &barrier);
-
-    // Close and execute command list
-    commandList->Close();
-    ID3D12CommandList* commandLists[] = { commandList.Get() };
-    commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
+    SubmitCommand();
 
     // Present the frame
     swapChain->Present(1, 0);
-
-    // Signal and wait on the fence
-    const UINT64 currentFence = fenceValue;
-    commandQueue->Signal(fence.Get(), currentFence);
-    fenceValue++;
-
-    if (fence->GetCompletedValue() < currentFence)
-    {
-        fence->SetEventOnCompletion(currentFence, fenceEvent);
-        WaitForSingleObject(fenceEvent, INFINITE);
-    }
-
     //Update frame index
     frameIndex = swapChain->GetCurrentBackBufferIndex();
 }

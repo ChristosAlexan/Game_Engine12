@@ -1,5 +1,7 @@
 #include "GFXGui.h"
 #include "ErrorLogger.h"
+#include "DX12_GLOBALS.h"
+
 
 GFXGui::GFXGui()
 {
@@ -33,11 +35,14 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 	init_info.NumFramesInFlight = 2;
 	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Or your render target format.
 	init_info.SrvDescriptorHeap = descriptorHeap;
-	init_info.LegacySingleSrvCpuDescriptor = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	init_info.LegacySingleSrvGpuDescriptor = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	init_info.SrvDescriptorAllocFn = nullptr;
-	init_info.SrvDescriptorFreeFn = nullptr;
+	init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu) {
+		auto handle = g_descAllocator->Allocate();
+		*out_cpu = handle.cpuHandle;
+		*out_gpu = handle.gpuHandle;
+		};
 
+	init_info.SrvDescriptorFreeFn = nullptr; // Optional; ImGui usually doesn't free
+	// Capture your allocator
 	result = ImGui_ImplDX12_Init(&init_info);
 
 	if (!result)
@@ -53,8 +58,9 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 
 void GFXGui::BeginRender()
 {
-	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
+	ImGui_ImplDX12_NewFrame();
+
 	ImGui::NewFrame();
 	ImGui::ShowDemoWindow();
 }

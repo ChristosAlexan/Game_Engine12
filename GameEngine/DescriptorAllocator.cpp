@@ -3,22 +3,13 @@
 #include "ErrorLogger.h"
 #include <stdexcept>
 
-DescriptorAllocator::DescriptorAllocator(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool shaderVisible)
-	:m_type(type), m_descriptorCount(numDescriptors)
+DescriptorAllocator::DescriptorAllocator(ID3D12Device* device, ID3D12DescriptorHeap* heap, UINT numDescriptors, bool shaderVisible)
+	:m_descriptorCount(numDescriptors)
 {
-	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-	desc.NumDescriptors = numDescriptors;
-	desc.Type = type;
-	desc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	desc.NodeMask = 0;
-
-	HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_heap));
-	COM_ERROR_IF_FAILED(hr, "Failed to create descriptor heap!");
-
-	m_descriptorSize = device->GetDescriptorHandleIncrementSize(type);
-	m_cpuStart = m_heap->GetCPUDescriptorHandleForHeapStart();
+	m_descriptorSize = device->GetDescriptorHandleIncrementSize(heap->GetDesc().Type);
+	m_cpuStart = heap->GetCPUDescriptorHandleForHeapStart();
 	if (shaderVisible)
-		m_gpuStart = m_heap->GetGPUDescriptorHandleForHeapStart();
+		m_gpuStart = heap->GetGPUDescriptorHandleForHeapStart();
 }
 
 DescriptorAllocator::DescriptorHandle DescriptorAllocator::Allocate()
@@ -35,10 +26,23 @@ DescriptorAllocator::DescriptorHandle DescriptorAllocator::Allocate()
 	{
 		if (m_currentIndex >= m_descriptorCount)
 			ErrorLogger::Log("Descriptor heap exhausted!");
-
+		
 		index = m_currentIndex++;
 	}
-	return { GetCPUHandle(m_currentIndex), GetGPUHandle(m_currentIndex), m_currentIndex };
+	return { GetCPUHandle(index), GetGPUHandle(index), index };
+}
+
+UINT DescriptorAllocator::AllocateContiguous(UINT count)
+{
+	if (m_currentIndex + count > m_descriptorCount)
+	{
+		ErrorLogger::Log("Descriptor heap exhausted during contiguous allocation!");
+	}
+
+	// NOTE: This skips checking the free list (safe if you only use free list for single-slot reuse)
+	UINT startIndex = m_currentIndex;
+	m_currentIndex += count;
+	return startIndex;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DescriptorAllocator::GetCPUHandle(UINT index) const
@@ -79,4 +83,9 @@ void DescriptorAllocator::Free(UINT index)
 void DescriptorAllocator::Reset() {
 	m_currentIndex = 0;
 	std::queue<UINT>().swap(m_freeList);
+}
+
+UINT DescriptorAllocator::GetCurrentIndex() const
+{
+	return m_currentIndex;
 }

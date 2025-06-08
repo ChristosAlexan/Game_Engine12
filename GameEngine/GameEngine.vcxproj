@@ -244,7 +244,6 @@
     <ClCompile Include="BaseEntity12.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="COMException.cpp" />
-    <ClCompile Include="CubeEntity12.cpp" />
     <ClCompile Include="CubeShape12.cpp" />
     <ClCompile Include="DescriptorAllocator.cpp" />
     <ClCompile Include="DX12.cpp" />
@@ -263,10 +262,9 @@
     <ClCompile Include="InputVariables.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="KeyboardEvent.cpp" />
-    <ClCompile Include="MeshDataStorage.cpp" />
+    <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="MeshGenerators.cpp" />
     <ClCompile Include="MeshManager.cpp" />
-    <ClCompile Include="RectEntity12.cpp" />
     <ClCompile Include="RectShape12.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Shapes12.cpp" />
@@ -287,11 +285,11 @@
     <ClInclude Include="ComponentStorage12.h" />
     <ClInclude Include="ConstantBuffer12.h" />
     <ClInclude Include="ConstantBufferTypes.h" />
-    <ClInclude Include="CubeEntity12.h" />
     <ClInclude Include="CubeShape12.h" />
     <ClInclude Include="DescriptorAllocator.h" />
     <ClInclude Include="DX12.h" />
     <ClInclude Include="DX12Includes.h" />
+    <ClInclude Include="DX12_GLOBALS.h" />
     <ClInclude Include="DXCShaderCompiler.h" />
     <ClInclude Include="DynamicUploadBuffer.h" />
     <ClInclude Include="ECSHeader.h" />
@@ -312,13 +310,12 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="KeyboardEvent.h" />
     <ClInclude Include="MaterialECS.h" />
+    <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MeshData.h" />
-    <ClInclude Include="MeshDataStorage.h" />
     <ClInclude Include="MeshGenerators.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="MouseEvent.h" />
-    <ClInclude Include="RectEntity12.h" />
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
     <ClInclude Include="RenderWindow.h" />

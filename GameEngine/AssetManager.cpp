@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 #include "MeshGenerators.h"
+#include "ErrorLogger.h"
 
 namespace ECS
 {
@@ -10,7 +11,7 @@ namespace ECS
 	std::shared_ptr<Mesh12> ECS::AssetManager::GetOrLoadMesh(const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
 		if (m_meshes.contains(name))
-			return m_meshes[name];
+			return m_meshes.at(name);
 
 		MeshData data;
 		if (name == "cube")
@@ -20,24 +21,10 @@ namespace ECS
 
 		auto mesh = std::make_shared<Mesh12>();
 		mesh->Upload(device, cmdList, data);
-		m_meshes[name] = mesh;
+		m_meshes.emplace(name, mesh);
 
-		return mesh;
+		return m_meshes.at(name);
 	}
-
-	std::shared_ptr<Material> AssetManager::GetOrCreateMaterial(const std::string& name)
-	{
-		return std::shared_ptr<Material>();
-	}
-
-	std::shared_ptr<Texture12> AssetManager::LoadTexture(const std::string& file,
-		ID3D12Device* device,
-		ID3D12GraphicsCommandList* cmdList,
-		DescriptorAllocator& srvAllocator)
-	{
-		return std::shared_ptr<Texture12>();
-	}
-
 }
 
 

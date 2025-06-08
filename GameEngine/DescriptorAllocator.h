@@ -11,11 +11,10 @@ public:
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 		UINT index;
 	};
-
-	DescriptorAllocator(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type,
-		UINT numDescriptors, bool shaderVisible = true);
-
+	
+	DescriptorAllocator(ID3D12Device* device, ID3D12DescriptorHeap* heap, UINT numDescriptors, bool shaderVisible);
 	DescriptorHandle Allocate();
+	UINT AllocateContiguous(UINT count);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(UINT index) const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(UINT index) const;
@@ -23,12 +22,13 @@ public:
 	UINT AllocateIndex();
 	void Free(UINT index);
 	void Reset();
+
+
+	UINT GetCurrentIndex() const;
 private:
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_heap;
-	D3D12_DESCRIPTOR_HEAP_TYPE m_type;
-	UINT m_descriptorSize;
-	UINT m_descriptorCount;
 	UINT m_currentIndex = 0;
+	UINT m_descriptorCount;
+	UINT m_descriptorSize;
 	std::queue<UINT> m_freeList;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE m_cpuStart{};

@@ -1,0 +1,28 @@
+#pragma once
+#include "MaterialECS.h"
+
+namespace ECS
+{
+	class MaterialManager
+	{
+	public:
+		MaterialManager();
+		std::shared_ptr<Material> GetOrCreateMaterial(const MaterialDesc& materialDesc, ID3D12Device* device,
+			ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+		std::shared_ptr<Texture12> GetOrLoadTexture(const std::string& file, const std::string& name,
+			ID3D12Device* device,
+			ID3D12GraphicsCommandList* cmdList,
+			DescriptorAllocator* allocator);
+
+		void Bindtextures(Material* material, ID3D12GraphicsCommandList* cmdList, UINT rootIndex);
+
+	private:
+		void AddTexture(const MaterialDesc& materialDesc, Material* material, TEXTURE_TYPE textType,
+			ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+	public:
+		std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
+		std::unordered_map<std::string, std::shared_ptr<Texture12>> m_textures;
+	};
+}
+
+

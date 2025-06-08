@@ -168,16 +168,7 @@
     <ClCompile Include="CubeShape12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CubeEntity12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RectEntity12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MeshManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshDataStorage.cpp">
       <Filter>ECS\Source</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
@@ -221,6 +212,9 @@
     </ClCompile>
     <ClCompile Include="DescriptorAllocator.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialManager.cpp">
+      <Filter>ECS\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -302,12 +296,6 @@
     <ClInclude Include="DX12Includes.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RectEntity12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeEntity12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TransformECS.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
@@ -324,9 +312,6 @@
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="MeshData.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshDataStorage.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="MaterialECS.h">
@@ -376,6 +361,12 @@
     </ClInclude>
     <ClInclude Include="DescriptorAllocator.h">
       <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12_GLOBALS.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialManager.h">
+      <Filter>ECS\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
