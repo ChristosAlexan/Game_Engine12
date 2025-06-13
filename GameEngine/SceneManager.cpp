@@ -1,120 +1,49 @@
 #include "SceneManager.h"
-#include "MeshGenerators.h"
-#include "ConstantBufferTypes.h"
-#include "DX12_GLOBALS.h"
+#include "ErrorLogger.h"
 
 namespace ECS
 {
-	SceneManager::SceneManager()
+	SceneManager::SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+		: m_device(device), m_cmdList(cmdList)
 	{
+		m_assetManager = std::make_shared<AssetManager>();
+		m_materialManager = std::make_shared<MaterialManager>();
 	}
 
-	void SceneManager::InitDescAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap)
+
+
+	void SceneManager::LoadScene(const std::string& sceneName)
 	{
-		g_descAllocator = std::make_unique<DescriptorAllocator>(device, heap, 512, true);
+		auto scene = std::make_unique<Scene>(sceneName, m_assetManager, m_materialManager, m_device, m_cmdList);
+		m_scenes.emplace(sceneName, std::move(scene));
 	}
 
-	void SceneManager::LoadMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	void SceneManager::SetCurrentScene(std::string sceneName)
 	{
-		MaterialDesc materialDesc = {};
-		materialDesc.albedoTexturePath = "Data/Textures/Tex1/plasticpattern1-albedo.png";
-		materialDesc.albedoTextureName = "defaultAlbedo";
-		materialDesc.normalTexturePath = "Data/Textures/Tex1/plasticpattern1-normal2b.png";
-		materialDesc.normalTextureName = "defaultNormal";
-		materialDesc.roughnessTexturePath = "Data/Textures/Tex1/plasticpattern1-roughness2.png";
-		materialDesc.roughnessTextureName = "defaultRougness";
-		materialDesc.metalnessTexturePath = "Data/Textures/Tex1/plasticpattern1-metalness.png";
-		materialDesc.metalnessTextureName = "defaultMetallic";
-
-		m_materialManager.GetOrCreateMaterial(materialDesc, device, cmdList, g_descAllocator.get());
-	}
-	void SceneManager::LoadAssets(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
-	{
-		for (int i = 0; i < 100; ++i)
-			CreateCubeEntity(device, cmdList);
-	}
-	ECS::EntityID SceneManager::CreateEntity()
-	{
-		EntityID id = m_NextEntityID++;
-		return id;
-	}
-	void SceneManager::AddTransformComponent(EntityID id, const TransformComponent& transformComponent)
-	{
-		m_transformComponents.emplace(id, transformComponent);
-	}
-	void SceneManager::AddRenderComponent(EntityID id, const RenderComponent& renderComponent)
-	{
-		for (const auto& [existingID, _] : m_renderComponents)
-		{
-			if (existingID == id)
-				return; // already added
+		auto it = m_scenes.find(sceneName);
+		if (it != m_scenes.end()) {
+			m_currentScene = it->second.get();
+			m_currentSceneName = sceneName;
 		}
-
-		m_renderComponents.emplace_back(std::make_pair(id, renderComponent));
-	}
-
-	void SceneManager::RenderEntities(ID3D12GraphicsCommandList* cmdList, DynamicUploadBuffer* dynamicCB, Camera& camera, float& dt)
-	{
-		for (const auto& [entityID, renderComponent] : m_renderComponents)
-		{
-			auto& tempTrans = m_transformComponents.at(entityID);
-			tempTrans.position = DirectX::XMFLOAT3((entityID + 1) * 2 + cos(dt), 0, (entityID + 1) * 2);
-			tempTrans.rotation = DirectX::XMFLOAT3((entityID + 1) * 2, (entityID + 1) * 2, (entityID + 1) * 2);
-			UpdateTransform(entityID, tempTrans, dt);
-
-			const auto& transform = m_transformComponents[entityID];
-
-			// 1. Compute world matrix
-			DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z) *
-				DirectX::XMMatrixRotationRollPitchYaw(transform.rotation.x, transform.rotation.y, transform.rotation.z) *
-				DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, transform.position.z);
-
-			CB_VS_SimpleShader vsCB = {};
-			vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
-			vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-			vsCB.worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
-			CB_PS_SimpleShader psCB = {};
-
-			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
-			psCB.color = renderComponent.material->baseColor;
-
-	
-			cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
-			cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
-
-			m_materialManager.Bindtextures(renderComponent.material.get(),  cmdList, 2);
-			renderComponent.mesh->Draw(cmdList);
+		else {
+			ErrorLogger::Log("Scene not found: " + sceneName);
 		}
 	}
 
-	void SceneManager::UpdateTransform(EntityID id, TransformComponent& trans, float dt)
+	Scene* SceneManager::GetCurrentScene() const
 	{
-		trans.position = trans.position;
-		trans.scale = trans.scale;
-		trans.rotation = trans.rotation;
+		if(m_currentScene)
+			return m_currentScene;
+
+		return nullptr;
 	}
 
-	void SceneManager::Clear()
+	void SceneManager::Update(float dt)
 	{
 	}
-	
-	ECS::EntityID SceneManager::CreateCubeEntity(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+
+	void SceneManager::Render(DynamicUploadBuffer* dynamicCB, Camera& camera, float dt)
 	{
-		EntityID id = CreateEntity();
-		m_assetManager.GetOrLoadMesh("cube", device, cmdList);
-	
-		TransformComponent transformComponent;
-		transformComponent.position = DirectX::XMFLOAT3(1, 0, 5);
-		transformComponent.scale = DirectX::XMFLOAT3(1, 1, 1);
-		transformComponent.rotation = DirectX::XMFLOAT3(0, 0, 0);
-		AddTransformComponent(id, transformComponent);
-
-		RenderComponent renderComponent;
-		renderComponent.mesh = m_assetManager.m_meshes.at("cube");
-		renderComponent.material = m_materialManager.m_materials.at("defaultMaterial");
-		renderComponent.material->baseColor = DirectX::XMFLOAT4(1, 0, 0, 1);
-		AddRenderComponent(id, renderComponent);
-
-		return id;
+		GetCurrentScene()->Render(camera, dynamicCB);
 	}
 }

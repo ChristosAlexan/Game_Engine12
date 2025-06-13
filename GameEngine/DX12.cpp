@@ -13,11 +13,14 @@ DX12::DX12()
     timer.Start();
 }
 
-void DX12::CreateScene(Camera& camera, int& width, int& height)
+void DX12::CreateScenes(Camera& camera, int& width, int& height)
 {
     ResetCommandAllocator();
-    m_sceneManager.LoadMaterials(device.Get(), commandList.Get());
-    m_sceneManager.LoadAssets(device.Get(), commandList.Get());
+    m_sceneManager = std::make_unique<ECS::SceneManager>(device.Get(), commandList.Get());
+    m_sceneManager->LoadScene("Scene1");
+    m_sceneManager->SetCurrentScene("Scene1");
+    m_sceneManager->GetCurrentScene()->LoadMaterials();
+    m_sceneManager->GetCurrentScene()->LoadAssets();
     SubmitCommand();
   
 
@@ -53,6 +56,11 @@ void DX12::SubmitCommand()
 
 }
 
+void DX12::InitDescAllocator(ID3D12DescriptorHeap* heap)
+{
+    g_descAllocator = std::make_unique<DescriptorAllocator>(device.Get(), heap, 512, true);
+}
+
 void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
 {
     CreateDeviceAndFactory();
@@ -64,10 +72,10 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     CreateSamplerStates();
     InitializeConstantBuffers();
     InitializeShaders();
-    m_sceneManager.InitDescAllocator(device.Get(), commandList.Get(), sharedHeap.Get());
+    InitDescAllocator(sharedHeap.Get());
     if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), sharedHeap.Get()))
         ErrorLogger::Log("Failed to initialize ImGui!");
-    CreateScene(camera, width, height);
+    CreateScenes(camera, width, height);
 }
 
 void DX12::CreateDeviceAndFactory()
@@ -379,7 +387,7 @@ void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
     ID3D12DescriptorHeap* heaps[] = { sharedHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
     
-    m_sceneManager.RenderEntities(commandList.Get(), dynamicCB.get(), camera, dt);
+    m_sceneManager->Render(dynamicCB.get(), camera, dt);
 
     commandList->SetDescriptorHeaps(1, heaps);
     m_gui.BeginRender();

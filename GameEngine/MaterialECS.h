@@ -19,14 +19,14 @@ namespace ECS
 
         std::string albedoTextureName = "defaultAlbedo";    // albedo (diffuse) texture
         std::string normalTextureName = "defaultNormal";    // normal map
-        std::string roughnessTextureName = " "; // roughness map
-        std::string metalnessTextureName = " "; // metalness map
+        std::string roughnessTextureName = ""; // roughness map
+        std::string metalnessTextureName = ""; // metalness map
 
 
-        std::string albedoTexturePath = " ";    // albedo (diffuse) texture
-        std::string normalTexturePath = " ";    // normal map
-        std::string roughnessTexturePath = " "; // roughness map
-        std::string metalnessTexturePath = " "; // metalness map
+        std::string albedoTexturePath = "";    // albedo (diffuse) texture
+        std::string normalTexturePath = "";    // normal map
+        std::string roughnessTexturePath = ""; // roughness map
+        std::string metalnessTexturePath = ""; // metalness map
 
         DirectX::XMFLOAT4 baseColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Used if no albedo texture
         float roughness = 0.5f;

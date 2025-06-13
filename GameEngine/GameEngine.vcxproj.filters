@@ -97,14 +97,8 @@
     <Filter Include="ECS\Source">
       <UniqueIdentifier>{a640336c-bc28-43ab-903c-3f328253976d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ECS\Entities">
-      <UniqueIdentifier>{ba269184-333f-4bce-b6dc-3e20235bc64e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ECS\Entities\Header">
-      <UniqueIdentifier>{0a50cc57-963e-4479-841e-7c4557050778}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ECS\Entities\Source">
-      <UniqueIdentifier>{6f94d4b2-6cc6-48dd-92f9-ebc6e975216c}</UniqueIdentifier>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{81da25cd-7a32-471e-85e4-567b45351328}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -204,9 +198,6 @@
     <ClCompile Include="imgui.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="BaseEntity12.cpp">
-      <Filter>ECS\Entities\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Texture12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
@@ -214,6 +205,15 @@
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MaterialManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityFactory.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ECSWorld.cpp">
       <Filter>ECS\Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -353,9 +353,6 @@
     <ClInclude Include="imconfig.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="BaseEntity12.h">
-      <Filter>ECS\Entities\Header</Filter>
-    </ClInclude>
     <ClInclude Include="Texture12.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
@@ -366,6 +363,18 @@
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityFactory.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSWorld.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityECS.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
   </ItemGroup>

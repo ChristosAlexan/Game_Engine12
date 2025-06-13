@@ -29,10 +29,10 @@ public:
 	void InitializeConstantBuffers();
 	void RenderFrame(Camera& camera, int width, int height, float& dt);
 private:
-	void CreateScene(Camera& camera, int& width, int& height);
+	void CreateScenes(Camera& camera, int& width, int& height);
 	void ResetCommandAllocator();
 	void SubmitCommand();
-
+	void InitDescAllocator(ID3D12DescriptorHeap* heap);
 public:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
@@ -63,7 +63,7 @@ private:
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
 	AppTimer timer;
 
-	ECS::SceneManager m_sceneManager;
+	std::unique_ptr<ECS::SceneManager> m_sceneManager;
 	GFXGui m_gui;
 };
 

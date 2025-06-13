@@ -1,43 +1,31 @@
 #pragma once
 #include "DX12Includes.h"
-#include "MeshManager.h"
-#include "ECSHeader.h"
-#include "MaterialECS.h"
-#include "TransformECS.h"
-#include "RenderingECS.h"
-#include "DynamicUploadBuffer.h"
-#include "Camera.h"
-#include "AssetManager.h"
-#include "MaterialManager.h"
+#include "Scene.h"
 
 namespace ECS
 {
 	class SceneManager
 	{
 	public:
-		SceneManager();
-		void InitDescAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12DescriptorHeap* heap);
-		void LoadMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-		void LoadAssets(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-		ECS::EntityID CreateEntity();  // Optional: overload to attach default components
-		void AddTransformComponent(EntityID id, const TransformComponent& transform);
-		void AddRenderComponent(EntityID id, const RenderComponent& render);
-		void RenderEntities(ID3D12GraphicsCommandList* cmdList, DynamicUploadBuffer* dynamicCB, Camera& camera, float& dt);
+		SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+		void InitDescAllocator(ID3D12DescriptorHeap* heap);
+		void LoadScene(const std::string& sceneName);
+		void SetCurrentScene(std::string sceneName);
+		[[nodiscard]] Scene* GetCurrentScene() const;
+		void Update(float dt);
+		void Render(DynamicUploadBuffer* dynamicCB, Camera& camera, float dt);
+		
 
-		void UpdateTransform(EntityID id, TransformComponent& trans, float dt); // Could also include systems like transform or animation
-		void Clear();          // Cleanup scene
-
-	public:
-		ECS::EntityID CreateCubeEntity(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 	private:
-		ECS::EntityID m_NextEntityID = 0;
-		std::unordered_map<EntityID, std::string> entityNames;
-		//std::unordered_map<std::string, std::shared_ptr<Mesh12>> m_meshes;
-		//std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
-		std::unordered_map<EntityID, TransformComponent> m_transformComponents;
-		std::vector<std::pair<EntityID, RenderComponent>> m_renderComponents;
-		AssetManager m_assetManager;
-		MaterialManager m_materialManager;
+		ID3D12Device* m_device = nullptr;
+		ID3D12GraphicsCommandList* m_cmdList;
+
+		std::shared_ptr <AssetManager> m_assetManager;
+		std::shared_ptr <MaterialManager> m_materialManager;
+
+		std::unordered_map<std::string, std::unique_ptr<Scene>> m_scenes;
+		Scene* m_currentScene = nullptr;
+		std::string m_currentSceneName;
 	};
 
 }

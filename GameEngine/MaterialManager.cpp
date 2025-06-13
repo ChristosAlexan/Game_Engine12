@@ -9,6 +9,9 @@ namespace ECS
 	std::shared_ptr<Material> MaterialManager::GetOrCreateMaterial(const MaterialDesc& materialDesc, ID3D12Device* device,
 		ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
 	{
+		if (!m_materialDescs.contains(materialDesc.name))
+			m_materialDescs.emplace(materialDesc.name, materialDesc);
+
 		if (m_materials.contains(materialDesc.name))
 			return m_materials.at(materialDesc.name);
 
@@ -20,7 +23,6 @@ namespace ECS
 		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::ROUGHNESS, device, cmdList, allocator);
 		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::METALLNESS, device, cmdList, allocator);
 
-		OutputDebugStringA(("material->textures.size = " + std::to_string(material->textures.size()) + "\n").c_str());
 		material->baseColor = materialDesc.baseColor;
 		material->roughness = materialDesc.roughness;
 		material->metalness = materialDesc.metalness;
@@ -48,10 +50,21 @@ namespace ECS
 
 		return m_textures.at(name);
 	}
+
 	void MaterialManager::Bindtextures(Material* material, ID3D12GraphicsCommandList* cmdList, UINT rootIndex)
 	{
 		cmdList->SetGraphicsRootDescriptorTable(rootIndex, material->textures[0]->GetGPUHandle());
 	}
+
+	std::optional<MaterialDesc> MaterialManager::GetMaterialDescByName(const std::string& name) const
+	{
+		auto it = m_materialDescs.find(name);
+		if (it != m_materialDescs.end())
+			return it->second;
+
+		return std::nullopt;
+	}
+
 	void MaterialManager::AddTexture(const MaterialDesc& materialDesc, Material* material, TEXTURE_TYPE textType,
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
 	{

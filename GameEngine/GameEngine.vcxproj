@@ -241,14 +241,15 @@
   <ItemGroup>
     <ClCompile Include="AppTimer.cpp" />
     <ClCompile Include="AssetManager.cpp" />
-    <ClCompile Include="BaseEntity12.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="COMException.cpp" />
     <ClCompile Include="CubeShape12.cpp" />
     <ClCompile Include="DescriptorAllocator.cpp" />
     <ClCompile Include="DX12.cpp" />
     <ClCompile Include="DXCShaderCompiler.cpp" />
+    <ClCompile Include="ECSWorld.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EntityFactory.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GFXGui.cpp" />
@@ -266,6 +267,7 @@
     <ClCompile Include="MeshGenerators.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="RectShape12.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Shapes12.cpp" />
     <ClCompile Include="Texture12.cpp" />
@@ -279,7 +281,6 @@
   <ItemGroup>
     <ClInclude Include="AppTimer.h" />
     <ClInclude Include="AssetManager.h" />
-    <ClInclude Include="BaseEntity12.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="COMException.h" />
     <ClInclude Include="ComponentStorage12.h" />
@@ -293,7 +294,10 @@
     <ClInclude Include="DXCShaderCompiler.h" />
     <ClInclude Include="DynamicUploadBuffer.h" />
     <ClInclude Include="ECSHeader.h" />
+    <ClInclude Include="ECSWorld.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="EntityECS.h" />
+    <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="ErrorLogger.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GFXGui.h" />
@@ -319,6 +323,7 @@
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
     <ClInclude Include="RenderWindow.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shapes12.h" />
     <ClInclude Include="StringHelper.h" />
