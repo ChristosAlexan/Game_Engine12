@@ -13,21 +13,21 @@ DX12::DX12()
     timer.Start();
 }
 
-void DX12::CreateScenes(Camera& camera, int& width, int& height)
-{
-    ResetCommandAllocator();
-    m_sceneManager = std::make_unique<ECS::SceneManager>(device.Get(), commandList.Get());
-    m_sceneManager->LoadScene("Scene1");
-    m_sceneManager->SetCurrentScene("Scene1");
-    m_sceneManager->GetCurrentScene()->LoadMaterials();
-    m_sceneManager->GetCurrentScene()->LoadAssets();
-    SubmitCommand();
-  
-
-    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
-    camera.SetPosition(0, 0, 0);
-}
+//void DX12::CreateScenes(Camera& camera, int& width, int& height)
+//{
+//    ResetCommandAllocator();
+//    m_sceneManager = std::make_unique<ECS::SceneManager>(device.Get(), commandList.Get());
+//    m_sceneManager->LoadScene("Scene1");
+//    m_sceneManager->SetCurrentScene("Scene1");
+//    m_sceneManager->GetCurrentScene()->LoadMaterials();
+//    m_sceneManager->GetCurrentScene()->LoadAssets();
+//    SubmitCommand();
+//  
+//
+//    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+//    camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
+//    camera.SetPosition(0, 0, 0);
+//}
 
 void DX12::ResetCommandAllocator()
 {
@@ -61,6 +61,26 @@ void DX12::InitDescAllocator(ID3D12DescriptorHeap* heap)
     g_descAllocator = std::make_unique<DescriptorAllocator>(device.Get(), heap, 512, true);
 }
 
+ID3D12CommandQueue* DX12::GetCommandQueue() const
+{
+    return commandQueue.Get();
+}
+
+ID3D12Device* DX12::GetDevice() const
+{
+    return device.Get();
+}
+
+ID3D12GraphicsCommandList* DX12::GetCmdList() const
+{
+    return commandList.Get();
+}
+
+ID3D12DescriptorHeap* DX12::GetDescriptorHeap() const
+{
+    return rtvHeap.Get();
+}
+
 void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
 {
     CreateDeviceAndFactory();
@@ -73,9 +93,9 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     InitializeConstantBuffers();
     InitializeShaders();
     InitDescAllocator(sharedHeap.Get());
-    if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), sharedHeap.Get()))
-        ErrorLogger::Log("Failed to initialize ImGui!");
-    CreateScenes(camera, width, height);
+    //if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), sharedHeap.Get()))
+    //    ErrorLogger::Log("Failed to initialize ImGui!");
+    //CreateScenes(camera, width, height);
 }
 
 void DX12::CreateDeviceAndFactory()
@@ -343,7 +363,7 @@ void DX12::InitializeConstantBuffers()
 }
 
 
-void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
+void DX12::RenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
 {
     // Reset allocator and command list
     commandAllocator->Reset();
@@ -387,11 +407,11 @@ void DX12::RenderFrame(Camera& camera, int width, int height, float& dt)
     ID3D12DescriptorHeap* heaps[] = { sharedHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
     
-    m_sceneManager->Render(dynamicCB.get(), camera, dt);
+    sceneManager->Render(dynamicCB.get(), camera, dt);
 
     commandList->SetDescriptorHeaps(1, heaps);
-    m_gui.BeginRender();
-    m_gui.EndRender(commandList.Get());
+    gui.BeginRender();
+    gui.EndRender(commandList.Get());
 
     // Transition back buffer to present
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(

@@ -33,7 +33,7 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 	init_info.Device = device;
 	init_info.CommandQueue = cmdQueue;
 	init_info.NumFramesInFlight = 2;
-	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM; // Or your render target format.
+	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	init_info.SrvDescriptorHeap = descriptorHeap;
 	init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu) {
 		auto handle = g_descAllocator->Allocate();
@@ -41,8 +41,8 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 		*out_gpu = handle.gpuHandle;
 		};
 
-	init_info.SrvDescriptorFreeFn = nullptr; // Optional; ImGui usually doesn't free
-	// Capture your allocator
+	init_info.SrvDescriptorFreeFn = nullptr;
+
 	result = ImGui_ImplDX12_Init(&init_info);
 
 	if (!result)
@@ -51,10 +51,9 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 		return false;
 	}
 	EditorStyle();
-	//ImGui::StyleColorsDark();
+
 	return true;
 }
-
 
 void GFXGui::BeginRender()
 {

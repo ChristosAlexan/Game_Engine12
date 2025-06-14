@@ -37,7 +37,7 @@ namespace ECS
 
 	void Scene::LoadAssets()
 	{
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 10; ++i)
 		{
 			EntityDesc entDesc = {};
 			entDesc.meshType = CUBE;

@@ -36,8 +36,6 @@ namespace ECS
 		std::shared_ptr<AssetManager> m_assetManager;
 		std::shared_ptr<MaterialManager> m_materialManager;
 		std::unique_ptr<EntityFactory> m_entityFactory;
-		//std::unordered_map<EntityID, TransformComponent> m_transformComponents;
-		//std::vector<std::pair<EntityID, RenderComponent>> m_renderComponents;
 
 		ID3D12Device* m_device = nullptr;
 		ID3D12GraphicsCommandList* m_cmdList = nullptr;

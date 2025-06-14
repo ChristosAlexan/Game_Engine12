@@ -27,12 +27,18 @@ public:
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeConstantBuffers();
-	void RenderFrame(Camera& camera, int width, int height, float& dt);
-private:
-	void CreateScenes(Camera& camera, int& width, int& height);
+	void RenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
+
+	//void CreateScenes(Camera& camera, int& width, int& height);
 	void ResetCommandAllocator();
 	void SubmitCommand();
 	void InitDescAllocator(ID3D12DescriptorHeap* heap);
+
+	ID3D12CommandQueue* GetCommandQueue() const;
+	ID3D12Device* GetDevice() const;
+	ID3D12GraphicsCommandList* GetCmdList() const;
+	ID3D12DescriptorHeap* GetDescriptorHeap() const;
+
 public:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
@@ -63,7 +69,7 @@ private:
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
 	AppTimer timer;
 
-	std::unique_ptr<ECS::SceneManager> m_sceneManager;
-	GFXGui m_gui;
+	//std::unique_ptr<ECS::SceneManager> m_sceneManager;
+	//GFXGui m_gui;
 };
 

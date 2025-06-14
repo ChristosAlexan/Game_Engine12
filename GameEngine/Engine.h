@@ -17,11 +17,15 @@ public:
 	bool ProcessMessages();
 	void Update(int width, int height);
 
-protected:
+private:
+	void CreateScenes(Camera& camera, int& width, int& height);
+private:
 	AppTimer timer;
 	Camera camera;
 	int width, height;
 	float dt = 0.0f;
 	float fps = 0.0f;
 	DX12 dx12;
+	std::unique_ptr<ECS::SceneManager> m_sceneManager;
+	GFXGui m_gui;
 };

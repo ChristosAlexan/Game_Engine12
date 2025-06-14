@@ -17,8 +17,13 @@ bool Engine::Initialize(HINSTANCE hInstance, std::string window_title, std::stri
 	if (!this->render_window.Initialize(this, hInstance, window_title, window_class, width, height))
 		return false;
 
-
 	dx12.Initialize(this->render_window.GetHWND(), camera, width, height);
+	if (!m_gui.Initialize(this->render_window.GetHWND(), dx12.GetDevice(), dx12.GetCommandQueue(), dx12.GetDescriptorHeap()))
+	{
+		ErrorLogger::Log("Failed to initialize ImGui!");
+		return false;
+	}
+	CreateScenes(camera, width, height);
 
 	return true;
 }
@@ -90,5 +95,21 @@ void Engine::Update(int width, int height)
 
 	ClipCursor(NULL);
 	while (ShowCursor(TRUE) < 0);
-	dx12.RenderFrame(camera, width, height, dt);
+	dx12.RenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+}
+
+void Engine::CreateScenes(Camera& camera, int& width, int& height)
+{
+	dx12.ResetCommandAllocator();
+	m_sceneManager = std::make_unique<ECS::SceneManager>(dx12.GetDevice(), dx12.GetCmdList());
+	m_sceneManager->LoadScene("Scene1");
+	m_sceneManager->SetCurrentScene("Scene1");
+	m_sceneManager->GetCurrentScene()->LoadMaterials();
+	m_sceneManager->GetCurrentScene()->LoadAssets();
+	dx12.SubmitCommand();
+
+
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
+	camera.SetPosition(0, 0, 0);
 }
