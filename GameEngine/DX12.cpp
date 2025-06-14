@@ -411,6 +411,7 @@ void DX12::RenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& came
 
     commandList->SetDescriptorHeaps(1, heaps);
     gui.BeginRender();
+    gui.UpdateTransformUI(sceneManager);
     gui.EndRender(commandList.Get());
 
     // Transition back buffer to present

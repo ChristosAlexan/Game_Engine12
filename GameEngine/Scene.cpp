@@ -37,7 +37,7 @@ namespace ECS
 
 	void Scene::LoadAssets()
 	{
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 3; ++i)
 		{
 			EntityDesc entDesc = {};
 			entDesc.meshType = CUBE;
@@ -85,7 +85,6 @@ namespace ECS
 		for (const auto& [entityID, renderComponent] : GetWorld()->GetAllRenderComponents())
 		{
 			auto tempTrans = GetWorld()->GetComponent<TransformComponent>(entityID);
-			tempTrans->position = DirectX::XMFLOAT3(0, 0, entityID * 5);
 			UpdateTransform(*tempTrans);
 
 			const auto& transform = GetWorld()->GetComponent<TransformComponent>(entityID);

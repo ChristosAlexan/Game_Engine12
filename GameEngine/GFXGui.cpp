@@ -2,7 +2,6 @@
 #include "ErrorLogger.h"
 #include "DX12_GLOBALS.h"
 
-
 GFXGui::GFXGui()
 {
 }
@@ -55,13 +54,35 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 	return true;
 }
 
+void GFXGui::UpdateTransformUI(ECS::SceneManager* sceneManager)
+{
+	auto scene = sceneManager->GetCurrentScene();
+	auto world = scene->GetWorld();
+	for (const auto& [entityID, transformComponent] : world->GetAllTransformComponents())
+	{
+		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
+		std::string entityLabel = "Entity" + std::to_string(entityID) + "##" + std::to_string(entityID);
+
+		if (ImGui::CollapsingHeader(entityLabel.c_str())) 
+		{
+			std::string posOffset = "Pos##" + std::to_string(entityID);
+			std::string scaleOffset = "Scale##" + std::to_string(entityID);
+			std::string rotOffset = "Rot##" + std::to_string(entityID);
+
+			ImGui::DragFloat3(posOffset.c_str(), &trans->position.x, 0.05f);
+			ImGui::DragFloat3(rotOffset.c_str(), &trans->rotation.x, 0.05f);
+			ImGui::DragFloat3(scaleOffset.c_str(), &trans->scale.x, 0.05f);
+		}
+	}
+}
+
 void GFXGui::BeginRender()
 {
 	ImGui_ImplWin32_NewFrame();
 	ImGui_ImplDX12_NewFrame();
 
 	ImGui::NewFrame();
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 }
 
 void GFXGui::EndRender(ID3D12GraphicsCommandList* cmdList)
