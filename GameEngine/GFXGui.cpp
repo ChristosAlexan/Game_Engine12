@@ -1,6 +1,7 @@
 #include "GFXGui.h"
 #include "ErrorLogger.h"
 #include "DX12_GLOBALS.h"
+#include "MathHelpers.h"
 
 GFXGui::GFXGui()
 {
@@ -79,21 +80,77 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
 {
 	ImGui::Begin("Entity");
+	ImGuizmo::SetOrthographic(false);
+	ImGuizmo::BeginFrame();
+
+	ImGuizmo::SetRect(0, 0, (float)screenWidth, (float)screenHeight);
 
 	if (m_closestEntityID != MAXUINT32)
 	{
+		DirectX::XMMATRIX viewMatrix = camera.GetViewMatrix();
+		DirectX::XMMATRIX projMatrix = camera.GetProjectionMatrix();
+
+
 		std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
 
-		if (ImGui::CollapsingHeader(entityLabel.c_str()))
+		static 	bool mode[3] = {false, false, false};
+		static ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+		if(ImGui::Checkbox("Trans", &mode[0]))
 		{
-			std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
-			std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
-			std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
-
-			ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
-			ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
-			ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+			operation = ImGuizmo::TRANSLATE;
+			mode[1] = false;
+			mode[2] = false;
 		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Rot", &mode[1]))
+		{
+			operation = ImGuizmo::ROTATE;
+			mode[0] = false;
+			mode[2] = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Scale", &mode[2]))
+		{
+			operation = ImGuizmo::SCALE;
+			mode[0] = false;
+			mode[1] = false;
+		}
+		std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
+		std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
+		std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
+
+		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
+		ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
+		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+
+		DirectX::XMMATRIX worldMatrix = m_closestTransform->worldMatrix;
+
+		float matrix[16];
+		DirectX::XMStoreFloat4x4((DirectX::XMFLOAT4X4*)matrix, worldMatrix);
+
+		if (ImGuizmo::Manipulate(
+			(const float*)&viewMatrix,
+			(const float*)&projMatrix,
+			operation,
+			ImGuizmo::LOCAL,
+			matrix))
+		{
+	
+			// If user changed the matrix, decompose it and apply to your TransformComponent
+			DirectX::XMMATRIX updatedMatix = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)matrix);
+
+			// Decompose updated world matrix into position, rotation, scale
+			DirectX::XMVECTOR scaleVec, rotQuat, transVec;
+			XMMatrixDecompose(&scaleVec, &rotQuat, &transVec, updatedMatix);
+
+			DirectX::XMStoreFloat3(&m_closestTransform->position, transVec);
+			DirectX::XMStoreFloat3(&m_closestTransform->scale, scaleVec);
+
+			// Convert quaternion to Euler angles
+			DirectX::XMFLOAT3 euler;
+			m_closestTransform->rotation = QuaternionToEulerAngles(rotQuat);
+		}
+
 	}
 		
 	
@@ -185,67 +242,4 @@ void GFXGui::EditorStyle()
 	colors[ImGuiCol_TabActive] = ImVec4(0.5f, 0.5f, 0.5f, 0.60f);
 	colors[ImGuiCol_TabUnfocused] = ImVec4(0.5f, 0.5f, 0.5f, 0.80f);
 	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.5f, 0.5f, 0.5f, 0.40f);
-}
-
-
-bool GFXGui::IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance)
-{
-	using namespace DirectX;
-
-	float tMin = 0.0f;
-	float tMax = FLT_MAX;
-
-	for (int i = 0; i < 3; ++i)
-	{
-		float rayOrigin = XMVectorGetByIndex(ray.origin, i);
-		float rayDir = XMVectorGetByIndex(ray.direction, i);
-		float boxMin = XMVectorGetByIndex(box.min, i);
-		float boxMax = XMVectorGetByIndex(box.max, i);
-
-		if (fabs(rayDir) < 1e-8f)
-		{
-			if (rayOrigin < boxMin || rayOrigin > boxMax)
-				return false;
-		}
-		else
-		{
-			float ood = 1.0f / rayDir;
-			float t1 = (boxMin - rayOrigin) * ood;
-			float t2 = (boxMax - rayOrigin) * ood;
-
-			if (t1 > t2) std::swap(t1, t2);
-
-			tMin = std::max(tMin, t1);
-			tMax = std::min(tMax, t2);
-
-			if (tMin > tMax)
-				return false;
-		}
-	}
-
-	// Only accept forward-facing hits
-	if (tMin < 0.0f)
-		return false;
-
-	outDistance = tMin;
-	return true;
-}
-
-GFXGui::Ray GFXGui::RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
-{
-	ImVec2 mousePos = ImGui::GetMousePos();
-	float ndcX = (2.0f * mousePos.x) / screenWidth - 1.0f;
-	float ndcY = 1.0f - (2.0f * mousePos.y) / screenHeight; // Invert Y for DX
-
-	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(nullptr, camera.GetViewMatrix());
-	DirectX::XMMATRIX invProj = DirectX::XMMatrixInverse(nullptr, camera.GetProjectionMatrix());
-
-	DirectX::XMVECTOR rayClip = DirectX::XMVectorSet(ndcX, ndcY, 1.0f, 1.0f);
-	DirectX::XMVECTOR rayEye = XMVector3TransformCoord(rayClip, invProj);
-	//rayEye = DirectX::XMVectorSetZ(rayEye, 1.0f); // Forward direction
-
-	DirectX::XMVECTOR rayDir = DirectX::XMVector3Normalize(XMVector3TransformNormal(rayEye, invView));
-	DirectX::XMVECTOR rayOrigin = camera.GetPositionVector();
-
-	return { rayOrigin, rayDir };
 }

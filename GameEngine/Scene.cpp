@@ -128,7 +128,7 @@ namespace ECS
 			// 1. Compute world matrix
 			DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixScaling(transform->scale.x, transform->scale.y, transform->scale.z) *
 				DirectX::XMMatrixRotationRollPitchYaw(transform->rotation.x, transform->rotation.y, transform->rotation.z) *
-				DirectX::XMMatrixTranslation(transform->position.x, transform->position.y, transform->position.z + entityID*5);
+				DirectX::XMMatrixTranslation(transform->position.x, transform->position.y, transform->position.z);
 			transform->worldMatrix = worldMatrix;
 
 

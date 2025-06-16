@@ -7,15 +7,11 @@
 #include <Windows.h>
 #include "DescriptorAllocator.h"
 #include "SceneManager.h"
+#include "ImGuizmo.h"
 
 class GFXGui
 {
 public:
-
-	struct Ray {
-		DirectX::XMVECTOR origin;
-		DirectX::XMVECTOR direction; // Must be normalized
-	};
 
 	GFXGui();
 
@@ -27,10 +23,6 @@ public:
 	void EndRender(ID3D12GraphicsCommandList* cmdList);
 
 	void EditorStyle();
-private:
-	bool IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance);
-	Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera);
-
 private:
 	float m_hitT = FLT_MAX;
 	ECS::EntityID m_closestEntityID;
