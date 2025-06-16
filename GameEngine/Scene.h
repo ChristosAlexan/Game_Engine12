@@ -24,6 +24,7 @@ namespace ECS
 		void LoadAssets();
 		AABB GetWorldAABB(TransformComponent* trans);
 
+		[[nodiscard]] const std::string GetName() const;
 		[[nodiscard]] AssetManager* GetAssetManager() const;
 		[[nodiscard]] MaterialManager* GetMaterialManager() const;
 		[[nodiscard]] ECSWorld* GetWorld() const;

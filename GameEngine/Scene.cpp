@@ -93,6 +93,11 @@ namespace ECS
 		return GenerateAABB(trans->aabb, trans->worldMatrix);
 	}
 
+	const std::string Scene::GetName() const
+	{
+		return m_sceneName;
+	}
+
 	AssetManager* Scene::GetAssetManager() const
 	{
 		return m_assetManager.get();

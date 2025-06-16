@@ -21,7 +21,8 @@ public:
 
 	bool Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap);
 	void SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
-	void UpdateTransformUI(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
+	void UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
+	void UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
 	void BeginRender();
 	void EndRender(ID3D12GraphicsCommandList* cmdList);
 

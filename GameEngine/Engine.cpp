@@ -103,7 +103,8 @@ void Engine::Update(int width, int height)
 	{
 		m_gui.SelectEntity(m_sceneManager.get(), width, height, camera);
 	}
-	m_gui.UpdateTransformUI(m_sceneManager.get(), width, height, camera);
+	m_gui.UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
+	m_gui.UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
 	dx12.EndRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
 }

@@ -4,6 +4,7 @@
 
 GFXGui::GFXGui()
 {
+	m_closestEntityID = MAXUINT32;
 }
 
 bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
@@ -75,22 +76,56 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 
 }
 
-void GFXGui::UpdateTransformUI(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
+void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
 {
-	ImGui::Begin("Engine");
+	ImGui::Begin("Entity");
 
-	std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
-
-	if (ImGui::CollapsingHeader(entityLabel.c_str()))
+	if (m_closestEntityID != MAXUINT32)
 	{
-		std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
-		std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
-		std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
+		std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
 
-		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
-		ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
-		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+		if (ImGui::CollapsingHeader(entityLabel.c_str()))
+		{
+			std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
+			std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
+			std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
+
+			ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
+			ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
+			ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+		}
 	}
+		
+	
+	ImGui::End();
+}
+
+void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
+{
+
+	auto scene = sceneManager->GetCurrentScene();
+	auto world = scene->GetWorld();
+
+	ImGui::Begin(scene->GetName().c_str());
+
+	for (const auto& [entityID, transformComponent] : world->GetAllTransformComponents())
+	{
+		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
+
+		std::string entityLabel = "Entity" + std::to_string(entityID) + "##" + std::to_string(entityID);
+
+		if (ImGui::CollapsingHeader(entityLabel.c_str()))
+		{
+			std::string posOffset = "Pos##" + std::to_string(entityID);
+			std::string scaleOffset = "Scale##" + std::to_string(entityID);
+			std::string rotOffset = "Rot##" + std::to_string(entityID);
+
+			ImGui::DragFloat3(posOffset.c_str(), &trans->position.x, 0.05f);
+			ImGui::DragFloat3(rotOffset.c_str(), &trans->rotation.x, 0.05f);
+			ImGui::DragFloat3(scaleOffset.c_str(), &trans->scale.x, 0.05f);
+		}
+	}
+
 	ImGui::End();
 }
 
