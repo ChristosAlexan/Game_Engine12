@@ -363,7 +363,7 @@ void DX12::InitializeConstantBuffers()
 }
 
 
-void DX12::RenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
+void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
 {
     // Reset allocator and command list
     commandAllocator->Reset();
@@ -379,12 +379,12 @@ void DX12::RenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& came
     commandList->RSSetScissorRects(1, &scissorRect);
 
     // Transition back buffer to render target
-    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    m_barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[frameIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET
     );
-    commandList->ResourceBarrier(1, &barrier);
+    commandList->ResourceBarrier(1, &m_barrier);
 
     // Set render target
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
@@ -410,17 +410,21 @@ void DX12::RenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& came
     sceneManager->Render(dynamicCB.get(), camera, dt);
 
     commandList->SetDescriptorHeaps(1, heaps);
+
     gui.BeginRender();
-    gui.UpdateTransformUI(sceneManager);
+}
+
+void DX12::EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt)
+{
     gui.EndRender(commandList.Get());
 
     // Transition back buffer to present
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    m_barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[frameIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
     );
-    commandList->ResourceBarrier(1, &barrier);
+    commandList->ResourceBarrier(1, &m_barrier);
     SubmitCommand();
 
     // Present the frame

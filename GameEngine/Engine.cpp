@@ -38,6 +38,9 @@ void Engine::Update(int width, int height)
 	timer.CalculateDeltaTime(dt, fps);
 	timer.Restart();
 	
+
+	dx12.StartRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+
 	if (keyboard.KeyIsPressed(VK_ESCAPE))
 	{
 		this->render_window.~RenderWindow();
@@ -95,7 +98,14 @@ void Engine::Update(int width, int height)
 
 	ClipCursor(NULL);
 	while (ShowCursor(TRUE) < 0);
-	dx12.RenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+
+	if (mouse.IsRightDown())
+	{
+		m_gui.SelectEntity(m_sceneManager.get(), width, height, camera);
+	}
+	m_gui.UpdateTransformUI(m_sceneManager.get(), width, height, camera);
+
+	dx12.EndRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
 }
 
 void Engine::CreateScenes(Camera& camera, int& width, int& height)

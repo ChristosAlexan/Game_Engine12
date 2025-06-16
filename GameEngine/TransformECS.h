@@ -3,10 +3,19 @@
 
 namespace ECS
 {
+	struct AABB
+	{
+		DirectX::XMVECTOR min = DirectX::XMVectorSet(-1.0f, -1.0f, -1.0f, 1.0f);
+		DirectX::XMVECTOR max = DirectX::XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	};
 	struct TransformComponent
 	{
 		DirectX::XMFLOAT3 position = { 0, 0, 0 };
 		DirectX::XMFLOAT3 rotation = { 0, 0, 0 };
 		DirectX::XMFLOAT3 scale = { 1, 1, 1 };
+
+		DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
+
+		AABB aabb;
 	};
 }

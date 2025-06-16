@@ -54,26 +54,44 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 	return true;
 }
 
-void GFXGui::UpdateTransformUI(ECS::SceneManager* sceneManager)
+void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
 {
+	float closestT = FLT_MAX;
 	auto scene = sceneManager->GetCurrentScene();
 	auto world = scene->GetWorld();
 	for (const auto& [entityID, transformComponent] : world->GetAllTransformComponents())
 	{
 		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
-		std::string entityLabel = "Entity" + std::to_string(entityID) + "##" + std::to_string(entityID);
 
-		if (ImGui::CollapsingHeader(entityLabel.c_str())) 
+		Ray ray = RaycastPicking(screenWidth, screenHeight, camera);
+
+		if (IntersectsAABB(ray, scene->GetWorldAABB(trans), m_hitT) && (m_hitT < closestT))
 		{
-			std::string posOffset = "Pos##" + std::to_string(entityID);
-			std::string scaleOffset = "Scale##" + std::to_string(entityID);
-			std::string rotOffset = "Rot##" + std::to_string(entityID);
-
-			ImGui::DragFloat3(posOffset.c_str(), &trans->position.x, 0.05f);
-			ImGui::DragFloat3(rotOffset.c_str(), &trans->rotation.x, 0.05f);
-			ImGui::DragFloat3(scaleOffset.c_str(), &trans->scale.x, 0.05f);
+			closestT = m_hitT;
+			m_closestEntityID = entityID;
+			m_closestTransform = trans;
 		}
 	}
+
+}
+
+void GFXGui::UpdateTransformUI(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
+{
+	ImGui::Begin("Engine");
+
+	std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
+
+	if (ImGui::CollapsingHeader(entityLabel.c_str()))
+	{
+		std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
+		std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
+		std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
+
+		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
+		ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
+		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+	}
+	ImGui::End();
 }
 
 void GFXGui::BeginRender()
@@ -132,4 +150,67 @@ void GFXGui::EditorStyle()
 	colors[ImGuiCol_TabActive] = ImVec4(0.5f, 0.5f, 0.5f, 0.60f);
 	colors[ImGuiCol_TabUnfocused] = ImVec4(0.5f, 0.5f, 0.5f, 0.80f);
 	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.5f, 0.5f, 0.5f, 0.40f);
+}
+
+
+bool GFXGui::IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance)
+{
+	using namespace DirectX;
+
+	float tMin = 0.0f;
+	float tMax = FLT_MAX;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		float rayOrigin = XMVectorGetByIndex(ray.origin, i);
+		float rayDir = XMVectorGetByIndex(ray.direction, i);
+		float boxMin = XMVectorGetByIndex(box.min, i);
+		float boxMax = XMVectorGetByIndex(box.max, i);
+
+		if (fabs(rayDir) < 1e-8f)
+		{
+			if (rayOrigin < boxMin || rayOrigin > boxMax)
+				return false;
+		}
+		else
+		{
+			float ood = 1.0f / rayDir;
+			float t1 = (boxMin - rayOrigin) * ood;
+			float t2 = (boxMax - rayOrigin) * ood;
+
+			if (t1 > t2) std::swap(t1, t2);
+
+			tMin = std::max(tMin, t1);
+			tMax = std::min(tMax, t2);
+
+			if (tMin > tMax)
+				return false;
+		}
+	}
+
+	// Only accept forward-facing hits
+	if (tMin < 0.0f)
+		return false;
+
+	outDistance = tMin;
+	return true;
+}
+
+GFXGui::Ray GFXGui::RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
+{
+	ImVec2 mousePos = ImGui::GetMousePos();
+	float ndcX = (2.0f * mousePos.x) / screenWidth - 1.0f;
+	float ndcY = 1.0f - (2.0f * mousePos.y) / screenHeight; // Invert Y for DX
+
+	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(nullptr, camera.GetViewMatrix());
+	DirectX::XMMATRIX invProj = DirectX::XMMatrixInverse(nullptr, camera.GetProjectionMatrix());
+
+	DirectX::XMVECTOR rayClip = DirectX::XMVectorSet(ndcX, ndcY, 1.0f, 1.0f);
+	DirectX::XMVECTOR rayEye = XMVector3TransformCoord(rayClip, invProj);
+	//rayEye = DirectX::XMVectorSetZ(rayEye, 1.0f); // Forward direction
+
+	DirectX::XMVECTOR rayDir = DirectX::XMVector3Normalize(XMVector3TransformNormal(rayEye, invView));
+	DirectX::XMVECTOR rayOrigin = camera.GetPositionVector();
+
+	return { rayOrigin, rayDir };
 }

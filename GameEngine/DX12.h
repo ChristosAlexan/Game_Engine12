@@ -27,7 +27,8 @@ public:
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeConstantBuffers();
-	void RenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
+	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
+	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
 	//void CreateScenes(Camera& camera, int& width, int& height);
 	void ResetCommandAllocator();
@@ -56,6 +57,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
+	CD3DX12_RESOURCE_BARRIER m_barrier;
 
 	// SAMPLE DESCS
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
