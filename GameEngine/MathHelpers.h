@@ -4,11 +4,11 @@
 
 struct Ray {
 	DirectX::XMVECTOR origin;
-	DirectX::XMVECTOR direction; // Must be normalized
+	DirectX::XMVECTOR direction;
 };
 
 
-DirectX::XMFLOAT3 QuaternionToEulerAngles(DirectX::XMVECTOR q)
+inline DirectX::XMFLOAT3 QuaternionToEulerAngles(DirectX::XMVECTOR q)
 {
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(q);
 	float pitch, yaw, roll;
@@ -31,7 +31,7 @@ DirectX::XMFLOAT3 QuaternionToEulerAngles(DirectX::XMVECTOR q)
 
 
 
-bool IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance)
+inline bool IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance)
 {
 	using namespace DirectX;
 
@@ -74,11 +74,11 @@ bool IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDistance)
 	return true;
 }
 
-Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
+inline Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
 {
 	ImVec2 mousePos = ImGui::GetMousePos();
 	float ndcX = (2.0f * mousePos.x) / screenWidth - 1.0f;
-	float ndcY = 1.0f - (2.0f * mousePos.y) / screenHeight; // Invert Y for DX
+	float ndcY = 1.0f - (2.0f * mousePos.y) / screenHeight;
 
 	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(nullptr, camera.GetViewMatrix());
 	DirectX::XMMATRIX invProj = DirectX::XMMatrixInverse(nullptr, camera.GetProjectionMatrix());

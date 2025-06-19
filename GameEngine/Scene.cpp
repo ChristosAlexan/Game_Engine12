@@ -74,7 +74,6 @@ namespace ECS
 			DirectX::XMVectorSet(maxF.x, maxF.y, maxF.z, 1.0f),
 		};
 
-		// Initialize min/max vectors
 		DirectX::XMVECTOR newMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
 		DirectX::XMVECTOR newMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
 
@@ -125,17 +124,20 @@ namespace ECS
 
 			const auto& transform = GetWorld()->GetComponent<TransformComponent>(entityID);
 
-			// 1. Compute world matrix
-			DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixScaling(transform->scale.x, transform->scale.y, transform->scale.z) *
-				DirectX::XMMatrixRotationRollPitchYaw(transform->rotation.x, transform->rotation.y, transform->rotation.z) *
-				DirectX::XMMatrixTranslation(transform->position.x, transform->position.y, transform->position.z);
-			transform->worldMatrix = worldMatrix;
+			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform->position);
+			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform->rotation);
+			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform->scale);
 
+			DirectX::XMMATRIX scale_mat = DirectX::XMMatrixScalingFromVector(scale_vec);
+			DirectX::XMMATRIX rot_mat = DirectX::XMMatrixRotationQuaternion(rot_vec);
+			DirectX::XMMATRIX pos_mat = DirectX::XMMatrixTranslationFromVector(pos_vec);
+		
+			transform->worldMatrix = scale_mat * rot_mat * pos_mat;
 
 			CB_VS_SimpleShader vsCB = {};
 			vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
 			vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-			vsCB.worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform->worldMatrix);
 			CB_PS_SimpleShader psCB = {};
 
 			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);

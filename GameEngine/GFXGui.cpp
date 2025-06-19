@@ -6,6 +6,7 @@
 GFXGui::GFXGui()
 {
 	m_closestEntityID = MAXUINT32;
+	m_hitT = FLT_MAX;
 }
 
 bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
@@ -74,7 +75,6 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 			m_closestTransform = trans;
 		}
 	}
-
 }
 
 void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
@@ -92,7 +92,8 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 
 
 		std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
-
+		std::string entityName = "Entity" + std::to_string(m_closestEntityID);
+		ImGui::Text(entityName.c_str());
 		static 	bool mode[3] = {false, false, false};
 		static ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
 		if(ImGui::Checkbox("Trans", &mode[0]))
@@ -120,8 +121,12 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 		std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
 
 		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
-		ImGui::DragFloat3(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.05f);
 		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
+		if (ImGui::DragFloat4(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.01f)) {
+			DirectX::XMVECTOR q = DirectX::XMLoadFloat4(&m_closestTransform->rotation);
+			q = DirectX::XMQuaternionNormalize(q);
+			DirectX::XMStoreFloat4(&m_closestTransform->rotation, q);
+		}
 
 		DirectX::XMMATRIX worldMatrix = m_closestTransform->worldMatrix;
 
@@ -135,25 +140,16 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 			ImGuizmo::LOCAL,
 			matrix))
 		{
-	
-			// If user changed the matrix, decompose it and apply to your TransformComponent
 			DirectX::XMMATRIX updatedMatix = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)matrix);
-
-			// Decompose updated world matrix into position, rotation, scale
+			
 			DirectX::XMVECTOR scaleVec, rotQuat, transVec;
 			XMMatrixDecompose(&scaleVec, &rotQuat, &transVec, updatedMatix);
 
 			DirectX::XMStoreFloat3(&m_closestTransform->position, transVec);
 			DirectX::XMStoreFloat3(&m_closestTransform->scale, scaleVec);
-
-			// Convert quaternion to Euler angles
-			DirectX::XMFLOAT3 euler;
-			m_closestTransform->rotation = QuaternionToEulerAngles(rotQuat);
+			DirectX::XMStoreFloat4(&m_closestTransform->rotation, rotQuat);
 		}
-
 	}
-		
-	
 	ImGui::End();
 }
 
@@ -170,7 +166,6 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
 
 		std::string entityLabel = "Entity" + std::to_string(entityID) + "##" + std::to_string(entityID);
-
 		if (ImGui::CollapsingHeader(entityLabel.c_str()))
 		{
 			std::string posOffset = "Pos##" + std::to_string(entityID);
