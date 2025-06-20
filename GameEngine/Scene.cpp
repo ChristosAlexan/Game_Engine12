@@ -9,14 +9,13 @@ namespace ECS
 		:m_sceneName(sceneName), m_assetManager(std::move(assetMgr)),
 		m_materialManager(std::move(materialMgr)), m_device(device), m_cmdList(cmdList)
 	{
-		m_world = std::make_shared<ECSWorld>();
-		m_entityFactory = std::make_unique<EntityFactory>(m_world.get(), m_device, m_cmdList);
+		m_registry = entt::registry{};
+		m_entityFactory = std::make_unique<EntityFactory>(m_registry, m_device, m_cmdList);
 	}
 
-	ECS::EntityID Scene::CreateEntity()
+	entt::entity Scene::CreateEntity()
 	{
-		EntityID id = m_NextEntityID++;
-		return id;
+		return m_registry.create();
 	}
 
 	void Scene::LoadMaterials()
@@ -107,9 +106,9 @@ namespace ECS
 		return m_materialManager.get();
 	}
 
-	ECSWorld* Scene::GetWorld() const
+	entt::registry& Scene::GetRegistry()
 	{
-		return m_world.get();
+		return m_registry;
 	}
 
 	void Scene::Update(float dt)
@@ -118,31 +117,28 @@ namespace ECS
 
 	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
-		for (const auto& [entityID, renderComponent] : GetWorld()->GetAllRenderComponents())
+		auto view = GetRegistry().view<TransformComponent, RenderComponent>();
+
+		for (auto [entity, transform, renderComponent] : view.each())
 		{
-			auto tempTrans = GetWorld()->GetComponent<TransformComponent>(entityID);
-
-			const auto& transform = GetWorld()->GetComponent<TransformComponent>(entityID);
-
-			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform->position);
-			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform->rotation);
-			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform->scale);
+			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
+			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);
+			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform.scale);
 
 			DirectX::XMMATRIX scale_mat = DirectX::XMMatrixScalingFromVector(scale_vec);
 			DirectX::XMMATRIX rot_mat = DirectX::XMMatrixRotationQuaternion(rot_vec);
 			DirectX::XMMATRIX pos_mat = DirectX::XMMatrixTranslationFromVector(pos_vec);
-		
-			transform->worldMatrix = scale_mat * rot_mat * pos_mat;
+
+			transform.worldMatrix = scale_mat * rot_mat * pos_mat;
 
 			CB_VS_SimpleShader vsCB = {};
 			vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
 			vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform->worldMatrix);
-			CB_PS_SimpleShader psCB = {};
+			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform.worldMatrix);
 
+			CB_PS_SimpleShader psCB = {};
 			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 			psCB.color = renderComponent.material->baseColor;
-
 
 			m_cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
 			m_cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));

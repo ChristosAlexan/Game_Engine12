@@ -7,7 +7,7 @@ namespace ECS
 	{
 	}
 
-	std::shared_ptr<Mesh12> ECS::AssetManager::GetOrLoadMesh(SHAPE_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	std::shared_ptr<Mesh12> ECS::AssetManager::GetOrLoadMesh(MESH_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
 		if (m_meshes.contains(name))
 			return m_meshes.at(name);

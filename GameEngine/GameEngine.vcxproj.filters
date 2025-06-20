@@ -103,6 +103,15 @@
     <Filter Include="Math">
       <UniqueIdentifier>{9cfe27c5-c40f-4c34-af57-4214f3803f20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ECS\Model">
+      <UniqueIdentifier>{2682372d-0f13-4ecd-8539-4f4a74f282c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Model\Header">
+      <UniqueIdentifier>{46e9b510-31be-40e5-a633-217fe68f19bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS\Model\Source">
+      <UniqueIdentifier>{d769a753-8659-416f-ac4c-e90565ef7af4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -214,9 +223,6 @@
       <Filter>ECS\Source</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ECSWorld.cpp">
       <Filter>ECS\Source</Filter>
     </ClCompile>
     <ClCompile Include="GraphEditor.cpp">
@@ -387,9 +393,6 @@
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ECSWorld.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="EntityECS.h">

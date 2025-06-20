@@ -25,7 +25,7 @@ public:
 	void EditorStyle();
 private:
 	float m_hitT;
-	ECS::EntityID m_closestEntityID;
+	entt::entity m_closestEntity;
 	ECS::TransformComponent* m_closestTransform;
 };
 

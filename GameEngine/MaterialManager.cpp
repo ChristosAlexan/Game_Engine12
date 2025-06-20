@@ -51,6 +51,16 @@ namespace ECS
 		return m_textures.at(name);
 	}
 
+	std::shared_ptr<Material> MaterialManager::GetMaterial(std::string name) const
+	{
+		if (m_materials.contains(name))
+			return m_materials.at(name);
+		else
+		{
+			ErrorLogger::Log("GetMaterial returned null for: " + name);
+		}
+	}
+
 	void MaterialManager::Bindtextures(Material* material, ID3D12GraphicsCommandList* cmdList, UINT rootIndex)
 	{
 		cmdList->SetGraphicsRootDescriptorTable(rootIndex, material->textures[0]->GetGPUHandle());

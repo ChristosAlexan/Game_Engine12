@@ -9,6 +9,8 @@ Texture12::Texture12()
 
 void Texture12::LoadFromFile(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
 {
+	m_debugName = filename;
+
 	DirectX::ScratchImage scratchImage;
 	DirectX::TexMetadata metadata;
 

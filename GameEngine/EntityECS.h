@@ -8,7 +8,7 @@ namespace ECS
 	struct EntityDesc
 	{
 		std::string name;
-		SHAPE_TYPE meshType = SHAPE_TYPE::CUBE;
+		MESH_TYPE meshType = MESH_TYPE::CUBE;
 		std::string materialName = "defaultMaterial";
 		TransformComponent transform = {};
 		MaterialDesc materialDesc = MaterialDesc::Default();

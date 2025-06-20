@@ -1,10 +1,12 @@
 #pragma once
 #include "MeshData.h"
 
-enum SHAPE_TYPE
+enum MESH_TYPE
 {
 	QUAD = 0,
-	CUBE = 1
+	CUBE = 1,
+	MESH = 2,
+	SKELETAL_MESH = 3
 };
 
 ECS::MeshData GenerateCubeMesh();

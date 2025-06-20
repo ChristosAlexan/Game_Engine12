@@ -5,7 +5,7 @@
 
 GFXGui::GFXGui()
 {
-	m_closestEntityID = MAXUINT32;
+	m_closestEntity = entt::null;
 	m_hitT = FLT_MAX;
 }
 
@@ -61,18 +61,16 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 {
 	float closestT = FLT_MAX;
 	auto scene = sceneManager->GetCurrentScene();
-	auto world = scene->GetWorld();
-	for (const auto& [entityID, transformComponent] : world->GetAllTransformComponents())
+	auto view = scene->GetRegistry().view<ECS::TransformComponent>();
+	for (auto [entity, transform] : view.each())
 	{
-		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
-
 		Ray ray = RaycastPicking(screenWidth, screenHeight, camera);
 
-		if (IntersectsAABB(ray, scene->GetWorldAABB(trans), m_hitT) && (m_hitT < closestT))
+		if (IntersectsAABB(ray, scene->GetWorldAABB(&transform), m_hitT) && (m_hitT < closestT))
 		{
 			closestT = m_hitT;
-			m_closestEntityID = entityID;
-			m_closestTransform = trans;
+			m_closestEntity = entity;
+			m_closestTransform = &transform;
 		}
 	}
 }
@@ -85,14 +83,16 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 
 	ImGuizmo::SetRect(0, 0, (float)screenWidth, (float)screenHeight);
 
-	if (m_closestEntityID != MAXUINT32)
+	if (m_closestEntity != entt::null)
 	{
 		DirectX::XMMATRIX viewMatrix = camera.GetViewMatrix();
 		DirectX::XMMATRIX projMatrix = camera.GetProjectionMatrix();
 
 
-		std::string entityLabel = "Entity" + std::to_string(m_closestEntityID) + "##" + std::to_string(m_closestEntityID);
-		std::string entityName = "Entity" + std::to_string(m_closestEntityID);
+		std::string entityLabel = "Entity" + std::to_string(static_cast<uint32_t>(m_closestEntity)) +
+			"##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string entityName = "Entity" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+
 		ImGui::Text(entityName.c_str());
 		static 	bool mode[3] = {false, false, false};
 		static ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
@@ -116,9 +116,9 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 			mode[0] = false;
 			mode[1] = false;
 		}
-		std::string posOffset = "Pos##" + std::to_string(m_closestEntityID);
-		std::string scaleOffset = "Scale##" + std::to_string(m_closestEntityID);
-		std::string rotOffset = "Rot##" + std::to_string(m_closestEntityID);
+		std::string posOffset = "Pos##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string scaleOffset = "Scale##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 
 		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
 		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
@@ -157,24 +157,22 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 {
 
 	auto scene = sceneManager->GetCurrentScene();
-	auto world = scene->GetWorld();
+	auto view = scene->GetRegistry().view<ECS::TransformComponent>();
 
 	ImGui::Begin(scene->GetName().c_str());
 
-	for (const auto& [entityID, transformComponent] : world->GetAllTransformComponents())
+	for (auto [entity, transform] : view.each())
 	{
-		auto trans = world->GetComponent<ECS::TransformComponent>(entityID);
-
-		std::string entityLabel = "Entity" + std::to_string(entityID) + "##" + std::to_string(entityID);
+		std::string entityLabel = "Entity" + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
 		if (ImGui::CollapsingHeader(entityLabel.c_str()))
 		{
-			std::string posOffset = "Pos##" + std::to_string(entityID);
-			std::string scaleOffset = "Scale##" + std::to_string(entityID);
-			std::string rotOffset = "Rot##" + std::to_string(entityID);
+			std::string posOffset = "Pos##" + std::to_string(static_cast<uint32_t>(entity));
+			std::string scaleOffset = "Scale##" + std::to_string(static_cast<uint32_t>(entity));
+			std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(entity));
 
-			ImGui::DragFloat3(posOffset.c_str(), &trans->position.x, 0.05f);
-			ImGui::DragFloat3(rotOffset.c_str(), &trans->rotation.x, 0.05f);
-			ImGui::DragFloat3(scaleOffset.c_str(), &trans->scale.x, 0.05f);
+			ImGui::DragFloat3(posOffset.c_str(), &transform.position.x, 0.05f);
+			ImGui::DragFloat3(rotOffset.c_str(), &transform.rotation.x, 0.05f);
+			ImGui::DragFloat3(scaleOffset.c_str(), &transform.scale.x, 0.05f);
 		}
 	}
 

@@ -9,7 +9,7 @@
 #include "DynamicUploadBuffer.h"
 #include "ConstantBufferTypes.h"
 #include "Camera.h"
-#include "ECSWorld.h"
+#include <entt/entt.hpp>
 
 namespace ECS
 {
@@ -19,7 +19,7 @@ namespace ECS
 		Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr,
 			ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 
-		ECS::EntityID CreateEntity();
+		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
 		AABB GetWorldAABB(TransformComponent* trans);
@@ -27,7 +27,7 @@ namespace ECS
 		[[nodiscard]] const std::string GetName() const;
 		[[nodiscard]] AssetManager* GetAssetManager() const;
 		[[nodiscard]] MaterialManager* GetMaterialManager() const;
-		[[nodiscard]] ECSWorld* GetWorld() const;
+		[[nodiscard]] entt::registry& GetRegistry();
 
 		void Update(float dt);
 		void Render(Camera& camera, DynamicUploadBuffer* dynamicCB);
@@ -44,7 +44,7 @@ namespace ECS
 
 		UINT m_NextEntityID = 0;
 
-		std::shared_ptr<ECSWorld> m_world;
+		entt::registry m_registry;
 	};
 
 }

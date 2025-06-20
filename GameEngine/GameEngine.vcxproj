@@ -247,7 +247,6 @@
     <ClCompile Include="DescriptorAllocator.cpp" />
     <ClCompile Include="DX12.cpp" />
     <ClCompile Include="DXCShaderCompiler.cpp" />
-    <ClCompile Include="ECSWorld.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityFactory.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
@@ -299,7 +298,6 @@
     <ClInclude Include="DXCShaderCompiler.h" />
     <ClInclude Include="DynamicUploadBuffer.h" />
     <ClInclude Include="ECSHeader.h" />
-    <ClInclude Include="ECSWorld.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EntityECS.h" />
     <ClInclude Include="EntityFactory.h" />

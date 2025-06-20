@@ -15,6 +15,8 @@ namespace ECS
 			ID3D12GraphicsCommandList* cmdList,
 			DescriptorAllocator* allocator);
 
+		std::shared_ptr<Material> GetMaterial(std::string name) const;
+
 		void Bindtextures(Material* material, ID3D12GraphicsCommandList* cmdList, UINT rootIndex);
 
 		std::optional<MaterialDesc> GetMaterialDescByName(const std::string& name) const;
