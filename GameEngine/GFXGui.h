@@ -27,6 +27,7 @@ private:
 	float m_hitT;
 	entt::entity m_closestEntity;
 	ECS::TransformComponent* m_closestTransform;
+	std::string m_closestEntityName;
 };
 
 

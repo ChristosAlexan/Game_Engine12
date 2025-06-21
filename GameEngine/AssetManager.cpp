@@ -7,7 +7,7 @@ namespace ECS
 	{
 	}
 
-	std::shared_ptr<Mesh12> ECS::AssetManager::GetOrLoadMesh(MESH_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const std::string* filepath)
+	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(MESH_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const std::string* filepath)
 	{
 		if (m_meshes.contains(name))
 			return m_meshes.at(name);
@@ -27,8 +27,9 @@ namespace ECS
 				break;
 
 		}
-		auto mesh = std::make_shared<Mesh12>();
-		mesh->Upload(device, cmdList, data);
+		auto mesh = std::make_shared<GpuMesh>();
+		mesh->cpuMesh = std::move(data);
+		mesh->Upload(device, cmdList);
 		m_meshes.emplace(name, mesh);
 
 		return m_meshes.at(name);

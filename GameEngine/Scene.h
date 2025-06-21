@@ -22,7 +22,7 @@ namespace ECS
 		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
-		AABB GetWorldAABB(TransformComponent* trans);
+		AABB GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp);
 
 		[[nodiscard]] const std::string GetName() const;
 		[[nodiscard]] AssetManager* GetAssetManager() const;
@@ -32,7 +32,7 @@ namespace ECS
 		void Update(float dt);
 		void Render(Camera& camera, DynamicUploadBuffer* dynamicCB);
 	private:
-		AABB GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix);
+		AABB GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp);
 	private:
 		std::string m_sceneName;
 		std::shared_ptr<AssetManager> m_assetManager;

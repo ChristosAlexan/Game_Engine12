@@ -26,31 +26,12 @@ namespace ECS
 		materialDesc.albedoTextureName = "defaultAlbedo";
 		materialDesc.normalTexturePath = "Data/Textures/Tex1/plasticpattern1-normal2b.png";
 		materialDesc.normalTextureName = "defaultNormal";
-		materialDesc.roughnessTexturePath = "Data/Textures/Tex1/plasticpattern1-roughness2.png";
-		materialDesc.roughnessTextureName = "defaultRougness";
-		materialDesc.metalnessTexturePath = "Data/Textures/Tex1/plasticpattern1-metalness.png";
-		materialDesc.metalnessTextureName = "defaultMetallic";
+		materialDesc.metalRoughnessTexturePath = "Data/Textures/Tex1/plasticpattern1-roughness2.png";
+		materialDesc.metalRoughnessTextureName = "defaultMetalRougness";
 		materialDesc.useAlbedoMap = true;
-		materialDesc.useMetalnessMap = true;
 		materialDesc.useNormalMap = true;
-		materialDesc.useRoughnessMap = true;
-
-		m_materialManager->GetOrCreateMaterial(materialDesc);
-
-
-		materialDesc.name = "TestMaterial";
-		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.jpg";
-		materialDesc.albedoTextureName = "defaultAlbedo1";
-		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_normal.jpg";
-		materialDesc.normalTextureName = "defaultNormal1";
-		materialDesc.roughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg";
-		materialDesc.roughnessTextureName = "defaultRougness1";
-		materialDesc.metalnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_emissive.jpg";
-		materialDesc.metalnessTextureName = "defaultMetallic1";
-		materialDesc.useAlbedoMap = true;
-		materialDesc.useMetalnessMap = true;
-		materialDesc.useNormalMap = true;
-		materialDesc.useRoughnessMap = true;
+		materialDesc.useMetalRoughnessMap = true;
+		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
 
 		m_materialManager->GetOrCreateMaterial(materialDesc);
 	}
@@ -74,24 +55,63 @@ namespace ECS
 			m_entityFactory->CreateMesh(this, entDesc);
 		}
 
-		if (auto desc = m_materialManager->GetMaterialDescByName("TestMaterial"))
-			entDesc.materialDesc = *desc;
-		else
-		{
-			ErrorLogger::Log("Material descriptor not found");
-			entDesc.materialDesc = MaterialDesc::Default();
-		}
+		//HELMET
+		MaterialDesc materialDesc = {};
+		materialDesc.name = "TestMaterial";
+		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.dds";
+		materialDesc.albedoTextureName = "defaultAlbedo1";
+		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_normal.dds";
+		materialDesc.normalTextureName = "defaultNormal1";
+		materialDesc.metalRoughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_metalRoughness.dds";
+		materialDesc.metalRoughnessTextureName = "defaultMetalRougness1";
+		materialDesc.useAlbedoMap = true;
+		materialDesc.useNormalMap = true;
+		materialDesc.useMetalRoughnessMap = true;
+		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
+
+		entDesc.materialDesc = materialDesc;
 		entDesc.meshType = STATIC_MESH;
 		entDesc.name = "Helmet";
-		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf";
+		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb";
+		entDesc.hasMaterial = true;
+		m_entityFactory->CreateMesh(this, entDesc);
+
+		//ROBO
+		materialDesc.name = "RoboMaterial";
+		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds";
+		materialDesc.albedoTextureName = "roboAlbedo";
+		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds";
+		materialDesc.normalTextureName = "roboNormal";
+		materialDesc.metalRoughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds";
+		materialDesc.metalRoughnessTextureName = "roboMetalRougness";
+		materialDesc.useAlbedoMap = true;
+		materialDesc.useNormalMap = true;
+		materialDesc.useMetalRoughnessMap = true;
+		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
+
+		entDesc.materialDesc = materialDesc;
+		entDesc.meshType = STATIC_MESH;
+		entDesc.name = "Robo";
+		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo.glb";
+		entDesc.hasMaterial = true;
 		m_entityFactory->CreateMesh(this, entDesc);
 	}
 
-	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix)
+	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp)
 	{
 		DirectX::XMFLOAT3 minF, maxF;
-		aabb.min = DirectX::XMVectorSet(-1.0f, -1.0f, -1.0f,1.0f);
-		aabb.max = DirectX::XMVectorSet(1.0f, 1.0f, 1.0f,1.0f);
+		DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
+		DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
+
+		for (const auto& vertex : renderComp->mesh->cpuMesh.vertices)
+		{
+			DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
+			min = DirectX::XMVectorMin(min, pos);
+			max = DirectX::XMVectorMax(max, pos);
+		}
+
+		aabb.min = min;
+		aabb.max = max;
 		DirectX::XMStoreFloat3(&minF, aabb.min);
 		XMStoreFloat3(&maxF, aabb.max);
 
@@ -112,7 +132,7 @@ namespace ECS
 
 		// Transform all corners and find new min/max
 		for (int i = 0; i < 8; ++i) {
-			DirectX::XMVECTOR cornerWorld = XMVector3Transform(corners[i], worldMatrix);
+			DirectX::XMVECTOR cornerWorld = XMVector3TransformCoord(corners[i], worldMatrix);
 			newMin = DirectX::XMVectorMin(newMin, cornerWorld);
 			newMax = DirectX::XMVectorMax(newMax, cornerWorld);
 		}
@@ -120,9 +140,9 @@ namespace ECS
 		return { newMin, newMax };
 	}
 
-	AABB Scene::GetWorldAABB(TransformComponent* trans)
+	AABB Scene::GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp)
 	{
-		return GenerateAABB(trans->aabb, trans->worldMatrix);
+		return GenerateAABB(trans->aabb, trans->worldMatrix, renderComp);
 	}
 
 	const std::string Scene::GetName() const
@@ -155,9 +175,6 @@ namespace ECS
 
 		for (auto [entity, transform, renderComponent] : renderGroup.each())
 		{
-			std::string label = "Entity_" + std::to_string(static_cast<uint32_t>(entity));
-			OutputDebugStringA(("Rendering entity: " + label + " with material: " + renderComponent.material->name + "\n").c_str());
-
 			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
 			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);
 			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform.scale);

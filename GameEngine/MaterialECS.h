@@ -9,8 +9,7 @@ namespace ECS
     {
         DIFFUSE = 0,
         NORMAL = 1,
-        ROUGHNESS = 2,
-        METALLNESS = 3
+        METAL_ROUGHNESS = 2
     };
 
     struct MaterialDesc
@@ -19,14 +18,13 @@ namespace ECS
 
         std::string albedoTextureName = "defaultAlbedo";    // albedo (diffuse) texture
         std::string normalTextureName = "defaultNormal";    // normal map
-        std::string roughnessTextureName = ""; // roughness map
-        std::string metalnessTextureName = ""; // metalness map
+        std::string metalRoughnessTextureName = ""; // roughness map
 
 
         std::string albedoTexturePath = "";    // albedo (diffuse) texture
         std::string normalTexturePath = "";    // normal map
-        std::string roughnessTexturePath = ""; // roughness map
-        std::string metalnessTexturePath = ""; // metalness map
+        std::string metalRoughnessTexturePath = ""; // roughness map
+        Texture12::TEXTURE_FORMAT tex_format;
 
         DirectX::XMFLOAT4 baseColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Used if no albedo texture
         float roughness = 0.5f;
@@ -34,8 +32,7 @@ namespace ECS
 
         bool useAlbedoMap = false;
         bool useNormalMap = false;
-        bool useRoughnessMap = false;
-        bool useMetalnessMap = false;
+        bool useMetalRoughnessMap = false;
 
         static MaterialDesc Default()
         {
@@ -47,18 +44,17 @@ namespace ECS
         std::string name;
         std::shared_ptr<Texture12> albedoTexture;    // albedo (diffuse) texture
         std::shared_ptr<Texture12> normalTexture;    // normal map
-        std::shared_ptr<Texture12> roughnessTexture; // roughness map
-        std::shared_ptr<Texture12> metalnessTexture; // metalness map
+        std::shared_ptr<Texture12> metalRoughnessTexture; // roughness map
 
         std::vector<std::shared_ptr<Texture12>> textures;
 
+        Texture12::TEXTURE_FORMAT tex_format;
         DirectX::XMFLOAT4 baseColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // Used if no albedo texture
         float roughness = 0.5f;
         float metalness = 0.0f;
 
         bool useAlbedoMap = false;
         bool useNormalMap = false;
-        bool useRoughnessMap = false;
-        bool useMetalnessMap = false;
+        bool useMetalRoughnessMap = false;
     };
 }

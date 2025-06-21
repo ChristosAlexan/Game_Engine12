@@ -15,5 +15,6 @@ namespace ECS
 		MaterialDesc materialDesc = MaterialDesc::Default();
 		bool visible = true;
 		bool castShadows = true;
+		bool hasMaterial = true;
 	};
 }

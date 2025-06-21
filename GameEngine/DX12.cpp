@@ -104,13 +104,13 @@ void DX12::CreateDeviceAndFactory()
     UINT dxgiFactoryFlags = 0;
   
 
-//#if defined(_DEBUG)
+#if defined(_DEBUG)
     Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
     if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
         debugController->EnableDebugLayer();
         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
     }
-//#endif
+#endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));
 
@@ -348,12 +348,12 @@ void DX12::InitializeConstantBuffers()
     dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 4 * 1024 * 1024); // 4 MB
 
     CD3DX12_DESCRIPTOR_RANGE srvRange;
-    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0); // t0–t4
+    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
 
     CD3DX12_ROOT_PARAMETER rootParams[3];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 VS
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 PS
-    rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // SRV t0–t7
+    rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
  
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,

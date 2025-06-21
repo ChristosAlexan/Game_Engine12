@@ -1,5 +1,6 @@
 #include "MaterialManager.h"
 #include "ErrorLogger.h"
+#include <filesystem>
 
 namespace ECS
 {
@@ -20,13 +21,12 @@ namespace ECS
 		auto material = std::make_shared<Material>();
 
 		if(materialDesc.useAlbedoMap)
-			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::DIFFUSE, m_device, m_cmdList, m_allocator);
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::DIFFUSE, m_device, m_cmdList, m_allocator, materialDesc.tex_format);
 		if (materialDesc.useNormalMap)
-			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::NORMAL, m_device, m_cmdList, m_allocator);
-		if (materialDesc.useRoughnessMap)
-			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::ROUGHNESS, m_device, m_cmdList, m_allocator);
-		if (materialDesc.useMetalnessMap)
-			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::METALLNESS, m_device, m_cmdList, m_allocator);
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::NORMAL, m_device, m_cmdList, m_allocator, materialDesc.tex_format);
+		if (materialDesc.useMetalRoughnessMap)
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::METAL_ROUGHNESS, m_device, m_cmdList, m_allocator, materialDesc.tex_format);
+
 
 		material->name = materialDesc.name;
 		material->baseColor = materialDesc.baseColor;
@@ -34,25 +34,34 @@ namespace ECS
 		material->metalness = materialDesc.metalness;
 		material->useAlbedoMap = materialDesc.useAlbedoMap;
 		material->useNormalMap = materialDesc.useNormalMap;
-		material->useRoughnessMap = materialDesc.useRoughnessMap;
-		material->useMetalnessMap = materialDesc.useMetalnessMap;
+		material->useMetalRoughnessMap = materialDesc.useMetalRoughnessMap;
 
 		m_materials.emplace(materialDesc.name, material);
 
-		OutputDebugStringA("TEST!!!!!!!\n\n");
 		return m_materials.at(materialDesc.name);
 	}
 
 	std::shared_ptr<Texture12> MaterialManager::GetOrLoadTexture(const std::string& file, const std::string& name,
 		ID3D12Device* device,
 		ID3D12GraphicsCommandList* cmdList,
-		DescriptorAllocator* allocator)
+		DescriptorAllocator* allocator, Texture12::TEXTURE_FORMAT tex_format)
 	{
 		if (m_textures.contains(name))
 			return m_textures.at(name);
 
 		auto texture = std::make_shared<Texture12>();
-		texture->LoadFromFile(file, device, cmdList, allocator);
+
+		std::filesystem::path ext = std::filesystem::path(file).extension();
+		if (ext == ".dds")
+			tex_format = Texture12::TEXTURE_FORMAT::DDS_FILE;
+		else
+			tex_format = Texture12::TEXTURE_FORMAT::WIC_FILE;
+
+		if(tex_format == Texture12::TEXTURE_FORMAT::DDS_FILE)
+			texture->LoadFromFileDDS(file, device, cmdList, allocator);
+		else if(tex_format == Texture12::TEXTURE_FORMAT::WIC_FILE)
+			texture->LoadFromFileWIC(file, device, cmdList, allocator);
+		
 		m_textures.emplace(name, texture);
 
 		return m_textures.at(name);
@@ -83,13 +92,13 @@ namespace ECS
 	}
 
 	void MaterialManager::AddTexture(const MaterialDesc& materialDesc, Material* material, TEXTURE_TYPE textType,
-		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
+		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator, Texture12::TEXTURE_FORMAT tex_format)
 	{
 		switch (textType)
 		{
 			case DIFFUSE:
 			{
-				GetOrLoadTexture(materialDesc.albedoTexturePath, materialDesc.albedoTextureName, device, cmdList, allocator);
+				GetOrLoadTexture(materialDesc.albedoTexturePath, materialDesc.albedoTextureName, device, cmdList, allocator, tex_format);
 				if (m_textures.contains(materialDesc.albedoTextureName))
 					material->albedoTexture = m_textures.at(materialDesc.albedoTextureName);
 				material->textures.push_back(material->albedoTexture);
@@ -97,26 +106,18 @@ namespace ECS
 			}
 			case NORMAL:
 			{
-				GetOrLoadTexture(materialDesc.normalTexturePath, materialDesc.normalTextureName, device, cmdList, allocator);
+				GetOrLoadTexture(materialDesc.normalTexturePath, materialDesc.normalTextureName, device, cmdList, allocator, tex_format);
 				if (m_textures.contains(materialDesc.normalTextureName))
 					material->normalTexture = m_textures.at(materialDesc.normalTextureName);
 				material->textures.push_back(material->normalTexture);
 				break;
 			}
-			case ROUGHNESS:
+			case METAL_ROUGHNESS:
 			{
-				GetOrLoadTexture(materialDesc.roughnessTexturePath, materialDesc.roughnessTextureName, device, cmdList, allocator);
-				if (m_textures.contains(materialDesc.roughnessTextureName))
-					material->roughnessTexture = m_textures.at(materialDesc.roughnessTextureName);
-				material->textures.push_back(material->roughnessTexture);
-				break;
-			}
-			case METALLNESS:
-			{
-				GetOrLoadTexture(materialDesc.metalnessTexturePath, materialDesc.metalnessTextureName, device, cmdList, allocator);
-				if (m_textures.contains(materialDesc.metalnessTextureName))
-					material->metalnessTexture = m_textures.at(materialDesc.metalnessTextureName);
-				material->textures.push_back(material->metalnessTexture);
+				GetOrLoadTexture(materialDesc.metalRoughnessTexturePath, materialDesc.metalRoughnessTextureName, device, cmdList, allocator, tex_format);
+				if (m_textures.contains(materialDesc.metalRoughnessTextureName))
+					material->metalRoughnessTexture = m_textures.at(materialDesc.metalRoughnessTextureName);
+				material->textures.push_back(material->metalRoughnessTexture);
 				break;
 			}
 			default:

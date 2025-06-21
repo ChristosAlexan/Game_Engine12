@@ -8,12 +8,13 @@ namespace ECS
 
 	void MeshManager::CreateMesh(const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const MeshData& data)
 	{
-		std::shared_ptr<Mesh12> gpuMesh = std::make_shared<Mesh12>();
-		gpuMesh->Upload(device, cmdList, data);
+		std::shared_ptr<GpuMesh> gpuMesh = std::make_shared<GpuMesh>();
+		gpuMesh->cpuMesh = std::move(data);
+		gpuMesh->Upload(device, cmdList);
 		gpuMeshes[name] = gpuMesh;
 	}
 
-	std::shared_ptr<Mesh12> MeshManager::Get(const std::string& name) const
+	std::shared_ptr<GpuMesh> MeshManager::Get(const std::string& name) const
 	{
 		return gpuMeshes.at(name);
 	}

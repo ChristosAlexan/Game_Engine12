@@ -10,6 +10,8 @@ namespace ECS
 
 	entt::entity EntityFactory::CreateMesh(Scene* scene, EntityDesc& entityDesc)
 	{
+		std::unique_ptr<ECS::Material> mat;
+
 		auto id = scene->CreateEntity();
 
 		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(entityDesc.meshType, entityDesc.name, m_device, m_cmdList, &entityDesc.filePath);
@@ -21,6 +23,7 @@ namespace ECS
 		RenderComponent renderComponent = {};
 		renderComponent.mesh = mesh;
 		renderComponent.material = material;
+		renderComponent.name = entityDesc.name;
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		return id;
 	}

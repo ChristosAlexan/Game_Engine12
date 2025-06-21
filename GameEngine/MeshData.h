@@ -14,17 +14,18 @@ namespace ECS
         std::vector<DWORD> indices;
     };
 
-    struct Mesh12 
+    struct GpuMesh 
     {
         VertexBuffer12<Vertex> vertexBuffer;
         IndexBuffer12 indexBuffer;
         uint32_t indexCount = 0;
+        MeshData cpuMesh;
 
-        void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const MeshData& data) 
+        void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
         {
-            vertexBuffer.Initialize(device, cmdList, data.vertices.data(), data.vertices.size());
-            indexBuffer.Initialize(device, cmdList, data.indices.data(), (uint32_t)data.indices.size());
-            indexCount = static_cast<uint32_t>(data.indices.size());
+            vertexBuffer.Initialize(device, cmdList, cpuMesh.vertices.data(), cpuMesh.vertices.size());
+            indexBuffer.Initialize(device, cmdList, cpuMesh.indices.data(), (uint32_t)cpuMesh.indices.size());
+            indexCount = static_cast<uint32_t>(cpuMesh.indices.size());
         }
 
         void Draw(ID3D12GraphicsCommandList* cmdList) 
@@ -34,17 +35,5 @@ namespace ECS
             cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
         }
-    };
-
-    struct StaticMeshAsset 
-    {
-        MeshData meshData;
-        MaterialDesc materialDesc;
-    };
-
-    struct LoadedStaticMesh 
-    {
-        std::shared_ptr<Mesh12> mesh;
-        std::shared_ptr<Material> material;
     };
 }

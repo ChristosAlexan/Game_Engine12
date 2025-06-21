@@ -6,9 +6,19 @@
 class Texture12
 {
 public:
+	enum TEXTURE_FORMAT
+	{
+		AUTO = 0,
+		WIC_FILE = 1,
+		DDS_FILE = 2
+	};
+
 	Texture12();
-	void LoadFromFile(const std::string& filename, 
+	void LoadFromFileWIC(const std::string& filename, 
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+	void LoadFromFileDDS(const std::string& filename,
+		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+
 	
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
 

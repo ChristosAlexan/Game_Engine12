@@ -10,10 +10,10 @@ namespace ECS
 	public:
 		MeshManager();
 		void CreateMesh(const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const MeshData& data);
-		std::shared_ptr<Mesh12> Get(const std::string& name) const;
+		std::shared_ptr<GpuMesh> Get(const std::string& name) const;
 
 	private:
-		std::unordered_map<std::string, std::shared_ptr<Mesh12>> gpuMeshes;
+		std::unordered_map<std::string, std::shared_ptr<GpuMesh>> gpuMeshes;
 
 	};
 }

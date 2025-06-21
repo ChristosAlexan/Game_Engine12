@@ -59,16 +59,17 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 {
 	float closestT = FLT_MAX;
 	auto scene = sceneManager->GetCurrentScene();
-	auto view = scene->GetRegistry().view<ECS::TransformComponent>();
-	for (auto [entity, transform] : view.each())
+	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent>();
+	for (auto [entity, transform, renderComponent] : renderGroup.each())
 	{
 		Ray ray = RaycastPicking(screenWidth, screenHeight, camera);
 
-		if (IntersectsAABB(ray, scene->GetWorldAABB(&transform), m_hitT) && (m_hitT < closestT))
+		if (IntersectsAABB(ray, scene->GetWorldAABB(&transform, &renderComponent), m_hitT) && (m_hitT < closestT))
 		{
 			closestT = m_hitT;
 			m_closestEntity = entity;
 			m_closestTransform = &transform;
+			m_closestEntityName = renderComponent.name;
 		}
 	}
 }
@@ -87,9 +88,9 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 		DirectX::XMMATRIX projMatrix = camera.GetProjectionMatrix();
 
 
-		std::string entityLabel = "Entity" + std::to_string(static_cast<uint32_t>(m_closestEntity)) +
+		std::string entityLabel = m_closestEntityName + ": " + std::to_string(static_cast<uint32_t>(m_closestEntity)) +
 			"##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-		std::string entityName = "Entity" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string entityName = m_closestEntityName + ": " + std::to_string(static_cast<uint32_t>(m_closestEntity));
 
 		ImGui::Text(entityName.c_str());
 		static 	bool mode[3] = {false, false, false};
@@ -155,13 +156,13 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 {
 
 	auto scene = sceneManager->GetCurrentScene();
-	auto view = scene->GetRegistry().view<ECS::TransformComponent>();
+	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent>();
 
 	ImGui::Begin(scene->GetName().c_str());
 
-	for (auto [entity, transform] : view.each())
+	for (auto [entity, transform, renderComponent] : renderGroup.each())
 	{
-		std::string entityLabel = "Entity" + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
+		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
 		if (ImGui::CollapsingHeader(entityLabel.c_str()))
 		{
 			std::string posOffset = "Pos##" + std::to_string(static_cast<uint32_t>(entity));

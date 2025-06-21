@@ -6,7 +6,8 @@
 namespace ECS
 {
     struct RenderComponent {
-        std::shared_ptr<Mesh12> mesh;
+        std::shared_ptr<GpuMesh> mesh;
         std::shared_ptr<Material> material;
+        std::string name;
     };
 }
