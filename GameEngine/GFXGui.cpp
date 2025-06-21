@@ -9,7 +9,7 @@ GFXGui::GFXGui()
 	m_hitT = FLT_MAX;
 }
 
-bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
+bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
 {
 	bool result;
 	//Setup ImGui
@@ -22,9 +22,7 @@ bool GFXGui::Initialize(HWND hwnd, ID3D12Device* device, ID3D12CommandQueue* cmd
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 
-
-	result = ImGui_ImplWin32_Init(hwnd);
-
+	result = ImGui_ImplSDL3_InitForD3D(sdl_window);
 	if (!result)
 	{
 		ErrorLogger::Log("Failed to initialize ImGui: Win32!");
@@ -181,7 +179,7 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 
 void GFXGui::BeginRender()
 {
-	ImGui_ImplWin32_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
 	ImGui_ImplDX12_NewFrame();
 
 	ImGui::NewFrame();

@@ -231,7 +231,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\Libraries</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
@@ -260,27 +260,22 @@
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
     <ClCompile Include="imgui_impl_dx12.cpp" />
+    <ClCompile Include="imgui_impl_sdl3.cpp" />
     <ClCompile Include="imgui_impl_win32.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="ImSequencer.cpp" />
-    <ClCompile Include="InputVariables.cpp" />
-    <ClCompile Include="Keyboard.cpp" />
-    <ClCompile Include="KeyboardEvent.cpp" />
     <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="MeshGenerators.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="RectShape12.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Shapes12.cpp" />
     <ClCompile Include="Texture12.cpp" />
     <ClCompile Include="WinMain.cpp" />
-    <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="MouseEvent.cpp" />
-    <ClCompile Include="RenderWindow.cpp" />
     <ClCompile Include="StringHelper.cpp" />
-    <ClCompile Include="WindowContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppTimer.h" />
@@ -311,6 +306,7 @@
     <ClInclude Include="imgui.h" />
     <ClInclude Include="ImGuizmo.h" />
     <ClInclude Include="imgui_impl_dx12.h" />
+    <ClInclude Include="imgui_impl_sdl3.h" />
     <ClInclude Include="imgui_impl_win32.h" />
     <ClInclude Include="imgui_internal.h" />
     <ClInclude Include="ImSequencer.h" />
@@ -319,29 +315,23 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="ImZoomSlider.h" />
     <ClInclude Include="IndexBuffer12.h" />
-    <ClInclude Include="InputVariables.h" />
-    <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="KeyboardEvent.h" />
     <ClInclude Include="MaterialECS.h" />
     <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MathHelpers.h" />
     <ClInclude Include="MeshData.h" />
     <ClInclude Include="MeshGenerators.h" />
     <ClInclude Include="MeshManager.h" />
-    <ClInclude Include="Mouse.h" />
-    <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
-    <ClInclude Include="RenderWindow.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="GameWindow.h" />
     <ClInclude Include="Shapes12.h" />
     <ClInclude Include="StringHelper.h" />
     <ClInclude Include="Texture12.h" />
     <ClInclude Include="TransformECS.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer12.h" />
-    <ClInclude Include="WindowContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader12.hlsl">

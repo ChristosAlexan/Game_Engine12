@@ -117,9 +117,9 @@ namespace ECS
 
 	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
-		auto view = GetRegistry().view<TransformComponent, RenderComponent>();
+		auto renderGroup = GetRegistry().group<TransformComponent, RenderComponent>();
 
-		for (auto [entity, transform, renderComponent] : view.each())
+		for (auto [entity, transform, renderComponent] : renderGroup.each())
 		{
 			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
 			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);

@@ -1,20 +1,20 @@
 #pragma once
 
 #include "DX12.h"
-#include "WindowContainer.h"
 #include "AppTimer.h"
 #include <future>
 #include <thread>
 #include <algorithm>
 #include "Camera.h"
+#include "GameWindow.h"
 
-class Engine : virtual WindowContainer
+class Engine
 {
 public:
 	Engine();
 
-	bool Initialize(HINSTANCE hInstance, std::string window_title, std::string window_class, int width, int height);
-	bool ProcessMessages();
+	bool Initialize(std::string window_title, std::string window_class, int width, int height);
+	bool StopEngine();
 	void Update(int width, int height);
 
 private:
@@ -28,4 +28,13 @@ private:
 	DX12 dx12;
 	std::unique_ptr<ECS::SceneManager> m_sceneManager;
 	GFXGui m_gui;
+	GameWindow game_window;
+
+
+	std::unordered_set<SDL_Keycode> heldKeys;
+	bool isMiddleMouseDown = false;
+	bool isRightMouseDown = false;
+	bool bStopEngine = false;
+	int rawDeltaX = 0;
+	int rawDeltaY = 0;
 };

@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "ErrorLogger.h"
 
 using namespace DirectX;
 
@@ -7,18 +8,18 @@ Engine::Engine()
 {
 }
 
-bool Engine::Initialize(HINSTANCE hInstance, std::string window_title, std::string window_class, int width, int height)
+bool Engine::Initialize(std::string window_title, std::string window_class, int width, int height)
 {
 	this->width = width;
 	this->height = height;
 
 	timer.Start();
 
-	if (!this->render_window.Initialize(this, hInstance, window_title, window_class, width, height))
+	if (!game_window.Initialize(width, height))
 		return false;
 
-	dx12.Initialize(this->render_window.GetHWND(), camera, width, height);
-	if (!m_gui.Initialize(this->render_window.GetHWND(), dx12.GetDevice(), dx12.GetCommandQueue(), dx12.GetDescriptorHeap()))
+	dx12.Initialize(game_window.GetWindow(), camera, width, height);
+	if (!m_gui.Initialize(game_window.GetSDLWindow(), dx12.GetDevice(), dx12.GetCommandQueue(), dx12.GetDescriptorHeap()))
 	{
 		ErrorLogger::Log("Failed to initialize ImGui!");
 		return false;
@@ -28,9 +29,9 @@ bool Engine::Initialize(HINSTANCE hInstance, std::string window_title, std::stri
 	return true;
 }
 
-bool Engine::ProcessMessages()
+bool Engine::StopEngine()
 {
-	return this->render_window.ProcessMessages();
+	return bStopEngine;
 }
 
 void Engine::Update(int width, int height)
@@ -38,68 +39,106 @@ void Engine::Update(int width, int height)
 	timer.CalculateDeltaTime(dt, fps);
 	timer.Restart();
 	
-
+	if (heldKeys.contains(SDLK_ESCAPE))
+	{
+		SDL_DestroyWindow(game_window.GetSDLWindow());
+		bStopEngine = true;
+	}
 	dx12.StartRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
 
-	if (keyboard.KeyIsPressed(VK_ESCAPE))
+	rawDeltaX = 0;
+	rawDeltaY = 0;
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) 
 	{
-		this->render_window.~RenderWindow();
-	}
+		ImGui_ImplSDL3_ProcessEvent(&event);
+		switch (event.type) {
+		case SDL_EVENT_QUIT:
+			SDL_DestroyWindow(game_window.GetSDLWindow());
+			bStopEngine = true;
+			break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			SDL_DestroyWindow(game_window.GetSDLWindow());
+			bStopEngine = true;
+			break;
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			if (event.button.button == SDL_BUTTON_MIDDLE)
+				isMiddleMouseDown = true;
+			else if (event.button.button == SDL_BUTTON_RIGHT)
+				isRightMouseDown = true;
+			break;
 
-	float cameraSpeed = 3.0f;
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			if (event.button.button == SDL_BUTTON_MIDDLE)
+				isMiddleMouseDown = false;
+			else if (event.button.button == SDL_BUTTON_RIGHT)
+				isRightMouseDown = false;
+			break;
 
-
-	while (!mouse.EventBufferIsEmpty())
-	{
-		MouseEvent me = mouse.ReadEvent();
-	
-		if (mouse.IsMiddleDown())
-		{
-			if (me.GetType() == MouseEvent::EventType::RAW_MOVE)
+		case SDL_EVENT_MOUSE_MOTION:
+			if (isMiddleMouseDown) 
 			{
-				camera.AdjustRotation(static_cast<float>(me.GetPosY()) * 0.004f, static_cast<float>(me.GetPosX()) * 0.004f, 0.0f, true);
+				rawDeltaX += event.motion.xrel*1.5f;
+				rawDeltaY += event.motion.yrel*1.5f;
 			}
+			break;
+		case SDL_EVENT_KEY_DOWN:
+			heldKeys.insert(event.key.key);
+			break;
+
+		case SDL_EVENT_KEY_UP:
+			heldKeys.erase(event.key.key);
+			break;
+		default:
+			break;
 		}
 	}
 
-	if (keyboard.KeyIsPressed(VK_SHIFT))
+	if (isMiddleMouseDown && (rawDeltaX != 0 || rawDeltaY != 0))
+	{
+		camera.AdjustRotation(
+			static_cast<float>(rawDeltaY) * 0.004f,
+			static_cast<float>(rawDeltaX) * 0.004f,
+			0.0f,
+			true
+		);
+	}
+	SDL_SetWindowRelativeMouseMode(game_window.GetSDLWindow(), false);
+
+
+	float cameraSpeed = 3.0f;
+
+	if (heldKeys.contains(SDLK_LSHIFT) || heldKeys.contains(SDLK_RSHIFT))
 	{
 		cameraSpeed = 10.0f;
 	}
-	if (keyboard.KeyIsPressed('W'))
+
+	if (heldKeys.contains(SDLK_W))
 	{
 		camera.AdjustPosition(camera.GetForwardVector() * cameraSpeed * dt);
 	}
-	if (keyboard.KeyIsPressed('S'))
+	if (heldKeys.contains(SDLK_S))
 	{
 		camera.AdjustPosition(camera.GetBackwardVector() * cameraSpeed * dt);
 	}
-
-	if (keyboard.KeyIsPressed('A'))
+	if (heldKeys.contains(SDLK_A))
 	{
 		camera.AdjustPosition(camera.GetLeftVector() * cameraSpeed * dt);
-
 	}
-	if (keyboard.KeyIsPressed('D'))
+	if (heldKeys.contains(SDLK_D))
 	{
 		camera.AdjustPosition(camera.GetRightVector() * cameraSpeed * dt);
 	}
-
-	if (keyboard.KeyIsPressed(VK_SPACE))
+	if (heldKeys.contains(SDLK_SPACE))
 	{
 		camera.AdjustPosition(0.0f, cameraSpeed * dt, 0.0f);
 	}
-	if (keyboard.KeyIsPressed('Q'))
+	if (heldKeys.contains(SDLK_Q))
 	{
 		camera.AdjustPosition(0.0f, -cameraSpeed * dt, 0.0f);
 	}
 
-
-
-	ClipCursor(NULL);
-	while (ShowCursor(TRUE) < 0);
-
-	if (mouse.IsRightDown())
+	if (isRightMouseDown)
 	{
 		m_gui.SelectEntity(m_sceneManager.get(), width, height, camera);
 	}

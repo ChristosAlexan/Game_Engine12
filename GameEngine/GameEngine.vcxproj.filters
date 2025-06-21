@@ -112,30 +112,18 @@
     <Filter Include="ECS\Model\Source">
       <UniqueIdentifier>{d769a753-8659-416f-ac4c-e90565ef7af4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDL">
+      <UniqueIdentifier>{42409853-5403-450e-be48-4902ff629426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDL\Header">
+      <UniqueIdentifier>{103343e1-7a9b-4b66-b340-d4c8240e8f7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDL\Source">
+      <UniqueIdentifier>{2731b9a4-ab8a-4bf0-8291-3ee928328550}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowContainer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InputVariables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KeyboardEvent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MouseEvent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="COMException.cpp">
@@ -240,29 +228,14 @@
     <ClCompile Include="ImSequencer.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="GameWindow.cpp">
+      <Filter>SDL\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_sdl3.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WindowContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InputVariables.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyboardEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MouseEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="COMException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -418,6 +391,12 @@
     </ClInclude>
     <ClInclude Include="MathHelpers.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWindow.h">
+      <Filter>SDL\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_sdl3.h">
+      <Filter>ImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

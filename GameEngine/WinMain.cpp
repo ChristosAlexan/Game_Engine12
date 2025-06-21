@@ -1,5 +1,6 @@
 #include"Engine.h"
 #include<Windows.h>
+#include "ErrorLogger.h"
 
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PSTR lpCmdLine, INT nCmdShow)
@@ -14,14 +15,15 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	const int w = 1920;
 	const int h = 1080;
 	Engine engine;
-	if (engine.Initialize(hInstance, "DXEngine", "Window", w, h))
+	if (engine.Initialize("DXEngine", "Window", w, h))
 	{
-		while (engine.ProcessMessages() == true)
+		while (engine.StopEngine() != true)
 		{
 			engine.Update(w, h);
 		}
 	}
 	ClipCursor(NULL);
+	SDL_Quit();
 
 	return 0;
 }
