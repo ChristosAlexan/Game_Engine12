@@ -4,6 +4,7 @@
 #include "IndexBuffer12.h"
 #include <vector>
 #include "Vertex.h"
+#include "MaterialECS.h"
 
 namespace ECS
 {
@@ -33,5 +34,17 @@ namespace ECS
             cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
         }
+    };
+
+    struct StaticMeshAsset 
+    {
+        MeshData meshData;
+        MaterialDesc materialDesc;
+    };
+
+    struct LoadedStaticMesh 
+    {
+        std::shared_ptr<Mesh12> mesh;
+        std::shared_ptr<Material> material;
     };
 }

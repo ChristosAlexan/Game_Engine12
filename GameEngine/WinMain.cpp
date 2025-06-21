@@ -12,8 +12,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return -1;
 	}
 
-	const int w = 1920;
-	const int h = 1080;
+	const int w = 1600;
+	const int h = 900;
 	Engine engine;
 	if (engine.Initialize("DXEngine", "Window", w, h))
 	{

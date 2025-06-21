@@ -3,11 +3,12 @@
 
 namespace ECS
 {
-	MaterialManager::MaterialManager()
+	MaterialManager::MaterialManager(ID3D12Device* device,
+		ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
+		:m_device(device), m_cmdList(cmdList), m_allocator(allocator)
 	{
 	}
-	std::shared_ptr<Material> MaterialManager::GetOrCreateMaterial(const MaterialDesc& materialDesc, ID3D12Device* device,
-		ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
+	std::shared_ptr<Material> MaterialManager::GetOrCreateMaterial(const MaterialDesc& materialDesc)
 	{
 		if (!m_materialDescs.contains(materialDesc.name))
 			m_materialDescs.emplace(materialDesc.name, materialDesc);
@@ -18,21 +19,27 @@ namespace ECS
 		
 		auto material = std::make_shared<Material>();
 
-		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::DIFFUSE,  device, cmdList, allocator);
-		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::NORMAL, device, cmdList, allocator);
-		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::ROUGHNESS, device, cmdList, allocator);
-		AddTexture(materialDesc, material.get(), TEXTURE_TYPE::METALLNESS, device, cmdList, allocator);
+		if(materialDesc.useAlbedoMap)
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::DIFFUSE, m_device, m_cmdList, m_allocator);
+		if (materialDesc.useNormalMap)
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::NORMAL, m_device, m_cmdList, m_allocator);
+		if (materialDesc.useRoughnessMap)
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::ROUGHNESS, m_device, m_cmdList, m_allocator);
+		if (materialDesc.useMetalnessMap)
+			AddTexture(materialDesc, material.get(), TEXTURE_TYPE::METALLNESS, m_device, m_cmdList, m_allocator);
 
+		material->name = materialDesc.name;
 		material->baseColor = materialDesc.baseColor;
 		material->roughness = materialDesc.roughness;
 		material->metalness = materialDesc.metalness;
-		material->useAlbedoMap = true;
-		material->useNormalMap = false;
-		material->useMetalnessMap = false;
-		material->useRoughnessMap = false;
+		material->useAlbedoMap = materialDesc.useAlbedoMap;
+		material->useNormalMap = materialDesc.useNormalMap;
+		material->useRoughnessMap = materialDesc.useRoughnessMap;
+		material->useMetalnessMap = materialDesc.useMetalnessMap;
 
 		m_materials.emplace(materialDesc.name, material);
 
+		OutputDebugStringA("TEST!!!!!!!\n\n");
 		return m_materials.at(materialDesc.name);
 	}
 

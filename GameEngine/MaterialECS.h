@@ -32,10 +32,10 @@ namespace ECS
         float roughness = 0.5f;
         float metalness = 0.0f;
 
-        bool useAlbedoMap = true;
-        bool useNormalMap = true;
-        bool useRoughnessMap = true;
-        bool useMetalnessMap = true;
+        bool useAlbedoMap = false;
+        bool useNormalMap = false;
+        bool useRoughnessMap = false;
+        bool useMetalnessMap = false;
 
         static MaterialDesc Default()
         {
@@ -44,6 +44,7 @@ namespace ECS
     };
 
     struct Material {
+        std::string name;
         std::shared_ptr<Texture12> albedoTexture;    // albedo (diffuse) texture
         std::shared_ptr<Texture12> normalTexture;    // normal map
         std::shared_ptr<Texture12> roughnessTexture; // roughness map

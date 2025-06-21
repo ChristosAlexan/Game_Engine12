@@ -31,5 +31,5 @@ float4 Main(PSInput input) : SV_TARGET
     
     float3 lightDir = normalize(float3(lightPos.x, lightPos.y, lightPos.z));
     float diffuse = max(dot(normal, lightDir), 0.0);
-    return float4(albedo * diffuse, 1.0f);
+    return float4(albedo, 1.0f);
 }

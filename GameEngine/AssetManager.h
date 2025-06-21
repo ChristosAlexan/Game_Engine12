@@ -13,7 +13,7 @@ namespace ECS
     {
     public:
         AssetManager();
-        std::shared_ptr<Mesh12> GetOrLoadMesh(MESH_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+        std::shared_ptr<Mesh12> GetOrLoadMesh(MESH_TYPE shapeType, const std::string& name, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, const std::string* filepath = nullptr);
        
     public:
         std::unordered_map<std::string, std::shared_ptr<Mesh12>> m_meshes;

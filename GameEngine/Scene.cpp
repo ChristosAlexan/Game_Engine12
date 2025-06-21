@@ -30,16 +30,38 @@ namespace ECS
 		materialDesc.roughnessTextureName = "defaultRougness";
 		materialDesc.metalnessTexturePath = "Data/Textures/Tex1/plasticpattern1-metalness.png";
 		materialDesc.metalnessTextureName = "defaultMetallic";
+		materialDesc.useAlbedoMap = true;
+		materialDesc.useMetalnessMap = true;
+		materialDesc.useNormalMap = true;
+		materialDesc.useRoughnessMap = true;
 
-		m_materialManager->GetOrCreateMaterial(materialDesc, m_device, m_cmdList, g_descAllocator.get());
+		m_materialManager->GetOrCreateMaterial(materialDesc);
+
+
+		materialDesc.name = "TestMaterial";
+		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.jpg";
+		materialDesc.albedoTextureName = "defaultAlbedo1";
+		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_normal.jpg";
+		materialDesc.normalTextureName = "defaultNormal1";
+		materialDesc.roughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg";
+		materialDesc.roughnessTextureName = "defaultRougness1";
+		materialDesc.metalnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_emissive.jpg";
+		materialDesc.metalnessTextureName = "defaultMetallic1";
+		materialDesc.useAlbedoMap = true;
+		materialDesc.useMetalnessMap = true;
+		materialDesc.useNormalMap = true;
+		materialDesc.useRoughnessMap = true;
+
+		m_materialManager->GetOrCreateMaterial(materialDesc);
 	}
 
 	void Scene::LoadAssets()
 	{
+		EntityDesc entDesc = {};
+
 		for (int i = 0; i < 3; ++i)
 		{
-			EntityDesc entDesc = {};
-			entDesc.meshType = CUBE;
+		
 			if (auto desc = m_materialManager->GetMaterialDescByName("DefaultMaterial"))
 				entDesc.materialDesc = *desc;
 			else
@@ -47,10 +69,22 @@ namespace ECS
 				ErrorLogger::Log("Material descriptor not found");
 				entDesc.materialDesc = MaterialDesc::Default();
 			}
-
-			m_entityFactory->CreateStaticMesh(this, entDesc);
+			entDesc.meshType = CUBE;
+			entDesc.name = "Cube";
+			m_entityFactory->CreateMesh(this, entDesc);
 		}
 
+		if (auto desc = m_materialManager->GetMaterialDescByName("TestMaterial"))
+			entDesc.materialDesc = *desc;
+		else
+		{
+			ErrorLogger::Log("Material descriptor not found");
+			entDesc.materialDesc = MaterialDesc::Default();
+		}
+		entDesc.meshType = STATIC_MESH;
+		entDesc.name = "Helmet";
+		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf";
+		m_entityFactory->CreateMesh(this, entDesc);
 	}
 
 	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix)
@@ -121,6 +155,9 @@ namespace ECS
 
 		for (auto [entity, transform, renderComponent] : renderGroup.each())
 		{
+			std::string label = "Entity_" + std::to_string(static_cast<uint32_t>(entity));
+			OutputDebugStringA(("Rendering entity: " + label + " with material: " + renderComponent.material->name + "\n").c_str());
+
 			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
 			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);
 			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform.scale);

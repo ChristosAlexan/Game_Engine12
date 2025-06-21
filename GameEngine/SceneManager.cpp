@@ -3,11 +3,11 @@
 
 namespace ECS
 {
-	SceneManager::SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	SceneManager::SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
 		: m_device(device), m_cmdList(cmdList)
 	{
 		m_assetManager = std::make_shared<AssetManager>();
-		m_materialManager = std::make_shared<MaterialManager>();
+		m_materialManager = std::make_shared<MaterialManager>(device, cmdList, allocator);
 	}
 
 

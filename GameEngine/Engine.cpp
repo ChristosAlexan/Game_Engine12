@@ -151,7 +151,7 @@ void Engine::Update(int width, int height)
 void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
 	dx12.ResetCommandAllocator();
-	m_sceneManager = std::make_unique<ECS::SceneManager>(dx12.GetDevice(), dx12.GetCmdList());
+	m_sceneManager = std::make_unique<ECS::SceneManager>(dx12.GetDevice(), dx12.GetCmdList(), g_descAllocator.get());
 	m_sceneManager->LoadScene("Scene1");
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();

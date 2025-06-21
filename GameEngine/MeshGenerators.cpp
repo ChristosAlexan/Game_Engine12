@@ -73,7 +73,12 @@ ECS::MeshData GenerateQuadMesh()
     return mesh;
 }
 
-ECS::MeshData GenerateSphereMesh(uint32_t segments, uint32_t rings)
+ECS::MeshData GenerateStaticMesh(const std::string& filepath)
 {
-    return ECS::MeshData();
+	Model model;
+	model.LoadModel(filepath);
+
+	return model.GetMeshData();
 }
+
+

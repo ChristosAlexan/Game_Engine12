@@ -103,15 +103,6 @@
     <Filter Include="Math">
       <UniqueIdentifier>{9cfe27c5-c40f-4c34-af57-4214f3803f20}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ECS\Model">
-      <UniqueIdentifier>{2682372d-0f13-4ecd-8539-4f4a74f282c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ECS\Model\Header">
-      <UniqueIdentifier>{46e9b510-31be-40e5-a633-217fe68f19bb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ECS\Model\Source">
-      <UniqueIdentifier>{d769a753-8659-416f-ac4c-e90565ef7af4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDL">
       <UniqueIdentifier>{42409853-5403-450e-be48-4902ff629426}</UniqueIdentifier>
     </Filter>
@@ -120,6 +111,15 @@
     </Filter>
     <Filter Include="SDL\Source">
       <UniqueIdentifier>{2731b9a4-ab8a-4bf0-8291-3ee928328550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assimp">
+      <UniqueIdentifier>{d6c31adb-1f0f-4302-869d-baadd7a199ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assimp\Header">
+      <UniqueIdentifier>{337d7816-1645-493e-a666-66d5e3cfc273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assimp\Source">
+      <UniqueIdentifier>{34317125-0cd1-4612-98a0-715b2fc039ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -233,6 +233,9 @@
     </ClCompile>
     <ClCompile Include="imgui_impl_sdl3.cpp">
       <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Assimp\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -397,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="imgui_impl_sdl3.h">
       <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Assimp\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

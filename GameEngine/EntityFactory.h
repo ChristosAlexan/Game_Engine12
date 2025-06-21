@@ -12,8 +12,7 @@ namespace ECS
 	{
 	public:
 		EntityFactory(entt::registry& registry, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-		entt::entity CreateStaticMesh(Scene* scene, EntityDesc& entityDesc);											  
-		entt::entity CreateMesh(Scene* scene, EntityDesc& entityDesc);
+		entt::entity CreateMesh(Scene* scene, EntityDesc& entityDesc);											  
 	private:
 		entt::registry* m_registry = nullptr;
 		ID3D12Device* m_device = nullptr;

@@ -7,7 +7,7 @@ namespace ECS
 	class SceneManager
 	{
 	public:
-		SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+		SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
 		void InitDescAllocator(ID3D12DescriptorHeap* heap);
 		void LoadScene(const std::string& sceneName);
 		void SetCurrentScene(std::string sceneName);
