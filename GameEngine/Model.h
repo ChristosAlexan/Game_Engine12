@@ -9,6 +9,8 @@ class Model
 {
 public:
 	Model();
+
+	//NOTE: Use blender 2.83 when exporting .gltf or .glb models for correct skinning, later versions are not supported for now
 	bool LoadModel(const std::string& filepath);
 	void LoadSkeleton(tinygltf::Model& input);
 	void LoadAnimations(tinygltf::Model& input);

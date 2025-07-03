@@ -9,12 +9,10 @@ struct Primitive {
 	int32_t materialIndex;
 };
 
-// Contains the node's (optional) geometry and can be made up of an arbitrary number of primitives
 struct Mesh {
 	std::vector<Primitive> primitives;
 };
 
-// A node represents an object in the glTF scene graph
 struct Node {
 	Node* parent;
 	uint32_t			index;

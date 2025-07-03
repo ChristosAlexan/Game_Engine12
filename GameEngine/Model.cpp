@@ -517,7 +517,7 @@ void Model::UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransf
     if (node->skin > -1) {
 
         Skin& skin = skins[node->skin];
-        DirectX::XMMATRIX inverseTransform = DirectX::XMMatrixInverse(nullptr, GetNodeMatrix(node));
+        //DirectX::XMMATRIX inverseTransform = DirectX::XMMatrixInverse(nullptr, GetNodeMatrix(node));
 
         size_t numJoints = skin.joints.size();
         finalTransform.resize(numJoints);
@@ -539,6 +539,7 @@ void Model::UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransf
 
 void Model::CalculateFinalTransform(float dt, std::vector<DirectX::XMMATRIX>& finalTransform)
 {
+    // To test bind Pose
     //for (auto& node : nodes)
     //{
     //    UpdateJoints(node, finalTransform);
