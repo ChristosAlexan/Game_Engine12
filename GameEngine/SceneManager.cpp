@@ -40,6 +40,7 @@ namespace ECS
 
 	void SceneManager::Update(float dt)
 	{
+		m_currentScene->Update(dt);
 	}
 
 	void SceneManager::Render(DynamicUploadBuffer* dynamicCB, Camera& camera, float dt)

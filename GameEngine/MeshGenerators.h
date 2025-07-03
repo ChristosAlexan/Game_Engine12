@@ -1,15 +1,10 @@
 #pragma once
 #include "MeshData.h"
 #include "Model.h"
-
-enum MESH_TYPE
-{
-	QUAD = 0,
-	CUBE = 1,
-	STATIC_MESH = 2,
-	SKELETAL_MESH = 3
-};
+#include <entt/entt.hpp>
+#include "EntityECS.h"
 
 ECS::MeshData GenerateCubeMesh();
 ECS::MeshData GenerateQuadMesh();
-ECS::MeshData GenerateStaticMesh(const std::string& filepath);
+ECS::MeshData GenerateStaticMesh(ECS::EntityDesc& entityDesc);
+ECS::MeshData GenerateSkeletalMesh(entt::registry* registry, ECS::EntityDesc& entityDesc);

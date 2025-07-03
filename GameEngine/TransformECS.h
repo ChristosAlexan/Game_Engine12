@@ -15,7 +15,7 @@ namespace ECS
 		DirectX::XMFLOAT3 scale = { 1, 1, 1 };
 
 		DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
-
+		std::vector<DirectX::XMMATRIX> anim_transform;
 		AABB aabb;
 	};
 }

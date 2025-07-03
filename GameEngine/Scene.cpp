@@ -2,6 +2,8 @@
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 
+
+
 namespace ECS
 {
 	Scene::Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr,
@@ -38,22 +40,24 @@ namespace ECS
 
 	void Scene::LoadAssets()
 	{
+
+
 		EntityDesc entDesc = {};
 
-		for (int i = 0; i < 3; ++i)
-		{
-		
-			if (auto desc = m_materialManager->GetMaterialDescByName("DefaultMaterial"))
-				entDesc.materialDesc = *desc;
-			else
-			{
-				ErrorLogger::Log("Material descriptor not found");
-				entDesc.materialDesc = MaterialDesc::Default();
-			}
-			entDesc.meshType = CUBE;
-			entDesc.name = "Cube";
-			m_entityFactory->CreateMesh(this, entDesc);
-		}
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//
+		//	if (auto desc = m_materialManager->GetMaterialDescByName("DefaultMaterial"))
+		//		entDesc.materialDesc = *desc;
+		//	else
+		//	{
+		//		ErrorLogger::Log("Material descriptor not found");
+		//		entDesc.materialDesc = MaterialDesc::Default();
+		//	}
+		//	entDesc.meshType = CUBE;
+		//	entDesc.name = "Cube";
+		//	m_entityFactory->AddEntity(this, entDesc);
+		//}
 
 		//HELMET
 		MaterialDesc materialDesc = {};
@@ -68,13 +72,13 @@ namespace ECS
 		materialDesc.useNormalMap = true;
 		materialDesc.useMetalRoughnessMap = true;
 		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
-
+		entDesc.hasAnimation = false;
 		entDesc.materialDesc = materialDesc;
 		entDesc.meshType = STATIC_MESH;
 		entDesc.name = "Helmet";
-		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb";
+		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf";
 		entDesc.hasMaterial = true;
-		m_entityFactory->CreateMesh(this, entDesc);
+		m_entityFactory->AddEntity(this, entDesc);
 
 		//ROBO
 		materialDesc.name = "RoboMaterial";
@@ -90,12 +94,23 @@ namespace ECS
 		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
 
 		entDesc.materialDesc = materialDesc;
-		entDesc.meshType = STATIC_MESH;
+		entDesc.meshType = SKELETAL_MESH;
+		entDesc.hasAnimation = true;
 		entDesc.name = "Robo";
-		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo.glb";
+		//entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/blender 2.83/test1.gltf";
+		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/walk.gltf";
+		//entDesc.anim_filePaths.push_back("G:/gltf models/glTF-Sample-Models-main/Custom/test.gltf");
 		entDesc.hasMaterial = true;
-		m_entityFactory->CreateMesh(this, entDesc);
+		m_entityFactory->AddEntity(this, entDesc);
+
+
 	}
+
+
+	void Scene::Update(float dt)
+	{
+		GetAnimationManager()->Update(dt, this);
+	}	
 
 	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp)
 	{
@@ -165,12 +180,14 @@ namespace ECS
 		return m_registry;
 	}
 
-	void Scene::Update(float dt)
+	AnimationManager* Scene::GetAnimationManager() const
 	{
+		return m_animationManager.get();
 	}
 
 	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
+		auto animView = GetRegistry().view<Model>();
 		auto renderGroup = GetRegistry().group<TransformComponent, RenderComponent>();
 
 		for (auto [entity, transform, renderComponent] : renderGroup.each())
@@ -190,12 +207,23 @@ namespace ECS
 			vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
 			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform.worldMatrix);
 
+			CB_VS_AnimationShader skinningCB = {};
+			if (renderComponent.hasAnimation && !transform.anim_transform.empty())
+			{
+				memcpy(skinningCB.skinningMatrix, transform.anim_transform.data(), sizeof(skinningCB.skinningMatrix));
+
+			}
+			skinningCB.HasAnim = renderComponent.hasAnimation;
+
 			CB_PS_SimpleShader psCB = {};
 			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 			psCB.color = renderComponent.material->baseColor;
 
+
+			
 			m_cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
 			m_cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
+			m_cmdList->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
 
 			m_materialManager->Bindtextures(renderComponent.material.get(), m_cmdList, 2);
 			renderComponent.mesh->Draw(m_cmdList);

@@ -1,6 +1,8 @@
 #pragma once
 #include <DirectXMath.h>
-
+#include "TransformECS.h"
+#include "Camera.h"
+#include "imgui_internal.h"
 
 struct Ray {
 	DirectX::XMVECTOR origin;
@@ -74,7 +76,7 @@ inline bool IntersectsAABB(const Ray& ray, const ECS::AABB& box, float& outDista
 	return true;
 }
 
-inline Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
+inline inline Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& camera)
 {
 	ImVec2 mousePos = ImGui::GetMousePos();
 	float ndcX = (2.0f * mousePos.x) / screenWidth - 1.0f;

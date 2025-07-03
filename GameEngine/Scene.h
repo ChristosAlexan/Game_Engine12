@@ -9,6 +9,7 @@
 #include "DynamicUploadBuffer.h"
 #include "ConstantBufferTypes.h"
 #include "Camera.h"
+#include "AnimationManager.h"
 #include <entt/entt.hpp>
 
 namespace ECS
@@ -22,14 +23,15 @@ namespace ECS
 		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
-		AABB GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp);
+		void Update(float dt);
 
+		AABB GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp);
 		[[nodiscard]] const std::string GetName() const;
 		[[nodiscard]] AssetManager* GetAssetManager() const;
 		[[nodiscard]] MaterialManager* GetMaterialManager() const;
 		[[nodiscard]] entt::registry& GetRegistry();
+		[[nodiscard]] AnimationManager* GetAnimationManager() const;
 
-		void Update(float dt);
 		void Render(Camera& camera, DynamicUploadBuffer* dynamicCB);
 	private:
 		AABB GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp);
@@ -38,6 +40,7 @@ namespace ECS
 		std::shared_ptr<AssetManager> m_assetManager;
 		std::shared_ptr<MaterialManager> m_materialManager;
 		std::unique_ptr<EntityFactory> m_entityFactory;
+		std::unique_ptr<AnimationManager> m_animationManager;
 
 		ID3D12Device* m_device = nullptr;
 		ID3D12GraphicsCommandList* m_cmdList = nullptr;

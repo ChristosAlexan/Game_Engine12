@@ -44,6 +44,7 @@ void Engine::Update(int width, int height)
 		SDL_DestroyWindow(game_window.GetSDLWindow());
 		bStopEngine = true;
 	}
+	m_sceneManager->Update(dt);
 	dx12.StartRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
 
 	rawDeltaX = 0;

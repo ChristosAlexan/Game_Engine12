@@ -73,11 +73,23 @@ ECS::MeshData GenerateQuadMesh()
     return mesh;
 }
 
-ECS::MeshData GenerateStaticMesh(const std::string& filepath)
+ECS::MeshData GenerateStaticMesh(ECS::EntityDesc& entityDesc)
 {
 	Model model;
-	model.LoadModel(filepath);
+	model.LoadModel(entityDesc.filePath);
 
+	return model.GetMeshData();
+}
+
+ECS::MeshData GenerateSkeletalMesh(entt::registry* registry, ECS::EntityDesc& entityDesc)
+{
+	auto id = registry->create();
+	Model model;
+	model.name = entityDesc.name;
+	//model.SetAnimationsPaths(entityDesc.anim_filePaths);
+	model.LoadModel(entityDesc.filePath);
+
+	registry->emplace<Model>(id, model);
 	return model.GetMeshData();
 }
 

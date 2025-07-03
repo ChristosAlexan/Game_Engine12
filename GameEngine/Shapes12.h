@@ -10,7 +10,7 @@ class Shapes12
 public:
 	Shapes12();
 	virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) = 0;
-	virtual void UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<DWORD>& indices);
+	virtual void UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
 	virtual void Draw(ID3D12GraphicsCommandList* commandList);
 public:
 	DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0, 0, 0);

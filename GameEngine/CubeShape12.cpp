@@ -44,7 +44,7 @@ void CubeShape12::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* co
 	vertices.push_back(Vertex(-1, -1, -1, 1, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
 	vertices.push_back(Vertex(1, -1, -1, 0, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
 	
-	std::vector<DWORD> indices = {
+	std::vector<uint32_t> indices = {
 	0,2,1, 0,3,2,    // Top face
 	4,6,5, 4,7,6,    // Bottom face
 	8,10,9, 8,11,10, // Right face
@@ -56,7 +56,7 @@ void CubeShape12::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* co
 	UploadGeometry(device, commandList, vertices, indices);
 }
 
-void CubeShape12::UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<DWORD>& indices)
+void CubeShape12::UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
 {
 	Shapes12::UploadGeometry(device, commandList, vertices, indices);
 }

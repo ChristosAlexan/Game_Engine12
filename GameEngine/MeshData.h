@@ -8,10 +8,18 @@
 
 namespace ECS
 {
+    enum MESH_TYPE
+    {
+        QUAD = 0,
+        CUBE = 1,
+        STATIC_MESH = 2,
+        SKELETAL_MESH = 3
+    };
+
     struct MeshData 
     {
         std::vector<Vertex> vertices;
-        std::vector<DWORD> indices;
+        std::vector<uint32_t> indices;
     };
 
     struct GpuMesh 

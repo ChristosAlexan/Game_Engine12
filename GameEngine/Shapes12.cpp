@@ -4,7 +4,7 @@ Shapes12::Shapes12()
 {
 }
 
-void Shapes12::UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<DWORD>& indices)
+void Shapes12::UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
 {
 	vertexBuffer.Initialize(device, commandList, vertices.data(), vertices.size());
 	indexBuffer.Initialize(device, commandList, indices.data(), static_cast<UINT>(indices.size()));

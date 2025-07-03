@@ -9,6 +9,7 @@ namespace ECS
 	{
 		std::string name;
 		std::string filePath;
+		std::vector<std::string> anim_filePaths;
 		MESH_TYPE meshType;
 		std::string materialName = "defaultMaterial";
 		TransformComponent transform = {};
@@ -16,5 +17,6 @@ namespace ECS
 		bool visible = true;
 		bool castShadows = true;
 		bool hasMaterial = true;
+		bool hasAnimation = false;
 	};
 }

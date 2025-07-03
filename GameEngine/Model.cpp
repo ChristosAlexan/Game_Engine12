@@ -1,94 +1,548 @@
+
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "Model.h"
 #include <iostream>
 #include "ErrorLogger.h"
 #include "Vertex.h"
 #include "MeshData.h"
 
+inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")
+{
+    DirectX::XMFLOAT4X4 m;
+    DirectX::XMStoreFloat4x4(&m, mat);
+
+    std::ostringstream oss;
+    if (label && *label)
+        oss << label << ":\n";
+
+    for (int i = 0; i < 4; ++i)
+    {
+        oss << "[ " << m.m[i][0] << ", " << m.m[i][1] << ", "
+            << m.m[i][2] << ", " << m.m[i][3] << " ]\n";
+    }
+
+    OutputDebugStringA(oss.str().c_str());
+}
+
+
+
+
+DirectX::XMMATRIX Node::getLocalMatrix()
+{
+    DirectX::XMVECTOR trans_vec = DirectX::XMLoadFloat3(&translation);
+    DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&rotation);
+    DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&scale);
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(trans_vec);
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(rot_vec);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(scale_vec);
+
+    return  S * R * T ;
+}
+
+
 Model::Model()
 {
 }
 
-void Model::LoadModel(const std::string& filepath)
+bool Model::LoadModel(const std::string& filepath)
 {
-    m_scene = importer.ReadFile(filepath,
-        aiProcess_Triangulate |
-        aiProcess_GenSmoothNormals |
-        aiProcess_CalcTangentSpace |
-        aiProcess_JoinIdenticalVertices |
-        aiProcess_OptimizeMeshes |
-        aiProcess_ValidateDataStructure);
+    bool ret;
+    if(filepath.find(".glb") != std::string::npos)
+        ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
+    else if (filepath.find(".gltf") != std::string::npos)
+        ret = loader.LoadASCIIFromFile(&model, &err, &warn, filepath);
 
-    if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
+    if (!ret)
     {
-        std::string errorMsg = "Assimp Error: " + std::string(importer.GetErrorString());
-        ErrorLogger::Log(errorMsg);
-        return;
+        ErrorLogger::Log("Failed to load: " + filepath);
+        return false;
     }
 
-    OutputDebugStringA(("Meshes: " + std::to_string(m_scene->mNumMeshes) + " || Materials: " +std::to_string(m_scene->mNumMaterials) + "\n").c_str());
-    ProcessNode(m_scene->mRootNode, m_scene);
+    auto scene = model.scenes[0];
+    for (size_t i = 0; i < scene.nodes.size(); i++)
+    {
+        const tinygltf::Node node = model.nodes[scene.nodes[i]];
+        LoadNode(node, model, nullptr, scene.nodes[i]);
+    }
+    LoadSkeleton(model);
+    LoadAnimations(model);
+    
 
     m_cpuMesh.vertices = m_vertices;
     m_cpuMesh.indices = m_indices;
+
 }
+
 
 ECS::MeshData& Model::GetMeshData()
 {
     return m_cpuMesh;
 }
 
-void Model::ProcessNode(aiNode* node, const aiScene* scene)
+
+
+
+
+
+
+void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, Node* parent, uint32_t nodeIndex)
 {
-    aiMatrix4x4 aiTransform = node->mTransformation;
-    DirectX::XMMATRIX nodeTransform = DirectX::XMLoadFloat4x4(reinterpret_cast<const DirectX::XMFLOAT4X4*>(&aiTransform));
+    Node* node = new Node{};
+    node->matrix = DirectX::XMMatrixIdentity();
+    node->parent = parent;
+    node->index = nodeIndex;
+    node->skin = inputNode.skin;
 
-    for (unsigned int i = 0; i < node->mNumMeshes; ++i) 
+    if (inputNode.translation.size() == 3)
     {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        
+        node->translation =
+            DirectX::XMFLOAT3(inputNode.translation[0], inputNode.translation[1], inputNode.translation[2]);
+    }
+    if (inputNode.scale.size() == 3)
+    {
+        node->scale =
+            DirectX::XMFLOAT3(inputNode.scale[0], inputNode.scale[1], inputNode.scale[2]);
+    }
+    if (inputNode.rotation.size() == 4)
+    {
+        node->rotation =
+            DirectX::XMFLOAT4(inputNode.rotation[0], inputNode.rotation[1], inputNode.rotation[2], inputNode.rotation[3]);
+    }
 
-        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) 
+    // Load node's children
+    if (inputNode.children.size() > 0) 
+    {
+        for (size_t i = 0; i < inputNode.children.size(); i++) 
         {
-            Vertex v;
-
-            v.pos = {
-                mesh->mVertices[i].x,
-                mesh->mVertices[i].y,
-                mesh->mVertices[i].z
-            };
-            if (mesh->HasNormals())
-            {
-                v.normal = DirectX::XMFLOAT3(
-                    mesh->mNormals[i].x,
-                    mesh->mNormals[i].y,
-                    mesh->mNormals[i].z);
-            }
-            if (mesh->HasTextureCoords(0))
-            {
-                v.texCoord = DirectX::XMFLOAT2(
-                    mesh->mTextureCoords[0][i].x,
-                    1 - mesh->mTextureCoords[0][i].y);
-            }
-            if (mesh->HasTangentsAndBitangents())
-            {
-                v.tangent = DirectX::XMFLOAT3(
-                    mesh->mTangents[i].x,
-                    mesh->mTangents[i].y,
-                    mesh->mTangents[i].z);
-            }
-            m_vertices.push_back(v);
-        }
-
-        for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-            aiFace face = mesh->mFaces[i];
-            for (unsigned int j = 0; j < face.mNumIndices; ++j) {
-                m_indices.push_back(face.mIndices[j]);
-            }
+            LoadNode(input.nodes[inputNode.children[i]], input, node, inputNode.children[i]);
         }
     }
-
-    for (unsigned int i = 0; i < node->mNumChildren; ++i) 
+    // If the node contains mesh data, we load vertices and indices from the buffers
+    // In glTF this is done via accessors and buffer views
+    if (inputNode.mesh > -1) 
     {
-        ProcessNode(node->mChildren[i], scene);
+        const tinygltf::Mesh mesh = input.meshes[inputNode.mesh];
+        // Iterate through all primitives of this node's mesh
+        for (size_t i = 0; i < mesh.primitives.size(); i++) {
+            const tinygltf::Primitive& glTFPrimitive = mesh.primitives[i];
+            uint32_t firstIndex = static_cast<uint32_t>(m_indices.size());
+            uint32_t vertexStart = static_cast<uint32_t>(m_vertices.size());
+            uint32_t indexCount = 0;
+            // Vertices
+            {
+                const float* positionBuffer = nullptr;
+                const float* normalsBuffer = nullptr;
+                const float* texCoordsBuffer = nullptr;
+                const float* weightsBuffer = nullptr;
+                const uint16_t* jointsBuffer = nullptr;
+                size_t vertexCount = 0;
+
+                // Get buffer data for vertex positions
+                if (glTFPrimitive.attributes.find("POSITION") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("POSITION")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    positionBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                    vertexCount = accessor.count;
+                }
+                // Get buffer data for vertex normals
+                if (glTFPrimitive.attributes.find("NORMAL") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("NORMAL")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    normalsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                }
+                // Get buffer data for vertex texture coordinates
+                // glTF supports multiple sets, we only load the first one
+                if (glTFPrimitive.attributes.find("TEXCOORD_0") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("TEXCOORD_0")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    texCoordsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                }
+                if (glTFPrimitive.attributes.find("WEIGHTS_0") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("WEIGHTS_0")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    weightsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                }
+                if (glTFPrimitive.attributes.find("JOINTS_0") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("JOINTS_0")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    jointsBuffer = reinterpret_cast<const uint16_t*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                }
+
+                // Append data to model's vertex buffer
+                for (size_t vertexOffset = 0; vertexOffset < vertexCount; ++vertexOffset) {
+                    Vertex vert{};
+                    vert.pos = positionBuffer ? DirectX::XMFLOAT3(positionBuffer[0 + (vertexOffset * 3)], positionBuffer[1 + (vertexOffset * 3)], positionBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0, 0, 0);
+                    vert.normal = normalsBuffer ? DirectX::XMFLOAT3(normalsBuffer[0 + (vertexOffset * 3)], normalsBuffer[1 + (vertexOffset * 3)], normalsBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0,0,0);
+                    vert.texCoord = texCoordsBuffer ? DirectX::XMFLOAT2(texCoordsBuffer[0 + (vertexOffset * 2)], texCoordsBuffer[1 + (vertexOffset * 2)]) : DirectX::XMFLOAT2(0, 0);
+                    vert.tangent = DirectX::XMFLOAT3(0, 0, 0);
+                    vert.binormal = DirectX::XMFLOAT3(0, 0, 0);
+
+                    if (weightsBuffer)
+                    {
+                        vert.boneWeights[0] = weightsBuffer[0 + (vertexOffset * 4)];
+                        vert.boneWeights[1] = weightsBuffer[1 + (vertexOffset * 4)];
+                        vert.boneWeights[2] = weightsBuffer[2 + (vertexOffset * 4)];
+                        vert.boneWeights[3] = weightsBuffer[3 + (vertexOffset * 4)];
+                    }
+                    else
+                    {
+                        vert.boneWeights[0] = 0.0f;
+                        vert.boneWeights[1] = 0.0f;
+                        vert.boneWeights[2] = 0.0f;
+                        vert.boneWeights[3] = 0.0f;
+                    }
+                  
+                    if(jointsBuffer)
+                    {
+                        vert.boneIndices[0] = jointsBuffer[0 + (vertexOffset * 4)];
+                        vert.boneIndices[1] = jointsBuffer[1 + (vertexOffset * 4)];
+                        vert.boneIndices[2] = jointsBuffer[2 + (vertexOffset * 4)];
+                        vert.boneIndices[3] = jointsBuffer[3 + (vertexOffset * 4)];
+                    }
+                    else
+                    {
+
+                        vert.boneIndices[0] = 0;
+                        vert.boneIndices[1] = 0;
+                        vert.boneIndices[2] = 0;
+                        vert.boneIndices[3] = 0;
+                    }
+                    
+                    m_vertices.push_back(vert);
+                }
+            }
+
+            // Indices
+            {
+                const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.indices];
+                const tinygltf::BufferView& bufferView = input.bufferViews[accessor.bufferView];
+                const tinygltf::Buffer& buffer = input.buffers[bufferView.buffer];
+
+                indexCount += static_cast<uint32_t>(accessor.count);
+
+                // glTF supports different component types of indices
+                switch (accessor.componentType) {
+                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+                    const uint32_t* buf = reinterpret_cast<const uint32_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+                    for (size_t index = 0; index < accessor.count; index++) {
+                        m_indices.push_back(buf[index] + vertexStart);
+                    }
+                    break;
+                }
+                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+                    const uint16_t* buf = reinterpret_cast<const uint16_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+                    for (size_t index = 0; index < accessor.count; index++) {
+                        m_indices.push_back(buf[index] + vertexStart);
+                    }
+                    break;
+                }
+                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+                    const uint8_t* buf = reinterpret_cast<const uint8_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+                    for (size_t index = 0; index < accessor.count; index++) {
+                        m_indices.push_back(buf[index] + vertexStart);
+                    }
+                    break;
+                }
+                default:
+                    std::cerr << "Index component type " << accessor.componentType << " not supported!" << std::endl;
+                    return;
+                }
+            }
+            Primitive primitive{};
+            primitive.firstIndex = firstIndex;
+            primitive.indexCount = indexCount;
+            primitive.materialIndex = glTFPrimitive.material;
+            node->mesh.primitives.push_back(primitive);
+        }
     }
+
+    if (parent) {
+        parent->children.push_back(node);
+    }
+    else {
+        nodes.push_back(node);
+    }
+}
+
+void Model::LoadSkeleton(tinygltf::Model& input)
+{
+    if (input.skins.empty())
+        return;
+
+    skins.resize(input.skins.size());
+
+    for (size_t i = 0; i < input.skins.size(); i++)
+    {
+        OutputDebugStringA((input.skins[i].name + "\n").c_str());
+        tinygltf::Skin glTFSkin = input.skins[i];
+
+        skins[i].name = glTFSkin.name;
+        // Find the root node of the skeleton
+        skins[i].skeletonRoot = NodeFromIndex(glTFSkin.skeleton);
+
+        // Find joint nodes
+        for (int jointIndex : glTFSkin.joints)
+        {
+            Node* node = NodeFromIndex(jointIndex);
+            if (node)
+            {
+                skins[i].joints.push_back(node);
+            }
+        }
+
+        // Get the inverse bind matrices from the buffer associated to this skin
+        if (glTFSkin.inverseBindMatrices > -1)
+        {
+            const tinygltf::Accessor& accessor = input.accessors[glTFSkin.inverseBindMatrices];
+            const tinygltf::BufferView& bufferView = input.bufferViews[accessor.bufferView];
+            const tinygltf::Buffer& buffer = input.buffers[bufferView.buffer];
+            skins[i].inverseBindMatrices.resize(accessor.count);
+            memcpy(skins[i].inverseBindMatrices.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(DirectX::XMMATRIX));
+        }
+    }
+}
+
+void Model::LoadAnimations(tinygltf::Model& input)
+{
+    animations.resize(input.animations.size());
+
+    for (size_t i = 0; i < input.animations.size(); i++)
+    {
+        animations[i].start = std::numeric_limits<float>::max();
+        animations[i].end = std::numeric_limits<float>::lowest();
+
+        tinygltf::Animation glTFAnimation = input.animations[i];
+        animations[i].name = glTFAnimation.name;
+
+        // Samplers
+        animations[i].samplers.resize(glTFAnimation.samplers.size());
+        for (size_t j = 0; j < glTFAnimation.samplers.size(); j++)
+        {
+            tinygltf::AnimationSampler glTFSampler = glTFAnimation.samplers[j];
+            AnimationSampler& dstSampler = animations[i].samplers[j];
+            dstSampler.interpolation = glTFSampler.interpolation;
+
+            // Read sampler keyframe input time values
+            {
+                const tinygltf::Accessor& accessor = input.accessors[glTFSampler.input];
+                const tinygltf::BufferView& bufferView = input.bufferViews[accessor.bufferView];
+                const tinygltf::Buffer& buffer = input.buffers[bufferView.buffer];
+                const void* dataPtr = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
+                const float* buf = static_cast<const float*>(dataPtr);
+                for (size_t index = 0; index < accessor.count; index++)
+                {
+                    dstSampler.inputs.push_back(buf[index]);
+                }
+                // Adjust animation's start and end times
+                for (auto input : animations[i].samplers[j].inputs)
+                {
+                    if (input < animations[i].start)
+                    {
+                        animations[i].start = input;
+                    };
+                    if (input > animations[i].end)
+                    {
+                        animations[i].end = input;
+                    }
+                }
+            }
+
+            // Read sampler keyframe output translate/rotate/scale values
+            {
+                const tinygltf::Accessor& accessor = input.accessors[glTFSampler.output];
+                const tinygltf::BufferView& bufferView = input.bufferViews[accessor.bufferView];
+                const tinygltf::Buffer& buffer = input.buffers[bufferView.buffer];
+                const void* dataPtr = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
+                switch (accessor.type)
+                {
+                case TINYGLTF_TYPE_VEC3: {
+                    auto buf = static_cast<const DirectX::XMFLOAT3*>(dataPtr);
+
+                    for (size_t index = 0; index < accessor.count; index++)
+                    {
+                        DirectX::XMFLOAT4 buf4(buf[index].x, buf[index].y, buf[index].z, 0.0f);
+                        DirectX::XMVECTOR _vec = DirectX::XMLoadFloat4(&buf4);
+                        dstSampler.outputsVec4.push_back(_vec);
+                    }
+                    break;
+                }
+                case TINYGLTF_TYPE_VEC4: {
+                    auto buf = static_cast<const DirectX::XMFLOAT4*>(dataPtr);
+                    for (size_t index = 0; index < accessor.count; index++)
+                    {
+                        DirectX::XMVECTOR _vec = DirectX::XMLoadFloat4(&buf[index]);
+                        dstSampler.outputsVec4.push_back(_vec);
+                    }
+                    break;
+                }
+                default: {
+                    std::cout << "unknown type" << std::endl;
+                    break;
+                }
+                }
+            }
+        }
+
+        // Channels
+        animations[i].channels.resize(glTFAnimation.channels.size());
+        for (size_t j = 0; j < glTFAnimation.channels.size(); j++)
+        {
+            tinygltf::AnimationChannel glTFChannel = glTFAnimation.channels[j];
+            AnimationChannel& dstChannel = animations[i].channels[j];
+            dstChannel.path = glTFChannel.target_path;
+            dstChannel.samplerIndex = glTFChannel.sampler;
+            dstChannel.node = NodeFromIndex(glTFChannel.target_node);
+        }
+    }
+}
+
+Node* Model::FindNode(Node* parent, uint32_t index)
+{
+    Node* nodeFound = nullptr;
+    if (parent->index == index)
+    {
+        return parent;
+    }
+    for (auto& child : parent->children)
+    {
+        nodeFound = FindNode(child, index);
+        if (nodeFound)
+        {
+            break;
+        }
+    }
+    return nodeFound;
+}
+
+Node* Model::NodeFromIndex(uint32_t index)
+{
+    Node* nodeFound = nullptr;
+    for (auto& node : nodes)
+    {
+        nodeFound = FindNode(node, index);
+        if (nodeFound)
+        {
+            break;
+        }
+    }
+    return nodeFound;
+}
+
+DirectX::XMMATRIX Model::GetNodeMatrix(Node* node)
+{
+    DirectX::XMMATRIX   nodeMatrix = node->getLocalMatrix();
+    Node* currentParent = node->parent;
+    while (currentParent)
+    {
+        nodeMatrix = nodeMatrix * currentParent->getLocalMatrix();
+        currentParent = currentParent->parent;
+    }
+    return nodeMatrix;
+}
+
+
+
+
+void Model::UpdateAnimation(float deltaTime, std::vector<DirectX::XMMATRIX>& finalTransform)
+{
+    if (activeAnimation > static_cast<uint32_t>(animations.size()) - 1)
+    {
+        ErrorLogger::Log("No animation with index " + activeAnimation);
+        return;
+    }
+
+    Animation& animation = animations[activeAnimation];
+    animation.currentTime += deltaTime;
+    if (animation.currentTime > animation.end)
+    {
+        animation.currentTime -= animation.end;
+    }
+
+    for (auto& channel : animation.channels)
+    {
+        AnimationSampler& sampler = animation.samplers[channel.samplerIndex];
+        for (size_t i = 0; i < sampler.inputs.size() - 1; i++)
+        {
+            // Get the input keyframe values for the current time stamp
+            if ((animation.currentTime >= sampler.inputs[i]) && (animation.currentTime <= sampler.inputs[i + 1]))
+            {
+                float a = (animation.currentTime - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
+                if (channel.path == "translation")
+                {
+                    if (sampler.interpolation == "STEP")
+                        DirectX::XMStoreFloat3(&channel.node->translation, sampler.outputsVec4[i]);
+                    else
+                        DirectX::XMStoreFloat3(&channel.node->translation, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
+                }
+                if (channel.path == "rotation")
+                {
+                    if (sampler.interpolation == "STEP")
+                        DirectX::XMStoreFloat4(&channel.node->rotation, sampler.outputsVec4[i]);
+                    else
+                    {
+                        DirectX::XMVECTOR q1;
+                        q1 = sampler.outputsVec4[i];
+                        DirectX::XMVECTOR q2;
+                        q2 = sampler.outputsVec4[i + 1];
+
+                        DirectX::XMVECTOR rot = DirectX::XMQuaternionSlerp(q1, q2, a);
+                        rot = DirectX::XMQuaternionNormalize(rot);
+                        DirectX::XMStoreFloat4(&channel.node->rotation, rot);
+                    }
+                 
+                }
+                if (channel.path == "scale")
+                {
+                    if (sampler.interpolation == "STEP")
+                        DirectX::XMStoreFloat4(&channel.node->rotation, sampler.outputsVec4[i]);
+                    else
+                        DirectX::XMStoreFloat3(&channel.node->scale, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
+                }
+
+            }
+        }
+    }
+    for (auto& node : nodes)
+    {
+        UpdateJoints(node, finalTransform);
+    }
+}
+
+
+
+void Model::UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransform)
+{
+    if (node->skin > -1) {
+
+        Skin& skin = skins[node->skin];
+        DirectX::XMMATRIX inverseTransform = DirectX::XMMatrixInverse(nullptr, GetNodeMatrix(node));
+
+        size_t numJoints = skin.joints.size();
+        finalTransform.resize(numJoints);
+  
+        for (size_t i = 0; i < numJoints; i++)
+        {
+            finalTransform[i] = skin.inverseBindMatrices[i] * GetNodeMatrix(skin.joints[i]) ;
+            //finalTransform[i] = finalTransform[i] * inverseTransform ;
+
+            finalTransform[i] = DirectX::XMMatrixTranspose(finalTransform[i]);
+        }
+    }
+
+    for (auto& child : node->children)
+    {
+        UpdateJoints(child, finalTransform);
+    }
+}
+
+void Model::CalculateFinalTransform(float dt, std::vector<DirectX::XMMATRIX>& finalTransform)
+{
+    //for (auto& node : nodes)
+    //{
+    //    UpdateJoints(node, finalTransform);
+    //}
+  
+    UpdateAnimation(dt, finalTransform);
 }

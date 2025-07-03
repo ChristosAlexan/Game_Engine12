@@ -30,7 +30,6 @@ public:
 	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
-	//void CreateScenes(Camera& camera, int& width, int& height);
 	void ResetCommandAllocator();
 	void SubmitCommand();
 	void InitDescAllocator(ID3D12DescriptorHeap* heap);

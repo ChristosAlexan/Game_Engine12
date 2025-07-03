@@ -13,21 +13,6 @@ DX12::DX12()
     timer.Start();
 }
 
-//void DX12::CreateScenes(Camera& camera, int& width, int& height)
-//{
-//    ResetCommandAllocator();
-//    m_sceneManager = std::make_unique<ECS::SceneManager>(device.Get(), commandList.Get());
-//    m_sceneManager->LoadScene("Scene1");
-//    m_sceneManager->SetCurrentScene("Scene1");
-//    m_sceneManager->GetCurrentScene()->LoadMaterials();
-//    m_sceneManager->GetCurrentScene()->LoadAssets();
-//    SubmitCommand();
-//  
-//
-//    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-//    camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
-//    camera.SetPosition(0, 0, 0);
-//}
 
 void DX12::ResetCommandAllocator()
 {
@@ -93,9 +78,6 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     InitializeConstantBuffers();
     InitializeShaders();
     InitDescAllocator(sharedHeap.Get());
-    //if (!m_gui.Initialize(hwnd, device.Get(), commandQueue.Get(), sharedHeap.Get()))
-    //    ErrorLogger::Log("Failed to initialize ImGui!");
-    //CreateScenes(camera, width, height);
 }
 
 void DX12::CreateDeviceAndFactory()
@@ -278,10 +260,12 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob)
 
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        {"NORMAL", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
-        {"TANGENT", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
-        {"BINORMAL", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+        {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+        {"BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+        { "BONEWEIGHTS",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "BONEINDICES",   0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
     };
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -290,7 +274,7 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob)
     psoDesc.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
     psoDesc.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDesc.DepthStencilState.DepthEnable = TRUE;
     psoDesc.DepthStencilState.StencilEnable = FALSE;
@@ -345,16 +329,17 @@ void DX12::CreateDepthStencilBuffer(int& width, int& height)
 
 void DX12::InitializeConstantBuffers()
 {
-    dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 4 * 1024 * 1024); // 4 MB
+    dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 4 MB
 
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
 
-    CD3DX12_ROOT_PARAMETER rootParams[3];
+    CD3DX12_ROOT_PARAMETER rootParams[4];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 VS
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
- 
+    rootParams[3].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);

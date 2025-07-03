@@ -11,11 +11,11 @@ public:
 	D3D12_INDEX_BUFFER_VIEW ibView = {};
 public:
 	IndexBuffer12() {}
-	HRESULT Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const DWORD* data, UINT indexCount)
+	HRESULT Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const uint32_t* data, UINT indexCount)
 	{
 		HRESULT hr;
 
-		UINT ibSize = sizeof(DWORD) * indexCount;
+		UINT ibSize = sizeof(uint32_t) * indexCount;
 		// Create default heap
 		CD3DX12_HEAP_PROPERTIES defaultHeapProps(D3D12_HEAP_TYPE_DEFAULT);
 		CD3DX12_RESOURCE_DESC ibResourceDesc = CD3DX12_RESOURCE_DESC::Buffer(ibSize);
