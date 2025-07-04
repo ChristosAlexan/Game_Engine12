@@ -1,0 +1,80 @@
+{
+    "entities": [
+        {
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/walk.gltf",
+            "hasAnimation": true,
+            "hasMaterial": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -1.8691564798355103,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.026102541014552116,
+                    -0.6154519319534302,
+                    0.7874778509140015,
+                    0.02040041796863079
+                ],
+                "scale": [
+                    2.5199966430664063,
+                    2.5200014114379883,
+                    2.520000696182251
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "defaultAlbedo1",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf",
+            "hasAnimation": false,
+            "hasMaterial": true,
+            "materialName": "TestMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "defaultMetalRougness1",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_metalRoughness.dds",
+            "metalness": 0.0,
+            "name": "Helmet",
+            "normalTextureName": "defaultNormal1",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    4.818964004516602,
+                    2.2276594638824463,
+                    0.2616218328475952
+                ],
+                "rotation": [
+                    -0.17148323357105255,
+                    0.7271724343299866,
+                    -0.6350224018096924,
+                    -0.1963678002357483
+                ],
+                "scale": [
+                    0.4800005555152893,
+                    0.4799995720386505,
+                    0.48000064492225647
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        }
+    ]
+}

@@ -34,76 +34,14 @@ namespace ECS
 		materialDesc.useNormalMap = true;
 		materialDesc.useMetalRoughnessMap = true;
 		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
-
+		
 		m_materialManager->GetOrCreateMaterial(materialDesc);
 	}
 
 	void Scene::LoadAssets()
 	{
-
-
-		EntityDesc entDesc = {};
-
-		//for (int i = 0; i < 3; ++i)
-		//{
-		//
-		//	if (auto desc = m_materialManager->GetMaterialDescByName("DefaultMaterial"))
-		//		entDesc.materialDesc = *desc;
-		//	else
-		//	{
-		//		ErrorLogger::Log("Material descriptor not found");
-		//		entDesc.materialDesc = MaterialDesc::Default();
-		//	}
-		//	entDesc.meshType = CUBE;
-		//	entDesc.name = "Cube";
-		//	m_entityFactory->AddEntity(this, entDesc);
-		//}
-
-		//HELMET
-		MaterialDesc materialDesc = {};
-		materialDesc.name = "TestMaterial";
-		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.dds";
-		materialDesc.albedoTextureName = "defaultAlbedo1";
-		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_normal.dds";
-		materialDesc.normalTextureName = "defaultNormal1";
-		materialDesc.metalRoughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_metalRoughness.dds";
-		materialDesc.metalRoughnessTextureName = "defaultMetalRougness1";
-		materialDesc.useAlbedoMap = true;
-		materialDesc.useNormalMap = true;
-		materialDesc.useMetalRoughnessMap = true;
-		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
-		entDesc.hasAnimation = false;
-		entDesc.materialDesc = materialDesc;
-		entDesc.meshType = STATIC_MESH;
-		entDesc.name = "Helmet";
-		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf";
-		entDesc.hasMaterial = true;
-		m_entityFactory->AddEntity(this, entDesc);
-
-		//ROBO
-		materialDesc.name = "RoboMaterial";
-		materialDesc.albedoTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds";
-		materialDesc.albedoTextureName = "roboAlbedo";
-		materialDesc.normalTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds";
-		materialDesc.normalTextureName = "roboNormal";
-		materialDesc.metalRoughnessTexturePath = "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds";
-		materialDesc.metalRoughnessTextureName = "roboMetalRougness";
-		materialDesc.useAlbedoMap = true;
-		materialDesc.useNormalMap = true;
-		materialDesc.useMetalRoughnessMap = true;
-		materialDesc.tex_format = Texture12::TEXTURE_FORMAT::AUTO;
-
-		entDesc.materialDesc = materialDesc;
-		entDesc.meshType = SKELETAL_MESH;
-		entDesc.hasAnimation = true;
-		entDesc.name = "Robo";
-		//entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/blender 2.83/test1.gltf";
-		entDesc.filePath = "G:/gltf models/glTF-Sample-Models-main/Custom/walk.gltf";
-		//entDesc.anim_filePaths.push_back("G:/gltf models/glTF-Sample-Models-main/Custom/test.gltf");
-		entDesc.hasMaterial = true;
-		m_entityFactory->AddEntity(this, entDesc);
-
-
+		std::string fpath = ".//Save files/" + GetName();
+		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
 
@@ -183,6 +121,11 @@ namespace ECS
 	AnimationManager* Scene::GetAnimationManager() const
 	{
 		return m_animationManager.get();
+	}
+
+	EntityFactory* Scene::GetEntityFactory() const
+	{
+		return m_entityFactory.get();
 	}
 
 	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)

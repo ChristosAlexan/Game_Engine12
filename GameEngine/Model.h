@@ -49,7 +49,5 @@ private:
 	std::vector<Animation> animations;
 
 	uint32_t activeAnimation = 0;
-
-	bool bLoaded = false;
 };
 

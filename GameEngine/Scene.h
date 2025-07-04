@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "AnimationManager.h"
 #include <entt/entt.hpp>
+#include "SaveLoadSystem.h"
 
 namespace ECS
 {
@@ -31,6 +32,7 @@ namespace ECS
 		[[nodiscard]] MaterialManager* GetMaterialManager() const;
 		[[nodiscard]] entt::registry& GetRegistry();
 		[[nodiscard]] AnimationManager* GetAnimationManager() const;
+		[[nodiscard]] EntityFactory* GetEntityFactory() const;
 
 		void Render(Camera& camera, DynamicUploadBuffer* dynamicCB);
 	private:
@@ -48,6 +50,9 @@ namespace ECS
 		UINT m_NextEntityID = 0;
 
 		entt::registry m_registry;
+
+	public:
+		SaveLoadSystem m_saveLoadSystem;
 	};
 
 }

@@ -121,6 +121,9 @@
     <Filter Include="TINYGLTF\Source">
       <UniqueIdentifier>{34317125-0cd1-4612-98a0-715b2fc039ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Saves">
+      <UniqueIdentifier>{af1346f2-f9ed-4534-b63f-703ab27b5bbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -239,6 +242,9 @@
     </ClCompile>
     <ClCompile Include="AnimationManager.cpp">
       <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveLoadSystem.cpp">
+      <Filter>Saves</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -412,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="ModelData.h">
       <Filter>TINYGLTF\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveLoadSystem.h">
+      <Filter>Saves</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

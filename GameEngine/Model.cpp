@@ -8,26 +8,6 @@
 #include "Vertex.h"
 #include "MeshData.h"
 
-inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")
-{
-    DirectX::XMFLOAT4X4 m;
-    DirectX::XMStoreFloat4x4(&m, mat);
-
-    std::ostringstream oss;
-    if (label && *label)
-        oss << label << ":\n";
-
-    for (int i = 0; i < 4; ++i)
-    {
-        oss << "[ " << m.m[i][0] << ", " << m.m[i][1] << ", "
-            << m.m[i][2] << ", " << m.m[i][3] << " ]\n";
-    }
-
-    OutputDebugStringA(oss.str().c_str());
-}
-
-
-
 
 DirectX::XMMATRIX Node::getLocalMatrix()
 {
@@ -80,11 +60,6 @@ ECS::MeshData& Model::GetMeshData()
 {
     return m_cpuMesh;
 }
-
-
-
-
-
 
 
 void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, Node* parent, uint32_t nodeIndex)

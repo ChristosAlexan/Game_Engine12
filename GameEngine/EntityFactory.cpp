@@ -17,16 +17,16 @@ namespace ECS
 		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
 	
-		TransformComponent transform{};
-		m_registry->emplace<TransformComponent>(id, transform);
-
 		RenderComponent renderComponent = {};
 		renderComponent.mesh = mesh;
 		renderComponent.material = material;
 		renderComponent.name = entityDesc.name;
 		renderComponent.hasAnimation = entityDesc.hasAnimation;
-
+		
 		m_registry->emplace<RenderComponent>(id, renderComponent);
+		m_registry->emplace<EntityDesc>(id, entityDesc);
+		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
+
 		return id;
 	}
 }	

@@ -138,6 +138,11 @@ void Engine::Update(int width, int height)
 	{
 		camera.AdjustPosition(0.0f, -cameraSpeed * dt, 0.0f);
 	}
+	if (heldKeys.contains(SDLK_F5))
+	{
+		std::string savePath = ".//Save files/" + m_sceneManager->GetCurrentScene()->GetName();
+		m_sceneManager->GetCurrentScene()->m_saveLoadSystem.SaveScene(m_sceneManager->GetCurrentScene(), savePath);
+	}
 
 	if (isRightMouseDown)
 	{

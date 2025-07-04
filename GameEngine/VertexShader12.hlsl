@@ -50,7 +50,7 @@ PSInput Main(VSInput input)
         }
     
         output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(skinnedPos, 1.0f))));
-        output.normal = normalize(mul(worldMatrix, float4(n, 0.0f))); //set normalMatrix's w to 0 to omit translation with worldMatrix
+        output.normal = normalize(mul(worldMatrix, float4(n, 0.0f)));
         output.tangent = normalize(mul(worldMatrix, float4(t, 0.0f)));
         output.binormal = normalize(mul(worldMatrix, float4(b, 0.0f)));
    
@@ -62,7 +62,7 @@ PSInput Main(VSInput input)
     else
     {
         output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(input.position, 1.0f))));
-        output.normal = normalize(mul(worldMatrix, float4(input.normal, 0.0f))); //set normalMatrix's w to 0 to omit translation with worldMatrix
+        output.normal = normalize(mul(worldMatrix, float4(input.normal, 0.0f)));
         output.tangent = normalize(mul(worldMatrix, float4(input.tangent, 0.0f)));
         output.binormal = normalize(mul(worldMatrix, float4(input.binormal, 0.0f)));
    
