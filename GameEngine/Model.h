@@ -18,11 +18,18 @@ public:
 	void LoadAnimations(tinygltf::Model& input);
 	Node* FindNode(Node* parent, uint32_t index);
 	Node* NodeFromIndex(uint32_t index);
+	DirectX::XMMATRIX GetNodeMatrixFlat(int nodeIndex, const std::vector<FlatNode>& flatNodes);
 	DirectX::XMMATRIX GetNodeMatrix(Node* node);
-	//void SetCurrentAnim(uint32_t curAnim);
+	void UpdateAnimationFlat(float deltaTime, AnimatorComponent& animData); // Use the flat hierarchy to transform nodes per animation
 	void UpdateAnimation(float deltaTime, AnimatorComponent& animData);
 	void UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransform);
+	void UpdateJointsFlat(Node* node, AnimatorComponent& animData); // Update joints using the flat hierarchy per animator component
 	void CalculateFinalTransform(float dt, AnimatorComponent& animData);
+	void CalculateFinalTransformFlat(float dt, AnimatorComponent& animData);
+
+	/*Build a flat hierarchy of all nodes per animator component for easier access of nodes. Useful when many entities manipulate the same skeletal model*/
+	void BuildFlatHierarchy(AnimatorComponent& animData);
+	void FlattenHierarchyRecursive(Node* node, int parentIndex, AnimatorComponent& animData);
 	ECS::MeshData& GetMeshData();
 
 	void LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, Node* parent, uint32_t nodeIndex);
@@ -52,6 +59,6 @@ private:
 	std::vector<Animation> animations;
 
 	std::vector<std::string> m_animFiles;
-
+	uint32_t totalNodeCount = 0;
 };
 

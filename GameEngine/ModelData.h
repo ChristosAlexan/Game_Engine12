@@ -68,9 +68,19 @@ struct Animation
 	float                         currentTime = 0.0f;
 };
 
+
+struct FlatNode
+{
+	DirectX::XMFLOAT3 translation = { 0, 0, 0 };
+	DirectX::XMFLOAT4 rotation = { 0, 0, 0, 1 };
+	DirectX::XMFLOAT3 scale = { 1, 1, 1 };
+	int parentIndex = -1; // -1 means root
+};
+
 struct AnimatorComponent
 {
 	int currentAnim = 0;
 	float currentTime = 0.0f;
+	std::vector<FlatNode> flatNodes;
 	std::vector<DirectX::XMMATRIX> finalTransforms;
 };

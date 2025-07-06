@@ -119,6 +119,7 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 		std::string scaleOffset = "Scale##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 		std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 
+
 		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
 		ImGui::DragFloat3(scaleOffset.c_str(), &m_closestTransform->scale.x, 0.05f);
 		if (ImGui::DragFloat4(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.01f)) {
@@ -126,6 +127,23 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 			q = DirectX::XMQuaternionNormalize(q);
 			DirectX::XMStoreFloat4(&m_closestTransform->rotation, q);
 		}
+		
+		auto scene = sceneManager->GetCurrentScene();
+		entt::entity entity = static_cast<entt::entity>(m_closestEntity);
+
+		if (scene->GetRegistry().all_of<ECS::RenderComponent>(entity) && scene->GetRegistry().all_of<AnimatorComponent>(entity))
+		{
+			ECS::RenderComponent& renderComponent = scene->GetRegistry().get<ECS::RenderComponent>(entity);
+			AnimatorComponent& animComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
+
+			if (renderComponent.hasAnimation)
+			{
+
+				std::string animOffset = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+				ImGui::DragInt(animOffset.c_str(), &animComponent.currentAnim, 1, 0);
+			}
+		}
+		
 
 		DirectX::XMMATRIX worldMatrix = m_closestTransform->worldMatrix;
 
