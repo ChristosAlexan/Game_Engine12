@@ -160,13 +160,15 @@ namespace ECS
 
 			CB_PS_SimpleShader psCB = {};
 			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
-			psCB.color = renderComponent.material->baseColor;
+			psCB.color = DirectX::XMFLOAT4(1.0f,0.0f,0.0f,1.0f);
 
 
-			
-			m_cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
-			m_cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
-			m_cmdList->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
+			if(dynamicCB)
+			{
+				m_cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
+				m_cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
+			    m_cmdList->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
+			}
 
 			m_materialManager->Bindtextures(renderComponent.material.get(), m_cmdList, 2);
 			renderComponent.mesh->Draw(m_cmdList);

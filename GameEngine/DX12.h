@@ -24,9 +24,10 @@ public:
 	void CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc);
 	void CreateDescriptorHeaps();
 	void InitializeShaders();
-	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob);
+	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeConstantBuffers();
+	void RenderFullScreenQuad();
 	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
@@ -52,7 +53,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
@@ -69,8 +70,5 @@ private:
 
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
 	AppTimer timer;
-
-	//std::unique_ptr<ECS::SceneManager> m_sceneManager;
-	//GFXGui m_gui;
 };
 

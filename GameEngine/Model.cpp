@@ -473,7 +473,7 @@ void Model::UpdateAnimationFlat(float deltaTime, AnimatorComponent& animData)
 {
     if (animData.currentAnim > static_cast<uint32_t>(animations.size()) - 1)
     {
-        ErrorLogger::Log("No animation with index " + animData.currentAnim);
+        //ErrorLogger::Log("No animation with index " + animData.currentAnim);
         return;
     }
 
@@ -540,7 +540,7 @@ void Model::UpdateAnimation(float deltaTime, AnimatorComponent& animData)
 {
     if (animData.currentAnim > static_cast<uint32_t>(animations.size()) - 1)
     {
-        ErrorLogger::Log("No animation with index " + animData.currentAnim);
+        //ErrorLogger::Log("No animation with index " + animData.currentAnim);
         return;
     }
 

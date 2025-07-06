@@ -22,15 +22,6 @@
     <Filter Include="GFX\Source Files">
       <UniqueIdentifier>{1a4fc61a-85e3-4e9c-a71d-5df7497fa3a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{553428df-38a7-469b-996b-9b0750cbcee1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Vertex">
-      <UniqueIdentifier>{70ef3a8f-03df-4a8e-8dac-24253189a8f5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Pixel">
-      <UniqueIdentifier>{d551f2f4-c842-47d2-bf07-c4c9fac50277}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ImGui">
       <UniqueIdentifier>{8400f360-f550-4591-b464-2fcf5c304a7f}</UniqueIdentifier>
     </Filter>
@@ -429,6 +420,12 @@
     </FxCompile>
     <FxCompile Include="VertexShader12.hlsl">
       <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader_2D.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader_2D.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
