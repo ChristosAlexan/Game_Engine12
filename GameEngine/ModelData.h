@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-
+#include <map>
+#include "TransformECS.h"
 
 struct Primitive {
 	uint32_t firstIndex;
@@ -65,4 +66,11 @@ struct Animation
 	float                         start = std::numeric_limits<float>::max();
 	float                         end = std::numeric_limits<float>::min();
 	float                         currentTime = 0.0f;
+};
+
+struct AnimatorComponent
+{
+	int currentAnim = 0;
+	float currentTime = 0.0f;
+	std::vector<DirectX::XMMATRIX> finalTransforms;
 };

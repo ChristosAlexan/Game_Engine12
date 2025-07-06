@@ -131,9 +131,9 @@ namespace ECS
 	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
 		auto animView = GetRegistry().view<Model>();
-		auto renderGroup = GetRegistry().group<TransformComponent, RenderComponent>();
+		auto renderGroup = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
 
-		for (auto [entity, transform, renderComponent] : renderGroup.each())
+		for (auto [entity, transform, renderComponent, animComponent] : renderGroup.each())
 		{
 			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
 			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);
@@ -151,9 +151,9 @@ namespace ECS
 			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform.worldMatrix);
 
 			CB_VS_AnimationShader skinningCB = {};
-			if (renderComponent.hasAnimation && !transform.anim_transform.empty())
+			if (renderComponent.hasAnimation && !animComponent.finalTransforms.empty())
 			{
-				memcpy(skinningCB.skinningMatrix, transform.anim_transform.data(), sizeof(skinningCB.skinningMatrix));
+				memcpy(skinningCB.skinningMatrix, animComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
 
 			}
 			skinningCB.HasAnim = renderComponent.hasAnimation;

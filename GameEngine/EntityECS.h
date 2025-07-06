@@ -14,6 +14,7 @@ namespace ECS
 		std::string materialName = "defaultMaterial";
 		TransformComponent transform = {};
 		MaterialDesc materialDesc = MaterialDesc::Default();
+		AnimatorComponent animComponent;
 		bool visible = true;
 		bool castShadows = true;
 		bool hasMaterial = true;

@@ -1,9 +1,11 @@
 {
     "entities": [
-        {
+	{
+            "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
+            "AnimSize": 1,
             "albedoTextureName": "roboAlbedo",
             "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
-            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/walk.gltf",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
             "hasAnimation": true,
             "hasMaterial": true,
             "materialName": "RoboMaterial",
@@ -23,15 +25,55 @@
                     0.0
                 ],
                 "rotation": [
-                    0.026102541014552116,
-                    -0.6154519319534302,
-                    0.7874778509140015,
-                    0.02040041796863079
+                    0.000868359231390059,
+                    0.9991077184677124,
+                    0.026198377832770348,
+                    -0.03311747685074806
                 ],
                 "scale": [
-                    2.5199966430664063,
-                    2.5200014114379883,
-                    2.520000696182251
+                    2.519998073577881,
+                    2.5199995040893555,
+                    2.519996404647827
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasMaterial": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -1.8691564798355103,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.000868359231390059,
+                    0.9991077184677124,
+                    0.026198377832770348,
+                    -0.03311747685074806
+                ],
+                "scale": [
+                    2.519998073577881,
+                    2.5199995040893555,
+                    2.519996404647827
                 ]
             },
             "useAlbedoMap": true,

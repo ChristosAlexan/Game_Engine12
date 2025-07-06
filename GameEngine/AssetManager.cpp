@@ -12,6 +12,7 @@ namespace ECS
 		if (m_meshes.contains(entityDesc.name))
 			return m_meshes.at(entityDesc.name);
 
+		OutputDebugStringA(( "Name = " + entityDesc.name + "\n").c_str());
 		MeshData data;
 
 		switch (entityDesc.meshType)
@@ -24,6 +25,7 @@ namespace ECS
 				break;
 			case STATIC_MESH:
 				data = GenerateStaticMesh(entityDesc);
+				break;
 			case SKELETAL_MESH:
 				data = GenerateSkeletalMesh(registry, entityDesc);
 				break;

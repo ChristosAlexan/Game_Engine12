@@ -28,31 +28,54 @@ Model::Model()
 
 bool Model::LoadModel(const std::string& filepath)
 {
+    uint32_t animIndex = 0;
+    models.resize(m_animFiles.size() + 1);
     bool ret;
-    if(filepath.find(".glb") != std::string::npos)
-        ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
-    else if (filepath.find(".gltf") != std::string::npos)
-        ret = loader.LoadASCIIFromFile(&model, &err, &warn, filepath);
 
-    if (!ret)
+    for (int i = 0; i < models.size(); ++i)
     {
-        ErrorLogger::Log("Failed to load: " + filepath);
-        return false;
-    }
+        std::string _path;
 
-    auto scene = model.scenes[0];
+        if (i == 0)
+            _path = filepath;
+        else
+            _path = m_animFiles[animIndex++];
+
+        if (_path.find(".glb") != std::string::npos)
+            ret = loader.LoadBinaryFromFile(&models[i], &err, &warn, _path);
+        else if (_path.find(".gltf") != std::string::npos)
+            ret = loader.LoadASCIIFromFile(&models[i], &err, &warn, _path);
+
+        if (!ret)
+        {
+            ErrorLogger::Log("Failed to load: " + _path);
+            return false;
+        }
+    }
+   
+    auto scene = models[0].scenes[0];
     for (size_t i = 0; i < scene.nodes.size(); i++)
     {
-        const tinygltf::Node node = model.nodes[scene.nodes[i]];
-        LoadNode(node, model, nullptr, scene.nodes[i]);
+        const tinygltf::Node node = models[0].nodes[scene.nodes[i]];
+        LoadNode(node, models[0], nullptr, scene.nodes[i]);
     }
-    LoadSkeleton(model);
-    LoadAnimations(model);
+    LoadSkeleton(models[0]);
+
+    for (auto& model : models)
+    {
+        LoadAnimations(model);
+    }
+    
     
 
     m_cpuMesh.vertices = m_vertices;
     m_cpuMesh.indices = m_indices;
 
+}
+
+void Model::SetAnimFiles(const std::vector<std::string>& animFiles)
+{
+    m_animFiles = animFiles;
 }
 
 
@@ -281,22 +304,25 @@ void Model::LoadSkeleton(tinygltf::Model& input)
 
 void Model::LoadAnimations(tinygltf::Model& input)
 {
-    animations.resize(input.animations.size());
+    //animations.resize(input.animations.size());
+ 
+    animations.push_back(Animation{});
 
+    uint32_t index = animations.size() - 1;
     for (size_t i = 0; i < input.animations.size(); i++)
     {
-        animations[i].start = std::numeric_limits<float>::max();
-        animations[i].end = std::numeric_limits<float>::lowest();
+        animations[index].start = std::numeric_limits<float>::max();
+        animations[index].end = std::numeric_limits<float>::lowest();
 
         tinygltf::Animation glTFAnimation = input.animations[i];
-        animations[i].name = glTFAnimation.name;
+        animations[index].name = glTFAnimation.name;
 
         // Samplers
-        animations[i].samplers.resize(glTFAnimation.samplers.size());
+        animations[index].samplers.resize(glTFAnimation.samplers.size());
         for (size_t j = 0; j < glTFAnimation.samplers.size(); j++)
         {
             tinygltf::AnimationSampler glTFSampler = glTFAnimation.samplers[j];
-            AnimationSampler& dstSampler = animations[i].samplers[j];
+            AnimationSampler& dstSampler = animations[index].samplers[j];
             dstSampler.interpolation = glTFSampler.interpolation;
 
             // Read sampler keyframe input time values
@@ -311,15 +337,15 @@ void Model::LoadAnimations(tinygltf::Model& input)
                     dstSampler.inputs.push_back(buf[index]);
                 }
                 // Adjust animation's start and end times
-                for (auto input : animations[i].samplers[j].inputs)
+                for (auto input : animations[index].samplers[j].inputs)
                 {
-                    if (input < animations[i].start)
+                    if (input < animations[index].start)
                     {
-                        animations[i].start = input;
+                        animations[index].start = input;
                     };
-                    if (input > animations[i].end)
+                    if (input > animations[index].end)
                     {
-                        animations[i].end = input;
+                        animations[index].end = input;
                     }
                 }
             }
@@ -361,11 +387,11 @@ void Model::LoadAnimations(tinygltf::Model& input)
         }
 
         // Channels
-        animations[i].channels.resize(glTFAnimation.channels.size());
+        animations[index].channels.resize(glTFAnimation.channels.size());
         for (size_t j = 0; j < glTFAnimation.channels.size(); j++)
         {
             tinygltf::AnimationChannel glTFChannel = glTFAnimation.channels[j];
-            AnimationChannel& dstChannel = animations[i].channels[j];
+            AnimationChannel& dstChannel = animations[index].channels[j];
             dstChannel.path = glTFChannel.target_path;
             dstChannel.samplerIndex = glTFChannel.sampler;
             dstChannel.node = NodeFromIndex(glTFChannel.target_node);
@@ -417,22 +443,19 @@ DirectX::XMMATRIX Model::GetNodeMatrix(Node* node)
     return nodeMatrix;
 }
 
-
-
-
-void Model::UpdateAnimation(float deltaTime, std::vector<DirectX::XMMATRIX>& finalTransform)
+void Model::UpdateAnimation(float deltaTime, AnimatorComponent& animData)
 {
-    if (activeAnimation > static_cast<uint32_t>(animations.size()) - 1)
+    if (animData.currentAnim > static_cast<uint32_t>(animations.size()) - 1)
     {
-        ErrorLogger::Log("No animation with index " + activeAnimation);
+        ErrorLogger::Log("No animation with index " + animData.currentAnim);
         return;
     }
 
-    Animation& animation = animations[activeAnimation];
-    animation.currentTime += deltaTime;
-    if (animation.currentTime > animation.end)
+    Animation& animation = animations[animData.currentAnim];
+    animData.currentTime += deltaTime;
+    if (animData.currentTime > animation.end)
     {
-        animation.currentTime -= animation.end;
+        animData.currentTime -= animation.end;
     }
 
     for (auto& channel : animation.channels)
@@ -441,9 +464,9 @@ void Model::UpdateAnimation(float deltaTime, std::vector<DirectX::XMMATRIX>& fin
         for (size_t i = 0; i < sampler.inputs.size() - 1; i++)
         {
             // Get the input keyframe values for the current time stamp
-            if ((animation.currentTime >= sampler.inputs[i]) && (animation.currentTime <= sampler.inputs[i + 1]))
+            if ((animData.currentTime >= sampler.inputs[i]) && (animData.currentTime <= sampler.inputs[i + 1]))
             {
-                float a = (animation.currentTime - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
+                float a = (animData.currentTime - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
                 if (channel.path == "translation")
                 {
                     if (sampler.interpolation == "STEP")
@@ -466,7 +489,7 @@ void Model::UpdateAnimation(float deltaTime, std::vector<DirectX::XMMATRIX>& fin
                         rot = DirectX::XMQuaternionNormalize(rot);
                         DirectX::XMStoreFloat4(&channel.node->rotation, rot);
                     }
-                 
+
                 }
                 if (channel.path == "scale")
                 {
@@ -481,7 +504,7 @@ void Model::UpdateAnimation(float deltaTime, std::vector<DirectX::XMMATRIX>& fin
     }
     for (auto& node : nodes)
     {
-        UpdateJoints(node, finalTransform);
+        UpdateJoints(node, animData.finalTransforms);
     }
 }
 
@@ -512,7 +535,7 @@ void Model::UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransf
     }
 }
 
-void Model::CalculateFinalTransform(float dt, std::vector<DirectX::XMMATRIX>& finalTransform)
+void Model::CalculateFinalTransform(float dt, AnimatorComponent& animData)
 {
     // To test bind Pose
     //for (auto& node : nodes)
@@ -520,5 +543,5 @@ void Model::CalculateFinalTransform(float dt, std::vector<DirectX::XMMATRIX>& fi
     //    UpdateJoints(node, finalTransform);
     //}
   
-    UpdateAnimation(dt, finalTransform);
+    UpdateAnimation(dt, animData);
 }

@@ -13,5 +13,6 @@ namespace ECS
         std::vector<std::string> anim_names; // Store the names of the attached animations
         DirectX::XMMATRIX bone_transform;
         bool hasAnimation = false;
+        int curAnim = 0;
     };
 }

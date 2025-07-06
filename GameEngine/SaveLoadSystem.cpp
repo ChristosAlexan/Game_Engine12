@@ -38,14 +38,23 @@ namespace ECS
 			entityJson["normalTexturePath"] = entityDesc.materialDesc.normalTexturePath;
 			entityJson["metalRoughnessTextureName"] = entityDesc.materialDesc.metalRoughnessTextureName;
 			entityJson["metalRoughnessTexturePath"] = entityDesc.materialDesc.metalRoughnessTexturePath;
-			//entityJson["baseColor"] = {
-				//{entityDesc.materialDesc.baseColor.x, entityDesc.materialDesc.baseColor.y, entityDesc.materialDesc.baseColor.z, entityDesc.materialDesc.baseColor.w}};
 			entityJson["useAlbedoMap"] = entityDesc.materialDesc.useAlbedoMap;
 			entityJson["useNormalMap"] = entityDesc.materialDesc.useNormalMap;
 			entityJson["useMetalRoughnessMap"] = entityDesc.materialDesc.useMetalRoughnessMap;
 			entityJson["roughness"] = entityDesc.materialDesc.roughness;
 			entityJson["metalness"] = entityDesc.materialDesc.metalness;
 			entityJson["tex_format"] = entityDesc.materialDesc.tex_format;
+
+			if (entityDesc.hasAnimation)
+			{
+				entityJson["AnimSize"] = entityDesc.anim_filePaths.size();
+				for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
+				{
+					entityJson["AnimFiles" + std::to_string(i)] = entityDesc.anim_filePaths[i];
+				}
+			}
+		
+			
 
 			sceneJson["entities"].push_back(entityJson);
 		}
@@ -88,15 +97,24 @@ namespace ECS
 			entityDesc.materialDesc.metalRoughnessTextureName = entityJson["metalRoughnessTextureName"];
 			entityDesc.materialDesc.metalRoughnessTexturePath = entityJson["metalRoughnessTexturePath"];
 
-			//const auto& color = entityJson["baseColor"];
-			//entityDesc.materialDesc.baseColor = { color[0], color[1], color[2], color[3] };
-
 			entityDesc.materialDesc.useAlbedoMap = entityJson["useAlbedoMap"];
 			entityDesc.materialDesc.useNormalMap = entityJson["useNormalMap"];
 			entityDesc.materialDesc.useMetalRoughnessMap = entityJson["useMetalRoughnessMap"];
 			entityDesc.materialDesc.roughness = entityJson["roughness"];
 			entityDesc.materialDesc.metalness = entityJson["metalness"];
 			entityDesc.materialDesc.tex_format = entityJson["tex_format"];
+
+			if (entityDesc.hasAnimation)
+			{
+				int animSize = entityJson["AnimSize"];
+				entityDesc.anim_filePaths.resize(animSize);
+
+				for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
+				{
+					entityDesc.anim_filePaths[i] = entityJson["AnimFiles" + std::to_string(i)];
+				}
+			}
+			
 
 			scene->GetEntityFactory()->AddEntity(scene, entityDesc);
 		}

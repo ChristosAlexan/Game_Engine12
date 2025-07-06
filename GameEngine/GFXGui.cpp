@@ -156,11 +156,11 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 {
 
 	auto scene = sceneManager->GetCurrentScene();
-	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent>();
+	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent, AnimatorComponent>();
 
 	ImGui::Begin(scene->GetName().c_str());
 
-	for (auto [entity, transform, renderComponent] : renderGroup.each())
+	for (auto [entity, transform, renderComponent, animComponent] : renderGroup.each())
 	{
 		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
 		if (ImGui::CollapsingHeader(entityLabel.c_str()))
@@ -172,6 +172,12 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 			ImGui::DragFloat3(posOffset.c_str(), &transform.position.x, 0.05f);
 			ImGui::DragFloat3(rotOffset.c_str(), &transform.rotation.x, 0.05f);
 			ImGui::DragFloat3(scaleOffset.c_str(), &transform.scale.x, 0.05f);
+
+			if(renderComponent.hasAnimation)
+			{
+				std::string animOffset = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(entity));
+				ImGui::DragInt(animOffset.c_str(), &animComponent.currentAnim, 1, 0);
+			}
 		}
 	}
 

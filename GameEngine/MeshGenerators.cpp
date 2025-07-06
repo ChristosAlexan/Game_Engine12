@@ -86,7 +86,7 @@ ECS::MeshData GenerateSkeletalMesh(entt::registry* registry, ECS::EntityDesc& en
 	auto id = registry->create();
 	Model model;
 	model.name = entityDesc.name;
-	//model.SetAnimationsPaths(entityDesc.anim_filePaths);
+	model.SetAnimFiles(entityDesc.anim_filePaths);
 	model.LoadModel(entityDesc.filePath);
 
 	registry->emplace<Model>(id, model);
