@@ -20,12 +20,12 @@ public:
 	Node* NodeFromIndex(uint32_t index);
 	DirectX::XMMATRIX GetNodeMatrixFlat(int nodeIndex, const std::vector<FlatNode>& flatNodes);
 	DirectX::XMMATRIX GetNodeMatrix(Node* node);
-	void UpdateAnimationFlat(float deltaTime, AnimatorComponent& animData); // Use the flat hierarchy to transform nodes per animation
+	void UpdateAnimationBlend(float deltaTime, AnimatorComponent& animData); // Use the flat hierarchy to transform nodes per animation
 	void UpdateAnimation(float deltaTime, AnimatorComponent& animData);
 	void UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransform);
 	void UpdateJointsFlat(Node* node, AnimatorComponent& animData); // Update joints using the flat hierarchy per animator component
 	void CalculateFinalTransform(float dt, AnimatorComponent& animData);
-	void CalculateFinalTransformFlat(float dt, AnimatorComponent& animData);
+	void CalculateFinalTransformBlend(float dt, AnimatorComponent& animData);
 
 	/*Build a flat hierarchy of all nodes per animator component for easier access of nodes. Useful when many entities manipulate the same skeletal model*/
 	void BuildFlatHierarchy(AnimatorComponent& animData);

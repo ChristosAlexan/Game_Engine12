@@ -469,7 +469,7 @@ DirectX::XMMATRIX Model::GetNodeMatrix(Node* node)
 }
 
 
-void Model::UpdateAnimationFlat(float deltaTime, AnimatorComponent& animData)
+void Model::UpdateAnimationBlend(float deltaTime, AnimatorComponent& animData)
 {
     if (animData.currentAnim > static_cast<uint32_t>(animations.size()) - 1)
     {
@@ -478,64 +478,116 @@ void Model::UpdateAnimationFlat(float deltaTime, AnimatorComponent& animData)
     }
 
     Animation& animation = animations[animData.currentAnim];
+
     animData.currentTime += deltaTime;
     if (animData.currentTime > animation.end)
     {
         animData.currentTime -= animation.end;
     }
 
-    for (auto& channel : animation.channels)
-    {
-        uint32_t channelNodeIndex = channel.node->index;
-        auto& flatNode = animData.flatNodes[channelNodeIndex];
+     for (auto& channel : animation.channels)
+     {
+         uint32_t channelNodeIndex = channel.node->index;
+         auto& flatNode = animData.flatNodes[channelNodeIndex];
 
-        AnimationSampler& sampler = animation.samplers[channel.samplerIndex];
-        for (size_t i = 0; i < sampler.inputs.size() - 1; i++)
-        {
-            // Get the input keyframe values for the current time stamp
-            if ((animData.currentTime >= sampler.inputs[i]) && (animData.currentTime <= sampler.inputs[i + 1]))
-            {
-                float a = (animData.currentTime - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
-                if (channel.path == "translation")
-                {
-                    if (sampler.interpolation == "STEP")
-                        DirectX::XMStoreFloat3(&flatNode.translation, sampler.outputsVec4[i]);
-                    else
-                        DirectX::XMStoreFloat3(&flatNode.translation, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
-                }
-                if (channel.path == "rotation")
-                {
-                    if (sampler.interpolation == "STEP")
-                        DirectX::XMStoreFloat4(&flatNode.rotation, sampler.outputsVec4[i]);
-                    else
-                    {
-                        DirectX::XMVECTOR q1;
-                        q1 = sampler.outputsVec4[i];
-                        DirectX::XMVECTOR q2;
-                        q2 = sampler.outputsVec4[i + 1];
+         AnimationSampler& sampler = animation.samplers[channel.samplerIndex];
+         for (size_t i = 0; i < sampler.inputs.size() - 1; i++)
+         {
+             // Get the input keyframe values for the current time stamp
+             if ((animData.currentTime >= sampler.inputs[i]) && (animData.currentTime <= sampler.inputs[i + 1]))
+             {
+                 float a = (animData.currentTime - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
+                 if (channel.path == "translation")
+                 {
+                     if (sampler.interpolation == "STEP")
+                         DirectX::XMStoreFloat3(&flatNode.translation, sampler.outputsVec4[i]);
+                     else
+                         DirectX::XMStoreFloat3(&flatNode.translation, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
+                 }
+                 if (channel.path == "rotation")
+                 {
+                     if (sampler.interpolation == "STEP")
+                         DirectX::XMStoreFloat4(&flatNode.rotation, sampler.outputsVec4[i]);
+                     else
+                     {
+                         DirectX::XMVECTOR q1;
+                         q1 = sampler.outputsVec4[i];
+                         DirectX::XMVECTOR q2;
+                         q2 = sampler.outputsVec4[i + 1];
 
-                        DirectX::XMVECTOR rot = DirectX::XMQuaternionSlerp(q1, q2, a);
-                        rot = DirectX::XMQuaternionNormalize(rot);
-                        DirectX::XMStoreFloat4(&flatNode.rotation, rot);
-                    }
+                         DirectX::XMVECTOR rot = DirectX::XMQuaternionSlerp(q1, q2, a);
+                         rot = DirectX::XMQuaternionNormalize(rot);
+                         DirectX::XMStoreFloat4(&flatNode.rotation, rot);
+                     }
 
-                }
-                if (channel.path == "scale")
-                {
-                    if (sampler.interpolation == "STEP")
-                        DirectX::XMStoreFloat3(&flatNode.scale, sampler.outputsVec4[i]);
-                    else
-                        DirectX::XMStoreFloat3(&flatNode.scale, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
-                }
+                 }
+                 if (channel.path == "scale")
+                 {
+                     if (sampler.interpolation == "STEP")
+                         DirectX::XMStoreFloat3(&flatNode.scale, sampler.outputsVec4[i]);
+                     else
+                         DirectX::XMStoreFloat3(&flatNode.scale, DirectX::XMVectorLerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], a));
+                 }
 
-            }
-        }
-    }
+             }
+         }
+     }
+
+     if (animData.currentAnim != animData.previousAnim)
+     {
+         if (!animData.isBlending)
+         {
+             animData.blendTime = 0.0f;
+             animData.isBlending = true;
+         }
+     }
+     // Blend previous and current animation
+     if (animData.isBlending)
+     {
+         animData.blendTime += deltaTime;
+         float t = animData.blendTime / animData.blendDuration;
+         float smoothT = (1.0f - cosf(t * DirectX::XM_PI)) * 0.5f; // smoothstep for better blending between animations
+         t = std::clamp(t, 0.0f, 1.0f);
+
+         Animation& animationPrev = animations[animData.previousAnim];
+         for (int i = 0; i < animData.flatNodes.size(); ++i)
+         {
+             auto& curNode = animData.flatNodes[i];
+             auto& prevNode = animData.flatNodesPrev[i];
+
+             DirectX::XMVECTOR currentNodePos = DirectX::XMLoadFloat3(&curNode.translation);
+             DirectX::XMVECTOR prevNodePos = DirectX::XMLoadFloat3(&prevNode.translation);
+             DirectX::XMStoreFloat3(&curNode.translation, DirectX::XMVectorLerp(prevNodePos, currentNodePos, smoothT));
+
+             DirectX::XMVECTOR currentNodeRot = DirectX::XMLoadFloat4(&curNode.rotation);
+             DirectX::XMVECTOR prevNodeRot = DirectX::XMLoadFloat4(&prevNode.rotation);
+             DirectX::XMVECTOR rot = DirectX::XMQuaternionSlerp(prevNodeRot, currentNodeRot, smoothT);
+             rot = DirectX::XMQuaternionNormalize(rot);
+             DirectX::XMStoreFloat4(&curNode.rotation, rot);
+
+             DirectX::XMVECTOR currentNodeScale = DirectX::XMLoadFloat3(&curNode.scale);
+             DirectX::XMVECTOR prevNodeScale = DirectX::XMLoadFloat3(&prevNode.scale);
+             DirectX::XMStoreFloat3(&curNode.scale, DirectX::XMVectorLerp(prevNodeScale, currentNodeScale, smoothT));
+
+
+         }
+
+         if (t >= 1.0f)
+         {
+             animData.isBlending = false;
+             animData.previousAnim = animData.currentAnim;
+             animData.flatNodesPrev = animData.flatNodes;
+             animData.blendTime = 0.0f;
+         }
+
+     }
+    
     for (auto& node : nodes)
     {
         UpdateJointsFlat(node, animData);
     }
 }
+
 void Model::UpdateAnimation(float deltaTime, AnimatorComponent& animData)
 {
     if (animData.currentAnim > static_cast<uint32_t>(animations.size()) - 1)
@@ -597,7 +649,7 @@ void Model::UpdateAnimation(float deltaTime, AnimatorComponent& animData)
     }
     for (auto& node : nodes)
     {
-        UpdateJoints(node, animData.finalTransforms);
+        UpdateJointsFlat(node, animData);
     }
 }
 
@@ -659,9 +711,9 @@ void Model::CalculateFinalTransform(float dt, AnimatorComponent& animData)
     UpdateAnimation(dt, animData);
 }
 
-void Model::CalculateFinalTransformFlat(float dt, AnimatorComponent& animData)
+void Model::CalculateFinalTransformBlend(float dt, AnimatorComponent& animData)
 {
-    UpdateAnimationFlat(dt, animData);
+    UpdateAnimationBlend(dt, animData);
 }
 
 void Model::BuildFlatHierarchy(AnimatorComponent& animData)
@@ -674,6 +726,8 @@ void Model::BuildFlatHierarchy(AnimatorComponent& animData)
     {
         FlattenHierarchyRecursive(root, -1, animData); // parent index = -1 for root
     }
+
+    animData.flatNodesPrev = animData.flatNodes;
 }
 
 void Model::FlattenHierarchyRecursive(Node* node, int parentIndex, AnimatorComponent& animData)

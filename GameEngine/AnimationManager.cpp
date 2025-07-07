@@ -17,7 +17,7 @@ void ECS::AnimationManager::Update(float dt, Scene* scene)
 			if (renderComponent.name == model.name && renderComponent.hasAnimation)
 			{
 				model.BuildFlatHierarchy(AnimComponent);
-				model.CalculateFinalTransformFlat(dt, AnimComponent);
+				model.CalculateFinalTransformBlend(dt, AnimComponent);
 			}	
 		}
 	}

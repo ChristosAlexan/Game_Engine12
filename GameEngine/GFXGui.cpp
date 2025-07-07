@@ -139,8 +139,11 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 			if (renderComponent.hasAnimation)
 			{
 
-				std::string animOffset = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-				ImGui::DragInt(animOffset.c_str(), &animComponent.currentAnim, 1, 0);
+				std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+				ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
+
+				label = "blendDuration##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+				ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
 			}
 		}
 		
@@ -193,8 +196,11 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 
 			if(renderComponent.hasAnimation)
 			{
-				std::string animOffset = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(entity));
-				ImGui::DragInt(animOffset.c_str(), &animComponent.currentAnim, 1, 0);
+				std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(entity));
+				ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
+
+				label = "blendDuration##" + std::to_string(static_cast<uint32_t>(entity));
+				ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
 			}
 		}
 	}

@@ -86,13 +86,13 @@ void DX12::CreateDeviceAndFactory()
     UINT dxgiFactoryFlags = 0;
   
 
-//#if defined(_DEBUG)
+#if defined(_DEBUG)
     Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
     if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
         debugController->EnableDebugLayer();
         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
     }
-//#endif
+#endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));
 

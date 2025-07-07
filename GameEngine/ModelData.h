@@ -80,7 +80,12 @@ struct FlatNode
 struct AnimatorComponent
 {
 	int currentAnim = 0;
+	int previousAnim = 0;
 	float currentTime = 0.0f;
 	std::vector<FlatNode> flatNodes;
+	std::vector<FlatNode> flatNodesPrev;
 	std::vector<DirectX::XMMATRIX> finalTransforms;
+	bool isBlending = false;
+	float blendDuration = 0.25f;
+	float blendTime = 0.0f;
 };
