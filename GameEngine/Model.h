@@ -39,9 +39,8 @@ private:
 
 public:
 	std::string name;
-	std::vector<Node*> nodes;
+	
 private:
-	//tinygltf::Model model;
 	std::vector<tinygltf::Model> models;
 	tinygltf::TinyGLTF loader;
 	std::string err;
@@ -59,6 +58,7 @@ private:
 	std::vector<Animation> animations;
 
 	std::vector<std::string> m_animFiles;
+	std::vector<Node*> nodes;
 	uint32_t totalNodeCount = 0;
 };
 

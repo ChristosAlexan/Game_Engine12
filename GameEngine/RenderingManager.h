@@ -1,4 +1,6 @@
 #pragma once
+#include "Camera.h"
+#include "DynamicUploadBuffer.h"
 #include "RenderingECS.h"
 #include "ModelData.h"
 #include "TransformECS.h"
@@ -6,13 +8,13 @@
 namespace ECS
 {
 	class Scene;
-	class AnimationManager
+	class RenderingManager
 	{
 	public:
-		AnimationManager();
-		void Update(float dt, Scene* scene,
+		RenderingManager();
+		void Render(Scene* scene, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList,
 			TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent);
 	};
-
 }
+
 

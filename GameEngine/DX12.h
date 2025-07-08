@@ -45,6 +45,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
 	DXCShaderCompiler shaderCompiler;
+	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> swapChain;
@@ -68,7 +69,7 @@ private:
 	HANDLE fenceEvent = nullptr;
 	UINT rtvDescriptorSize;
 
-	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
+
 	AppTimer timer;
 };
 

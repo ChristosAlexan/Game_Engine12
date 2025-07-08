@@ -271,6 +271,7 @@
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="RectShape12.cpp" />
+    <ClCompile Include="RenderingManager.cpp" />
     <ClCompile Include="SaveLoadSystem.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -329,6 +330,7 @@
     <ClInclude Include="ModelData.h" />
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
+    <ClInclude Include="RenderingManager.h" />
     <ClInclude Include="SaveLoadSystem.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />

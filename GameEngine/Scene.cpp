@@ -6,13 +6,14 @@
 
 namespace ECS
 {
-	Scene::Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr,
+	Scene::Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr, 
+		std::shared_ptr<RenderingManager> renderingManager,
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
-		:m_sceneName(sceneName), m_assetManager(std::move(assetMgr)),
-		m_materialManager(std::move(materialMgr)), m_device(device), m_cmdList(cmdList)
+		:m_sceneName(sceneName), m_assetManager(assetMgr),
+		m_materialManager(materialMgr), m_renderingManager(renderingManager)
 	{
 		m_registry = entt::registry{};
-		m_entityFactory = std::make_unique<EntityFactory>(m_registry, m_device, m_cmdList);
+		m_entityFactory = std::make_unique<EntityFactory>(m_registry, device, cmdList);
 	}
 
 	entt::entity Scene::CreateEntity()
@@ -44,10 +45,14 @@ namespace ECS
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
-
-	void Scene::Update(float dt)
+	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList)
 	{
-		GetAnimationManager()->Update(dt, this);
+		auto group = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
+		for (auto [entity, transformComponent, renderComponent, animatorComponent] : group.each())
+		{
+			GetAnimationManager()->Update(dt, this, transformComponent, renderComponent, animatorComponent);
+			GetRenderingManager()->Render(this, camera, dynamicCB, cmdList, transformComponent, renderComponent, animatorComponent);
+		}
 	}	
 
 	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp)
@@ -123,56 +128,18 @@ namespace ECS
 		return m_animationManager.get();
 	}
 
+	RenderingManager* Scene::GetRenderingManager() const
+	{
+		return m_renderingManager.get();
+	}
+
 	EntityFactory* Scene::GetEntityFactory() const
 	{
 		return m_entityFactory.get();
 	}
-
-	void Scene::Render(Camera& camera, DynamicUploadBuffer* dynamicCB)
+	SaveLoadSystem& Scene::GetSaveLoadSystems()
 	{
-		auto animView = GetRegistry().view<Model>();
-		auto renderGroup = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
-
-		for (auto [entity, transform, renderComponent, animComponent] : renderGroup.each())
-		{
-			DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transform.position);
-			DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transform.rotation);
-			DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transform.scale);
-
-			DirectX::XMMATRIX scale_mat = DirectX::XMMatrixScalingFromVector(scale_vec);
-			DirectX::XMMATRIX rot_mat = DirectX::XMMatrixRotationQuaternion(rot_vec);
-			DirectX::XMMATRIX pos_mat = DirectX::XMMatrixTranslationFromVector(pos_vec);
-
-			transform.worldMatrix = scale_mat * rot_mat * pos_mat;
-
-			CB_VS_SimpleShader vsCB = {};
-			vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
-			vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-			vsCB.worldMatrix = DirectX::XMMatrixTranspose(transform.worldMatrix);
-
-			CB_VS_AnimationShader skinningCB = {};
-			if (renderComponent.hasAnimation && !animComponent.finalTransforms.empty())
-			{
-				memcpy(skinningCB.skinningMatrix, animComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
-
-			}
-			skinningCB.HasAnim = renderComponent.hasAnimation;
-
-			CB_PS_SimpleShader psCB = {};
-			psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
-			psCB.color = DirectX::XMFLOAT4(1.0f,0.0f,0.0f,1.0f);
-
-
-			if(dynamicCB)
-			{
-				m_cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
-				m_cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
-			    m_cmdList->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
-			}
-
-			m_materialManager->Bindtextures(renderComponent.material.get(), m_cmdList, 2);
-			renderComponent.mesh->Draw(m_cmdList);
-		}
+		return m_saveLoadSystem;
 	}
 }
 

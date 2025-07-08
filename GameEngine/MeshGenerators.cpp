@@ -1,4 +1,5 @@
 #include "MeshGenerators.h"
+#include "AssetManager.h"
 
 ECS::MeshData GenerateCubeMesh()
 {
@@ -73,23 +74,20 @@ ECS::MeshData GenerateQuadMesh()
     return mesh;
 }
 
-ECS::MeshData GenerateStaticMesh(ECS::EntityDesc& entityDesc)
+ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc)
 {
-	Model model;
+	model.name = entityDesc.name;
 	model.LoadModel(entityDesc.filePath);
 
 	return model.GetMeshData();
 }
 
-ECS::MeshData GenerateSkeletalMesh(entt::registry* registry, ECS::EntityDesc& entityDesc)
+ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc)
 {
-	auto id = registry->create();
-	Model model;
 	model.name = entityDesc.name;
 	model.SetAnimFiles(entityDesc.anim_filePaths);
 	model.LoadModel(entityDesc.filePath);
 
-	registry->emplace<Model>(id, model);
 	return model.GetMeshData();
 }
 

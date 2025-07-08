@@ -568,8 +568,6 @@ void Model::UpdateAnimationBlend(float deltaTime, AnimatorComponent& animData)
              DirectX::XMVECTOR currentNodeScale = DirectX::XMLoadFloat3(&curNode.scale);
              DirectX::XMVECTOR prevNodeScale = DirectX::XMLoadFloat3(&prevNode.scale);
              DirectX::XMStoreFloat3(&curNode.scale, DirectX::XMVectorLerp(prevNodeScale, currentNodeScale, smoothT));
-
-
          }
 
          if (t >= 1.0f)

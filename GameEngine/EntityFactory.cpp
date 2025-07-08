@@ -24,7 +24,8 @@ namespace ECS
 		renderComponent.material = material;
 		renderComponent.name = entityDesc.name;
 		renderComponent.hasAnimation = entityDesc.hasAnimation;
-		
+		renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);

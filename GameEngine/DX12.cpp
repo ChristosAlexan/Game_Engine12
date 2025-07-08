@@ -347,7 +347,7 @@ void DX12::CreateDepthStencilBuffer(int& width, int& height)
 
 void DX12::InitializeConstantBuffers()
 {
-    dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 4 MB
+    dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 8 MB
 
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
@@ -413,15 +413,8 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
         nullptr
     );
 
-
     ID3D12DescriptorHeap* heaps[] = { sharedHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
-    
-    sceneManager->Render(dynamicCB.get(), camera, dt);
-
-    commandList->SetDescriptorHeaps(1, heaps);
-
-    gui.BeginRender();
 }
 
 void DX12::EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt)

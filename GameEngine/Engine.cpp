@@ -24,6 +24,8 @@ bool Engine::Initialize(std::string window_title, std::string window_class, int 
 		ErrorLogger::Log("Failed to initialize ImGui!");
 		return false;
 	}
+
+	// Load scenes from .json files
 	CreateScenes(camera, width, height);
 
 	return true;
@@ -44,8 +46,12 @@ void Engine::Update(int width, int height)
 		SDL_DestroyWindow(game_window.GetSDLWindow());
 		bStopEngine = true;
 	}
-	m_sceneManager->Update(dt);
+
+	// Start rendering of a frame
 	dx12.StartRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+	// Update current scene(animations, rendering etc.)
+	m_sceneManager->Update(dt, camera, dx12.dynamicCB.get(), dx12.GetCmdList());
+	m_gui.BeginRender();
 
 	rawDeltaX = 0;
 	rawDeltaY = 0;
@@ -141,7 +147,7 @@ void Engine::Update(int width, int height)
 	if (heldKeys.contains(SDLK_F5))
 	{
 		std::string savePath = ".//Save files/" + m_sceneManager->GetCurrentScene()->GetName();
-		m_sceneManager->GetCurrentScene()->m_saveLoadSystem.SaveScene(m_sceneManager->GetCurrentScene(), savePath);
+		m_sceneManager->GetCurrentScene()->GetSaveLoadSystems().SaveScene(m_sceneManager->GetCurrentScene(), savePath);
 	}
 
 	if (isRightMouseDown)
@@ -151,6 +157,7 @@ void Engine::Update(int width, int height)
 	m_gui.UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_gui.UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
+	// Finish rendering
 	dx12.EndRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
 }
 
@@ -158,7 +165,7 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
 	dx12.ResetCommandAllocator();
 	m_sceneManager = std::make_unique<ECS::SceneManager>(dx12.GetDevice(), dx12.GetCmdList(), g_descAllocator.get());
-	m_sceneManager->LoadScene("Scene1");
+	m_sceneManager->LoadScene("Scene1", dx12.GetCmdList());
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();

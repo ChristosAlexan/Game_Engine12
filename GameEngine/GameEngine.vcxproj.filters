@@ -237,6 +237,9 @@
     <ClCompile Include="SaveLoadSystem.cpp">
       <Filter>Saves</Filter>
     </ClCompile>
+    <ClCompile Include="RenderingManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -412,6 +415,9 @@
     </ClInclude>
     <ClInclude Include="SaveLoadSystem.h">
       <Filter>Saves</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingManager.h">
+      <Filter>ECS\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

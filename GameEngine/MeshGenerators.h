@@ -6,5 +6,5 @@
 
 ECS::MeshData GenerateCubeMesh();
 ECS::MeshData GenerateQuadMesh();
-ECS::MeshData GenerateStaticMesh(ECS::EntityDesc& entityDesc);
-ECS::MeshData GenerateSkeletalMesh(entt::registry* registry, ECS::EntityDesc& entityDesc);
+ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc);
+ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc);

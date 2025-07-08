@@ -5,20 +5,12 @@ ECS::AnimationManager::AnimationManager()
 {
 }
 
-void ECS::AnimationManager::Update(float dt, Scene* scene)
+void ECS::AnimationManager::Update(float dt, Scene* scene,
+	TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent)
 {
-	auto animView = scene->GetRegistry().view<Model>();
-	auto transformRenderGroup = scene->GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
-
-	for (auto [entity, model] : animView.each())
+	if (renderComponent.hasAnimation)
 	{
-		for (auto [entity2, transform, renderComponent, AnimComponent] : transformRenderGroup.each())
-		{
-			if (renderComponent.name == model.name && renderComponent.hasAnimation)
-			{
-				model.BuildFlatHierarchy(AnimComponent);
-				model.CalculateFinalTransformBlend(dt, AnimComponent);
-			}	
-		}
-	}
+		renderComponent.model->BuildFlatHierarchy(animatorComponent);
+		renderComponent.model->CalculateFinalTransformBlend(dt, animatorComponent);
+	}	
 }
