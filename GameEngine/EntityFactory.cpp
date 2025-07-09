@@ -1,4 +1,5 @@
 #include "EntityFactory.h"
+#include "AssetManager.h"
 #include "Scene.h"
 
 namespace ECS

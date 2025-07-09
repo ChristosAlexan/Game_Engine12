@@ -5,8 +5,12 @@ struct PSInput
     float2 uv : TEXCOORD;
 };
 
+Texture2D renderTexture : register(t0);
+SamplerState gSampler : register(s0);
 
 float4 Main(PSInput input) : SV_TARGET
 {
-	return float4(0.4f, 0.4f, 0.4f, 1.0f);
+    float3 color = renderTexture.Sample(gSampler, input.uv).rgb;
+    
+    return float4(color, 1.0f);
 }

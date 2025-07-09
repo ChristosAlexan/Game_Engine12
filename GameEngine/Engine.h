@@ -1,12 +1,15 @@
 #pragma once
 
-#include "DX12.h"
 #include "AppTimer.h"
 #include <future>
-#include <thread>
 #include <algorithm>
 #include "Camera.h"
 #include "GameWindow.h"
+#include <unordered_set>
+#include "SceneManager.h"
+
+class DX12;
+class GFXGui;
 
 class Engine
 {
@@ -18,6 +21,8 @@ public:
 	void Update(int width, int height);
 
 private:
+	void InitializeSceneManager();
+	void InitializeDirectX12();
 	void CreateScenes(Camera& camera, int& width, int& height);
 private:
 	AppTimer timer;
@@ -25,11 +30,8 @@ private:
 	int width, height;
 	float dt = 0.0f;
 	float fps = 0.0f;
-	DX12 dx12;
 	std::unique_ptr<ECS::SceneManager> m_sceneManager;
-	GFXGui m_gui;
 	GameWindow game_window;
-
 
 	std::unordered_set<SDL_Keycode> heldKeys;
 	bool isMiddleMouseDown = false;

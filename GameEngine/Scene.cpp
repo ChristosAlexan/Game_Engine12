@@ -1,4 +1,9 @@
 #include "Scene.h"
+#include "EntityFactory.h"
+#include "AnimationManager.h"
+#include "MaterialManager.h"
+#include "AssetManager.h"
+#include "RenderingManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 

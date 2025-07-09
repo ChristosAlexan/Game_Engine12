@@ -8,14 +8,15 @@
 #include "ConstantBufferTypes.h"
 #include "DynamicUploadBuffer.h"
 #include "AppTimer.h"
-#include "SceneManager.h"
 #include "GFXGui.h"
+#include "RenderTargetTexture.h"
+#include "SceneManager.h"
 
 class DX12
 {
 public:
 	DX12();
-	void Initialize(HWND hwnd, Camera& camera, int& width, int& height);
+	void Initialize(HWND hwnd, int& width, int& height);
 	void CreateDeviceAndFactory();
 	void CreateCommandObjects();
 	void CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height);
@@ -27,7 +28,7 @@ public:
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeConstantBuffers();
-	void RenderFullScreenQuad();
+	void TransitionBackBuffer();
 	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
@@ -71,5 +72,7 @@ private:
 
 
 	AppTimer timer;
+
+	RenderTargetTexture m_renderTexture;
 };
 

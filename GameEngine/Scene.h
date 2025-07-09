@@ -1,8 +1,6 @@
 #pragma once
-#include "MaterialManager.h"
-#include "AssetManager.h"
-#include "EntityFactory.h"
-#include "RenderingManager.h"
+
+//#include "RenderingManager.h"
 #include "ECSHeader.h"
 //#include "TransformECS.h"
 //#include "RenderingECS.h"
@@ -10,12 +8,18 @@
 #include "DynamicUploadBuffer.h"
 #include "ConstantBufferTypes.h"
 #include "Camera.h"
-#include "AnimationManager.h"
 #include <entt/entt.hpp>
 #include "SaveLoadSystem.h"
+#include "RenderingECS.h"
 
 namespace ECS
 {
+	class EntityFactory;
+	class AnimationManager;
+	class AssetManager;
+	class MaterialManager;
+	class RenderingManager;
+
 	class Scene
 	{
 	public:

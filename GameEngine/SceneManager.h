@@ -2,16 +2,25 @@
 #include "DX12Includes.h"
 #include "Scene.h"
 
+class GameWindow;
 namespace ECS
 {
+	class AssetManager;
+	class MaterialManager;
+	class RenderingManager;
+
 	class SceneManager
 	{
 	public:
-		SceneManager(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
-		void InitDescAllocator(ID3D12DescriptorHeap* heap);
-		void LoadScene(const std::string& sceneName, ID3D12GraphicsCommandList* cmdList);
+		SceneManager();
+		void InitializeManagers(GameWindow& game_window, int& width, int& height, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+		void AllocateRenderingManager();
+		void LoadScene(const std::string& sceneName, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+		void InitializeRenderPasses(ID3D12Device* device, int& width, int& height);
 		void SetCurrentScene(std::string sceneName);
 		Scene* GetCurrentScene() const;
+		RenderingManager* GetRenderingManager();
+
 		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList);
 		
 	private:

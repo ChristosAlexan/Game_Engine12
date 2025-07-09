@@ -6,6 +6,7 @@
 
 namespace ECS
 {
+	class AssetManager;
 	class Scene;
 
 	class EntityFactory

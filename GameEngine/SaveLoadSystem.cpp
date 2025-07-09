@@ -1,5 +1,7 @@
 #include "SaveLoadSystem.h"
+#include "EntityFactory.h"
 #include "Scene.h"
+#include "EntityECS.h"
 
 namespace ECS
 {

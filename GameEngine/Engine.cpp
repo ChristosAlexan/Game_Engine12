@@ -1,4 +1,7 @@
 #include "Engine.h"
+//#include "DX12.h"
+#include "GFXGui.h"
+#include "RenderingManager.h"
 #include "ErrorLogger.h"
 
 using namespace DirectX;
@@ -18,13 +21,9 @@ bool Engine::Initialize(std::string window_title, std::string window_class, int 
 	if (!game_window.Initialize(width, height))
 		return false;
 
-	dx12.Initialize(game_window.GetWindow(), camera, width, height);
-	if (!m_gui.Initialize(game_window.GetSDLWindow(), dx12.GetDevice(), dx12.GetCommandQueue(), dx12.GetDescriptorHeap()))
-	{
-		ErrorLogger::Log("Failed to initialize ImGui!");
-		return false;
-	}
 
+	InitializeSceneManager();
+	InitializeDirectX12();
 	// Load scenes from .json files
 	CreateScenes(camera, width, height);
 
@@ -48,10 +47,10 @@ void Engine::Update(int width, int height)
 	}
 
 	// Start rendering of a frame
-	dx12.StartRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(dt, camera, dx12.dynamicCB.get(), dx12.GetCmdList());
-	m_gui.BeginRender();
+	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
+	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
 	rawDeltaY = 0;
@@ -152,24 +151,34 @@ void Engine::Update(int width, int height)
 
 	if (isRightMouseDown)
 	{
-		m_gui.SelectEntity(m_sceneManager.get(), width, height, camera);
+		m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntity(m_sceneManager.get(), width, height, camera);
 	}
-	m_gui.UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
-	m_gui.UpdateAllEntities(m_sceneManager.get(), width, height, camera);
+	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
+	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
 	// Finish rendering
-	dx12.EndRenderFrame(m_sceneManager.get(), m_gui, camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 }
 
+void Engine::InitializeSceneManager()
+{
+	m_sceneManager = std::make_unique<ECS::SceneManager>();
+}
+void Engine::InitializeDirectX12()
+{
+	// Initialize rendering manager here as other managers depend on it
+	m_sceneManager->AllocateRenderingManager();
+	m_sceneManager->GetRenderingManager()->Initialize(game_window, width, height);
+}
 void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
-	dx12.ResetCommandAllocator();
-	m_sceneManager = std::make_unique<ECS::SceneManager>(dx12.GetDevice(), dx12.GetCmdList(), g_descAllocator.get());
-	m_sceneManager->LoadScene("Scene1", dx12.GetCmdList());
+	m_sceneManager->GetRenderingManager()->GetDX12().ResetCommandAllocator();
+	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), g_descAllocator.get());
+	m_sceneManager->LoadScene("Scene1", m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
-	dx12.SubmitCommand();
+	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
 
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);

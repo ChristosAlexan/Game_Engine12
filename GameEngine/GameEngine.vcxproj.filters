@@ -240,6 +240,12 @@
     <ClCompile Include="RenderingManager.cpp">
       <Filter>ECS\Source</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTargetTexture.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -418,6 +424,12 @@
     </ClInclude>
     <ClInclude Include="RenderingManager.h">
       <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetTexture.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>GFX\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

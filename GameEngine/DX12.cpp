@@ -66,7 +66,7 @@ ID3D12DescriptorHeap* DX12::GetDescriptorHeap() const
     return rtvHeap.Get();
 }
 
-void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
+void DX12::Initialize(HWND hwnd, int& width, int& height)
 {
     CreateDeviceAndFactory();
     CreateCommandObjects();
@@ -78,6 +78,8 @@ void DX12::Initialize(HWND hwnd, Camera& camera, int& width, int& height)
     InitializeConstantBuffers();
     InitializeShaders();
     InitDescAllocator(sharedHeap.Get());
+
+    m_renderTexture.Initialize(device.Get(), width, height);
 }
 
 void DX12::CreateDeviceAndFactory()
@@ -232,7 +234,7 @@ void DX12::CreateDescriptorHeaps()
     // --- Create SRV Descriptor Heap ---
     D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
     heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    heapDesc.NumDescriptors = 2048;
+    heapDesc.NumDescriptors = 256;
     heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&sharedHeap));
     COM_ERROR_IF_FAILED(hr, "Failed to create srv descriptor heap");
@@ -365,12 +367,15 @@ void DX12::InitializeConstantBuffers()
     CreateRootSignature(rootSigDesc);
 }
 
-void DX12::RenderFullScreenQuad()
+// Transition back buffer to render target
+void DX12::TransitionBackBuffer()
 {
-    commandList->SetPipelineState(pipelineState_2D.Get());
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    commandList->IASetVertexBuffers(0, 0, nullptr);
-    commandList->DrawInstanced(3, 1, 0, 0); // 1 triangle
+    m_barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+        renderTargets[frameIndex].Get(),
+        D3D12_RESOURCE_STATE_PRESENT,
+        D3D12_RESOURCE_STATE_RENDER_TARGET
+    );
+    commandList->ResourceBarrier(1, &m_barrier);
 }
 
 void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
@@ -379,6 +384,7 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
     commandAllocator->Reset();
     commandList->Reset(commandAllocator.Get(), nullptr);
     dynamicCB->Reset();
+    m_renderTexture.Reset(commandList.Get());
 
     commandList->SetGraphicsRootSignature(rootSignature.Get());
     commandList->SetPipelineState(pipelineState.Get());
@@ -387,14 +393,8 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
     D3D12_RECT scissorRect = { 0, 0, width, height };
     commandList->RSSetViewports(1, &viewport);
     commandList->RSSetScissorRects(1, &scissorRect);
-
-    // Transition back buffer to render target
-    m_barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        renderTargets[frameIndex].Get(),
-        D3D12_RESOURCE_STATE_PRESENT,
-        D3D12_RESOURCE_STATE_RENDER_TARGET
-    );
-    commandList->ResourceBarrier(1, &m_barrier);
+ 
+    TransitionBackBuffer();
 
     // Set render target
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
@@ -413,22 +413,21 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
         nullptr
     );
 
+
     ID3D12DescriptorHeap* heaps[] = { sharedHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
+
+    m_renderTexture.SetRenderTarget(commandList.Get(), dsvHandle);
 }
 
 void DX12::EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt)
 {
-    //RenderFullScreenQuad();
+    m_renderTexture.RenderFullScreenQuad(commandList.Get(), rtvHeap.Get(), dsvHeap.Get(), frameIndex, rtvDescriptorSize, pipelineState_2D.Get());
+  
     gui.EndRender(commandList.Get());
 
-    // Transition back buffer to present
-    m_barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        renderTargets[frameIndex].Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET,
-        D3D12_RESOURCE_STATE_PRESENT
-    );
-    commandList->ResourceBarrier(1, &m_barrier);
+
+    TransitionBackBuffer();
     SubmitCommand();
 
     // Present the frame

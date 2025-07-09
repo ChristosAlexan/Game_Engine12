@@ -252,6 +252,7 @@
     <ClCompile Include="EntityFactory.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
     <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GFXGui.cpp" />
     <ClCompile Include="GraphEditor.cpp" />
     <ClCompile Include="ImCurveEdit.cpp" />
@@ -272,6 +273,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="RectShape12.cpp" />
     <ClCompile Include="RenderingManager.cpp" />
+    <ClCompile Include="RenderTargetTexture.cpp" />
     <ClCompile Include="SaveLoadSystem.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -303,6 +305,7 @@
     <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="ErrorLogger.h" />
     <ClInclude Include="Frustum.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GFXGui.h" />
     <ClInclude Include="GraphEditor.h" />
     <ClInclude Include="imconfig.h" />
@@ -331,6 +334,7 @@
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
     <ClInclude Include="RenderingManager.h" />
+    <ClInclude Include="RenderTargetTexture.h" />
     <ClInclude Include="SaveLoadSystem.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
