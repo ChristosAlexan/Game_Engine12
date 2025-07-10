@@ -2,6 +2,8 @@
   "name": "gameEngine12",
   "version": "0.1.0",
   "dependencies": [
+    "d3dx12:x64-windows",
+	"directxtex:x64-windows",
     "draco",
     "jhasse-poly2tri",
     "kubazip",
