@@ -197,7 +197,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <AdditionalIncludeDirectories>..\includes;..\Includes\PhysX</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\includes;..\Includes\PhysX;..\vcpkg_installed\x64-windows\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -205,7 +205,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\Libraries</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Libraries;..\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>6.7</ShaderModel>

@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "dependencies": [
+    "draco",
+    "jhasse-poly2tri",
+    "kubazip",
+    "minizip",
+    "nlohmann-json",
+    "polyclipping",
+    "pugixml",
+    "sdl3",
+    "stb",
+    "utfcpp",
+    "zlib",
+	"tinygltf"
+  ]
+}
