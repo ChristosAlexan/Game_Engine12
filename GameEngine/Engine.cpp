@@ -48,8 +48,12 @@ void Engine::Update(int width, int height)
 
 	// Start rendering of a frame
 	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+	// Reset all render targets before rendering
+	m_sceneManager->GetRenderingManager()->ResetRenderTargets();
+	// Render the scene to the geometry pass
+	m_sceneManager->GetRenderingManager()->SetGbufferRenderTarget();
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
+	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
@@ -156,7 +160,8 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
-	// Finish rendering
+	// Render the scene to a fullscreen quad adn finish rendering
+	m_sceneManager->GetRenderingManager()->RenderGbufferFullscreen();
 	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 }
 
@@ -172,8 +177,8 @@ void Engine::InitializeDirectX12()
 }
 void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
-	m_sceneManager->GetRenderingManager()->GetDX12().ResetCommandAllocator();
-	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), g_descAllocator.get());
+	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), 
+		m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
 	m_sceneManager->LoadScene("Scene1", m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();

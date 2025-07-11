@@ -296,7 +296,6 @@
     <ClInclude Include="DescriptorAllocator.h" />
     <ClInclude Include="DX12.h" />
     <ClInclude Include="DX12Includes.h" />
-    <ClInclude Include="DX12_GLOBALS.h" />
     <ClInclude Include="DXCShaderCompiler.h" />
     <ClInclude Include="DynamicUploadBuffer.h" />
     <ClInclude Include="ECSHeader.h" />
@@ -347,6 +346,15 @@
     <ClInclude Include="VertexBuffer12.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="GBufferPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="PixelShader12.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Pixel</ShaderType>

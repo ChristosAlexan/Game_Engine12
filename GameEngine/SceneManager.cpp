@@ -27,11 +27,6 @@ namespace ECS
 		m_scenes.emplace(sceneName, std::move(scene));
 	}
 
-	void SceneManager::InitializeRenderPasses(ID3D12Device* device, int& width, int& height)
-	{
-		m_renderingManager->InitializeRenderTargets(device, width, height);
-	}
-
 	void SceneManager::SetCurrentScene(std::string sceneName)
 	{
 		auto it = m_scenes.find(sceneName);
@@ -57,8 +52,8 @@ namespace ECS
 		return m_renderingManager.get();
 	}
 
-	void SceneManager::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList)
+	void SceneManager::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
-		m_currentScene->Update(dt, camera, dynamicCB, cmdList);
+		m_currentScene->Update(dt, camera, dynamicCB);
 	}
 }

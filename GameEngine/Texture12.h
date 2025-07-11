@@ -15,15 +15,12 @@ public:
 
 	Texture12();
 	void LoadFromFileWIC(const std::string& filename, 
-		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 	void LoadFromFileDDS(const std::string& filename,
-		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
+		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 
 	
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
-
-	void BindTexture(UINT index, ID3D12GraphicsCommandList* cmdList);
-
 public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_cpuHandle{};

@@ -244,7 +244,7 @@
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GBuffer.cpp">
-      <Filter>GFX\Source Files</Filter>
+      <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,9 +368,6 @@
     <ClInclude Include="DescriptorAllocator.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DX12_GLOBALS.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MaterialManager.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
@@ -429,7 +426,7 @@
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GBuffer.h">
-      <Filter>GFX\Header Files</Filter>
+      <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -443,6 +440,9 @@
       <Filter>Shaders12\Vertex Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PixelShader_2D.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GBufferPS.hlsl">
       <Filter>Shaders12\Pixel Shaders</Filter>
     </FxCompile>
   </ItemGroup>

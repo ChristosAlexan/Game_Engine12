@@ -1,6 +1,5 @@
 #include "GFXGui.h"
 #include "ErrorLogger.h"
-#include "DX12_GLOBALS.h"
 #include "MathHelpers.h"
 
 GFXGui::GFXGui()
@@ -9,7 +8,7 @@ GFXGui::GFXGui()
 	m_hitT = FLT_MAX;
 }
 
-bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap)
+bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap, DescriptorAllocator* descAllocator)
 {
 	bool result;
 	//Setup ImGui
@@ -35,8 +34,8 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	init_info.NumFramesInFlight = 2;
 	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	init_info.SrvDescriptorHeap = descriptorHeap;
+	static auto handle = descAllocator->Allocate();
 	init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu) {
-		auto handle = g_descAllocator->Allocate();
 		*out_cpu = handle.cpuHandle;
 		*out_gpu = handle.gpuHandle;
 		};

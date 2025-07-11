@@ -14,18 +14,20 @@ namespace ECS
 	{
 	
 		m_dx12.Initialize(game_window.GetWindow(), width, height);
-		if (!m_gui.Initialize(game_window.GetSDLWindow(), m_dx12.GetDevice(), m_dx12.GetCommandQueue(), m_dx12.GetDescriptorHeap()))
+		if (!m_gui.Initialize(game_window.GetSDLWindow(), m_dx12.GetDevice(), m_dx12.GetCommandQueue(), m_dx12.GetRtvHeap(), m_dx12.GetDescriptorAllocator()))
 		{
 			ErrorLogger::Log("Failed to initialize ImGui!");
 			return false;
 		}
+		
+		InitializeRenderTargets(width, height);
 
 		return true;
 	}
 
-	void RenderingManager::InitializeRenderTargets(ID3D12Device* device, int& width, int& height)
+	void RenderingManager::InitializeRenderTargets(int& width, int& height)
 	{
-		m_gBufferTexture.Initialize(device, width, height);
+		m_gBuffer.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height);
 	}
 
 	 DX12& RenderingManager::GetDX12()
@@ -38,28 +40,33 @@ namespace ECS
 		return m_gui;
 	}
 
-	void RenderingManager::ResetRenderTargets(ID3D12GraphicsCommandList* cmdList)
+	GBuffer& RenderingManager::GetGbuffer()
 	{
-		m_gBufferTexture.Reset(cmdList);
+		return m_gBuffer;
 	}
 
-	void RenderingManager::SetCurrentRenderTarget(RenderTargetTexture& renderTarget, ID3D12GraphicsCommandList* cmdList, D3D12_CPU_DESCRIPTOR_HANDLE& dsvHandle)
+	void RenderingManager::ResetRenderTargets()
 	{
-		renderTarget.SetRenderTarget(cmdList, dsvHandle);
+		m_gBuffer.GetGbufferRenderTargetTexture().Reset(m_dx12.GetCmdList());
 	}
 
-	void RenderingManager::RenderToTexture(RenderTargetTexture& renderTarget, ID3D12GraphicsCommandList* cmdList,
-		ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* dsvHeap, UINT& frameIndex, UINT& rtvDescriptorSize,
-		ID3D12PipelineState* pipelineState)
+	void RenderingManager::SetGbufferRenderTarget()
 	{
-		renderTarget.RenderFullScreenQuad(cmdList, rtvHeap, dsvHeap, frameIndex, rtvDescriptorSize, pipelineState);
+		m_gBuffer.GetGbufferRenderTargetTexture().SetRenderTarget(m_dx12.GetCmdList(), m_dx12.dsvHandle);
 	}
 
-	void RenderingManager::Render(Scene* scene, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList, 
+	void RenderingManager::RenderGbufferFullscreen()
+	{
+		m_gBuffer.GetGbufferRenderTargetTexture().RenderFullScreenQuad(m_dx12.GetCmdList(), m_dx12.rtvHeap.Get(), m_dx12.dsvHeap.Get(), m_dx12.frameIndex, m_dx12.rtvDescriptorSize, m_dx12.pipelineState_2D.Get());
+	}
+
+	void RenderingManager::Render(Scene* scene, Camera& camera, DynamicUploadBuffer* dynamicCB, 
 		TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent)
 	{
 		if (!scene)
 			return;
+
+		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Gbuffer.Get());
 
 		DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transformComponent.position);
 		DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transformComponent.rotation);
@@ -89,17 +96,17 @@ namespace ECS
 		psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 		psCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
-		if (cmdList)
+		if (m_dx12.GetCmdList())
 		{
 			if (dynamicCB)
 			{
-				cmdList->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
-				cmdList->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
-				cmdList->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
 			}
 
-			scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), cmdList, 2);
-			renderComponent.mesh->Draw(cmdList);
+			scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), m_dx12.GetCmdList(), 2);
+			renderComponent.mesh->Draw(m_dx12.GetCmdList());
 		}
 	}
 }

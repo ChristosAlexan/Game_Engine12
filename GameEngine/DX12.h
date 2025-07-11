@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DX12Includes.h"
+#include "DescriptorAllocator.h"
 #include "Camera.h"
 #include "RectShape12.h"
 #include "CubeShape12.h"
@@ -25,10 +26,11 @@ public:
 	void CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc);
 	void CreateDescriptorHeaps();
 	void InitializeShaders();
-	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size);
+	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size, UINT num_renderTargets);
 	void CreateDepthStencilBuffer(int& width, int& height);
-	void InitializeConstantBuffers();
-	void TransitionBackBuffer();
+	void InitializeBuffers();
+	void TransitionBackBufferToRTV();
+	void TransitionBackBufferToPresent();
 	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
@@ -39,7 +41,10 @@ public:
 	ID3D12CommandQueue* GetCommandQueue() const;
 	ID3D12Device* GetDevice() const;
 	ID3D12GraphicsCommandList* GetCmdList() const;
-	ID3D12DescriptorHeap* GetDescriptorHeap() const;
+	ID3D12CommandAllocator* GetCommandAllocator() const;
+	ID3D12DescriptorHeap* GetRtvHeap() const;
+	ID3D12DescriptorHeap* GetSharedSrvHeap() const;
+	DescriptorAllocator* GetDescriptorAllocator() const;
 
 public:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;
@@ -47,17 +52,25 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
 	DXCShaderCompiler shaderCompiler;
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
+	UINT frameIndex = 0;
+	UINT rtvDescriptorSize;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer;
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> swapChain;
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTargets[2];
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	std::unique_ptr<DescriptorAllocator> m_descAllocator;
+	
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedHeap;
+
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedSrvHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
 	CD3DX12_RESOURCE_BARRIER m_barrier;
 
@@ -65,14 +78,12 @@ private:
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
 
 
-	UINT frameIndex = 0;
+
 	UINT64 fenceValue = 0;
 	HANDLE fenceEvent = nullptr;
-	UINT rtvDescriptorSize;
+
 
 
 	AppTimer timer;
-
-	RenderTargetTexture m_renderTexture;
 };
 

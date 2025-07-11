@@ -16,12 +16,10 @@ namespace ECS
 		void InitializeManagers(GameWindow& game_window, int& width, int& height, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
 		void AllocateRenderingManager();
 		void LoadScene(const std::string& sceneName, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-		void InitializeRenderPasses(ID3D12Device* device, int& width, int& height);
 		void SetCurrentScene(std::string sceneName);
 		Scene* GetCurrentScene() const;
 		RenderingManager* GetRenderingManager();
-
-		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList);
+		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
 		
 	private:
 		ID3D12Device* m_device = nullptr;

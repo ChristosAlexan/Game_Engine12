@@ -50,13 +50,13 @@ namespace ECS
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
-	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList)
+	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
 		auto group = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
 		for (auto [entity, transformComponent, renderComponent, animatorComponent] : group.each())
 		{
 			GetAnimationManager()->Update(dt, this, transformComponent, renderComponent, animatorComponent);
-			GetRenderingManager()->Render(this, camera, dynamicCB, cmdList, transformComponent, renderComponent, animatorComponent);
+			GetRenderingManager()->Render(this, camera, dynamicCB, transformComponent, renderComponent, animatorComponent);
 		}
 	}	
 

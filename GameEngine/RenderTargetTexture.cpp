@@ -5,9 +5,16 @@ RenderTargetTexture::RenderTargetTexture()
 {
 }
 
-HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, uint32_t width, uint32_t height)
+HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator, 
+	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, const uint32_t width, const uint32_t height, const uint32_t renderTargets_size)
 {
 	HRESULT hr;
+	m_srvHeap = sharedRsvHeap;
+	m_renderTargets_size = renderTargets_size;
+	m_renderTextures.resize(m_renderTargets_size);
+	m_rtvHandles.resize(m_renderTargets_size);
+	m_cpuHandle.resize(m_renderTargets_size);
+	m_gpuHandle.resize(m_renderTargets_size);
 
 	D3D12_RESOURCE_DESC desc = {};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -29,108 +36,124 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, uint32_t width, ui
 	clearValue.Color[2] = 0.0f;
 	clearValue.Color[3] = 1.0f;
 
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
-	hr = device->CreateCommittedResource(&heapProps,
-		D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET,
-		&clearValue, IID_PPV_ARGS(&m_renderTexture));
-
-	COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
-
-	// Create Render Target View
+	// Create Render Target Views
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = 1;
+	rtvHeapDesc.NumDescriptors = m_renderTargets_size;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
 	COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
 
-	m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
-	device->CreateRenderTargetView(m_renderTexture.Get(), nullptr, rtvHandle);
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
+		hr = device->CreateCommittedResource(&heapProps,
+			D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET,
+			&clearValue, IID_PPV_ARGS(&m_renderTextures[i]));
+		COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
+		m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // Size of the rtvHeap
+		m_rtvHandles[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), i, m_rtvDescriptorSize); // offset per rtv heap to get the correct handle
+		device->CreateRenderTargetView(m_renderTextures[i].Get(), nullptr, m_rtvHandles[i]);
+	}
+		TransitionToSRV(cmdList);
 
-	// Create Shader Resource View
-	m_srvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
 
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	heapDesc.NumDescriptors = 2;
-	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_srvHeap));
-	COM_ERROR_IF_FAILED(hr, "Failed to create srv descriptor heap");
-	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle(m_srvHeap->GetCPUDescriptorHandleForHeapStart());
+		DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
+		m_cpuHandle[i] = handle.cpuHandle;
+		m_gpuHandle[i] = handle.gpuHandle;
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvHeapDesc = {};
-	srvHeapDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	srvHeapDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvHeapDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvHeapDesc.Texture2D.MipLevels = 1;
-	device->CreateShaderResourceView(m_renderTexture.Get(), &srvHeapDesc, srvHandle);
-	srvGpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_srvHeap->GetGPUDescriptorHandleForHeapStart(), 0, m_srvDescriptorSize);
+		// Create SRV
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvHeapDesc = {};
+		srvHeapDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvHeapDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvHeapDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvHeapDesc.Texture2D.MipLevels = 1;
+		device->CreateShaderResourceView(m_renderTextures[i].Get(), &srvHeapDesc, m_cpuHandle[i]);
+	}
 
 	return hr;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetTexture::GetRtvHandle()
+D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetTexture::GetSrvGpuHandle(uint32_t index)
 {
-	return m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetTexture::GetSrvGpuHandle()
-{
-	return srvGpuHandle;
+	return m_gpuHandle[index];
 }
 
 void RenderTargetTexture::SetRenderTarget(ID3D12GraphicsCommandList* cmdList, D3D12_CPU_DESCRIPTOR_HANDLE& dsvHandle)
 {
-	Transition(cmdList);
-
 	const float clearColor[] = { 0.1f, 0.1f, 0.4f, 1.0f };
-
-	auto rtvHandle = GetRtvHandle();
-	cmdList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-	cmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	cmdList->OMSetRenderTargets(m_renderTargets_size, m_rtvHandles.data(), FALSE, &dsvHandle);
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		cmdList->ClearRenderTargetView(m_rtvHandles[i], clearColor, 0, nullptr);
+	}
 }
 
-ID3D12Resource* RenderTargetTexture::GetResource()
+ID3D12Resource* RenderTargetTexture::GetRenderTextureSource(uint32_t index)
 {
-	return m_renderTexture.Get();
+	return m_renderTextures[index].Get();
 }
 
 void RenderTargetTexture::Reset(ID3D12GraphicsCommandList* cmdList)
 {
-	auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
-		GetResource(),
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	cmdList->ResourceBarrier(1, &barrierToRTV);
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetRenderTextureSource(i),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_RENDER_TARGET
+		);
+		cmdList->ResourceBarrier(1, &barrierToRTV);
+	}
+
 }
 
-void RenderTargetTexture::Transition(ID3D12GraphicsCommandList* cmdList)
+void RenderTargetTexture::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 {
-	auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-		GetResource(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
-	cmdList->ResourceBarrier(1, &barrierToSRV);
+	for(uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetRenderTextureSource(i),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_RENDER_TARGET
+		);
+		cmdList->ResourceBarrier(1, &barrierToSRV);
+	}
+	
+}
+void RenderTargetTexture::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
+{
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetRenderTextureSource(i),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+		);
+		cmdList->ResourceBarrier(1, &barrierToSRV);
+	}
 }
 
 void RenderTargetTexture::RenderFullScreenQuad(ID3D12GraphicsCommandList* cmdList, 
 	ID3D12DescriptorHeap* rtvHeap, ID3D12DescriptorHeap* dsvHeap, UINT& frameIndex, UINT& rtvDescriptorSize,
 	ID3D12PipelineState* pipelineState)
 {
+	ID3D12DescriptorHeap* heaps[] = { m_srvHeap };
+	cmdList->SetDescriptorHeaps(1, heaps);
+	// Transition to SRV
+	TransitionToSRV(cmdList);
+
 	// Set render target
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
 	// Set depth-stencil
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	cmdList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-
-	cmdList->SetGraphicsRootDescriptorTable(2, GetSrvGpuHandle());
+	cmdList->SetGraphicsRootDescriptorTable(4, GetSrvGpuHandle(0));
 	cmdList->SetPipelineState(pipelineState);
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	cmdList->IASetVertexBuffers(0, 0, nullptr);
-
 	cmdList->DrawInstanced(3, 1, 0, 0);
 }

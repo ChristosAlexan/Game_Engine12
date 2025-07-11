@@ -7,7 +7,7 @@ Texture12::Texture12()
 {
 }
 
-void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
+void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator)
 {
 	m_debugName = filename;
 
@@ -71,7 +71,7 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 	cmdList->ResourceBarrier(1, &barrier);
 
 	// Create SRV
-	DescriptorAllocator::DescriptorHandle handle = allocator->Allocate();
+	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
 	m_cpuHandle = handle.cpuHandle;
 	m_gpuHandle = handle.gpuHandle;
 
@@ -84,7 +84,7 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
 }
 
-void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
+void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator)
 {
 	m_debugName = filename;
 
@@ -148,7 +148,7 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 	cmdList->ResourceBarrier(1, &barrier);
 
 	// Create SRV
-	DescriptorAllocator::DescriptorHandle handle = allocator->Allocate();
+	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
 	m_cpuHandle = handle.cpuHandle;
 	m_gpuHandle = handle.gpuHandle;
 
@@ -164,9 +164,4 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandle() const
 {
 	return m_gpuHandle;
-}
-
-void Texture12::BindTexture(UINT index, ID3D12GraphicsCommandList* cmdList)
-{
-	cmdList->SetGraphicsRootDescriptorTable(index, GetGPUHandle());
 }

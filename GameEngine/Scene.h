@@ -4,7 +4,6 @@
 #include "ECSHeader.h"
 //#include "TransformECS.h"
 //#include "RenderingECS.h"
-#include "DX12_GLOBALS.h"
 #include "DynamicUploadBuffer.h"
 #include "ConstantBufferTypes.h"
 #include "Camera.h"
@@ -30,7 +29,7 @@ namespace ECS
 		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
-		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB, ID3D12GraphicsCommandList* cmdList);
+		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
 
 		AABB GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp);
 		const std::string GetName() const;
