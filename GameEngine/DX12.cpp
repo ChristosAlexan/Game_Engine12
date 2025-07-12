@@ -4,6 +4,7 @@
 #include "DX12.h"
 #include <stdexcept>
 #include "ErrorLogger.h"
+#include "GFX_MACROS.h"
 
 DX12::DX12()
 {
@@ -280,7 +281,7 @@ void DX12::InitializeShaders()
 
         // Create Gbuffer pipelineState
         psBlob = compiler.CompileShader(L"GBufferPS.hlsl", L"Main", L"ps_6_7");
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, 4);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM);
     }
 
     {
@@ -368,7 +369,7 @@ void DX12::InitializeBuffers()
     dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 8 MB
 
     CD3DX12_DESCRIPTOR_RANGE srvRangeGbuffer;
-    srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0, 0);
+    srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0);
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1);
     

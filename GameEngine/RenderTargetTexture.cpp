@@ -4,56 +4,60 @@
 RenderTargetTexture::RenderTargetTexture()
 {
 }
-
+//DXGI_FORMAT_R8G8B8A8_UNORM
 HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator, 
-	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, const uint32_t width, const uint32_t height, const uint32_t renderTargets_size)
+	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, 
+	const uint32_t width, const uint32_t height, std::vector<DXGI_FORMAT>& formats, const uint32_t renderTargets_size)
 {
 	HRESULT hr;
 	m_srvHeap = sharedRsvHeap;
 	m_renderTargets_size = renderTargets_size;
+	m_rtvHeaps.resize(m_renderTargets_size);
 	m_renderTextures.resize(m_renderTargets_size);
 	m_rtvHandles.resize(m_renderTargets_size);
 	m_cpuHandle.resize(m_renderTargets_size);
 	m_gpuHandle.resize(m_renderTargets_size);
 
-	D3D12_RESOURCE_DESC desc = {};
-	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	desc.Alignment = 0;
-	desc.Width = width;
-	desc.Height = height;
-	desc.DepthOrArraySize = 1;
-	desc.MipLevels = 1;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-	D3D12_CLEAR_VALUE clearValue = {};
-	clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	clearValue.Color[0] = 0.0f;
-	clearValue.Color[1] = 0.0f;
-	clearValue.Color[2] = 0.0f;
-	clearValue.Color[3] = 1.0f;
-
-	// Create Render Target Views
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = m_renderTargets_size;
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
-	COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
 
 
 	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
 	{
+		D3D12_RESOURCE_DESC desc = {};
+		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		desc.Alignment = 0;
+		desc.Width = width;
+		desc.Height = height;
+		desc.DepthOrArraySize = 1;
+		desc.MipLevels = 1;
+		desc.Format = formats[i];
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+		D3D12_CLEAR_VALUE clearValue = {};
+		clearValue.Format = formats[i];
+		clearValue.Color[0] = 0.0f;
+		clearValue.Color[1] = 0.0f;
+		clearValue.Color[2] = 0.0f;
+		clearValue.Color[3] = 1.0f;
+
+		// Create Render Target Views
+		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+		rtvHeapDesc.NumDescriptors = m_renderTargets_size;
+		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeaps[i]));
+		COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
+
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 		hr = device->CreateCommittedResource(&heapProps,
 			D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET,
 			&clearValue, IID_PPV_ARGS(&m_renderTextures[i]));
 		COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
 		m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // Size of the rtvHeap
-		m_rtvHandles[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), i, m_rtvDescriptorSize); // offset per rtv heap to get the correct handle
+		m_rtvHandles[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeaps[i]->GetCPUDescriptorHandleForHeapStart(), i, m_rtvDescriptorSize); // offset per rtv heap to get the correct handle
 		device->CreateRenderTargetView(m_renderTextures[i].Get(), nullptr, m_rtvHandles[i]);
 	}
 		TransitionToSRV(cmdList);
@@ -67,7 +71,7 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 
 		// Create SRV
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvHeapDesc = {};
-		srvHeapDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvHeapDesc.Format = formats[i];
 		srvHeapDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvHeapDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvHeapDesc.Texture2D.MipLevels = 1;

@@ -428,6 +428,9 @@
     <ClInclude Include="GBuffer.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GFX_MACROS.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader12.hlsl">

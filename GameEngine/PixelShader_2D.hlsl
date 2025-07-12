@@ -13,7 +13,8 @@ SamplerState gSampler : register(s0);
 
 float4 Main(PSInput input) : SV_TARGET
 {
-    float4 color = worldPosDepthTexture.Sample(gSampler, input.uv).rgba;
-    
-    return float4(color.www, 1.0f);
+    float4 color = albedoTexture.Sample(gSampler, input.uv).rgba;
+    float3 normal = normalTexture.Sample(gSampler, input.uv).xyz;
+    normal = normalize(normal.xyz * 2.0 - 1.0);
+    return float4(color.rgb, 1.0f);
 }

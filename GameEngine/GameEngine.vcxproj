@@ -306,6 +306,7 @@
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GFXGui.h" />
+    <ClInclude Include="GFX_MACROS.h" />
     <ClInclude Include="GraphEditor.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="ImCurveEdit.h" />
