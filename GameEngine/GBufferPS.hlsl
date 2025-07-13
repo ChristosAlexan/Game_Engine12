@@ -1,3 +1,5 @@
+#include "General_PS.hlsli"
+
 struct PSInput
 {
     float4 position : SV_POSITION;
@@ -32,9 +34,18 @@ GBufferOutput Main(PSInput input)
     float roughness = metalRougnessTexture.Sample(gSampler, input.uv).g;
     float depth = input.position.z / input.position.w;
     
-    output.albedo = albedo;
-    output.normal = float4(normal, 1.0f);
-    output.roughMetalDepth = float4(roughness, metalness, 0.0f, 0.0f);
+    if(hasTextures)
+    {
+        output.albedo = albedo;
+        output.normal = float4(normal, 1.0f);
+        output.roughMetalDepth = float4(roughness, metalness, 0.0f, 0.0f);
+    }
+    else
+    {
+        output.albedo = float4(color.rgb, 1.0f);
+        output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
+        output.roughMetalDepth = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
     output.worldPos = float4(worldPos, depth);
     
     return output;

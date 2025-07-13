@@ -66,6 +66,11 @@ namespace ECS
 		if (!scene)
 			return;
 
+		CB_VS_SimpleShader vsCB = {};
+		CB_VS_AnimationShader skinningCB = {};
+		CB_PS_SimpleShader psCB = {};
+		CB_PS_Material psMaterialCB = {};
+
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Gbuffer.Get());
 
 		DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transformComponent.position);
@@ -78,24 +83,30 @@ namespace ECS
 
 		transformComponent.worldMatrix = scale_mat * rot_mat * pos_mat;
 
-		CB_VS_SimpleShader vsCB = {};
+	
 		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
 		vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
 		vsCB.worldMatrix = DirectX::XMMatrixTranspose(transformComponent.worldMatrix);
 
-		CB_VS_AnimationShader skinningCB = {};
 
 		skinningCB.HasAnim = renderComponent.hasAnimation;
-		if (renderComponent.hasAnimation && !animatorComponent.finalTransforms.empty())
+
+		if (renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH && renderComponent.hasAnimation && !animatorComponent.finalTransforms.empty())
 		{
 			memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
-
 		}
 
-		CB_PS_SimpleShader psCB = {};
 		psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 		psCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-
+		psMaterialCB.color = renderComponent.material->baseColor;
+		psMaterialCB.hasTextures = renderComponent.hasTextures;
+		psMaterialCB.metalness = renderComponent.material->metalness;
+		psMaterialCB.roughness = renderComponent.material->roughness;
+		psMaterialCB.useAlbedo = renderComponent.material->useAlbedoMap;
+		psMaterialCB.useNormals = renderComponent.material->useNormalMap;
+		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
+		psMaterialCB.padding = 0.0f;
+		
 		if (m_dx12.GetCmdList())
 		{
 			if (dynamicCB)
@@ -103,9 +114,11 @@ namespace ECS
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, dynamicCB->Allocate(psMaterialCB));
 			}
 
-			scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), m_dx12.GetCmdList(), 2);
+			if(renderComponent.hasTextures)
+				scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), m_dx12.GetCmdList(), 2);
 			renderComponent.mesh->Draw(m_dx12.GetCmdList());
 		}
 	}

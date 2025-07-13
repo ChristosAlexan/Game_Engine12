@@ -19,10 +19,10 @@ namespace ECS
 		switch (entityDesc.meshType)
 		{
 			case QUAD:
-				data = GenerateQuadMesh();
+				data = GenerateQuadMesh(entityDesc);
 				break;
 			case CUBE:
-				data = GenerateCubeMesh();
+				data = GenerateCubeMesh(entityDesc);
 				break;
 			case STATIC_MESH:
 				data = GenerateStaticMesh(model, entityDesc);
@@ -32,7 +32,9 @@ namespace ECS
 				data = GenerateSkeletalMesh(model, entityDesc);
 				MapModel(model, entityDesc);
 				break;
-
+			case LIGHT:
+				data = GenerateCubeMesh(entityDesc);
+				break;
 		}
 
 		auto mesh = std::make_shared<GpuMesh>();

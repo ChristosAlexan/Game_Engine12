@@ -26,7 +26,7 @@ namespace ECS
         std::string metalRoughnessTexturePath = ""; // roughness map
         Texture12::TEXTURE_FORMAT tex_format;
 
-        DirectX::XMFLOAT4 baseColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Used if no albedo texture
+        DirectX::XMFLOAT3 baseColor = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f); // Used if no albedo texture
         float roughness = 0.5f;
         float metalness = 0.0f;
 

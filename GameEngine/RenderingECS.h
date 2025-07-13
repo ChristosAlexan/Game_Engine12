@@ -8,6 +8,7 @@ namespace ECS
 {
     struct RenderComponent 
     {
+        ECS::MESH_TYPE meshType;
         std::shared_ptr<Model> model;
         std::shared_ptr<GpuMesh> mesh;
         std::shared_ptr<Material> material;
@@ -15,6 +16,7 @@ namespace ECS
         std::vector<std::string> anim_names; // Store the names of the attached animations
         DirectX::XMMATRIX bone_transform;
         bool hasAnimation = false;
+        bool hasTextures = false;
         int curAnim = 0;
     };
 }

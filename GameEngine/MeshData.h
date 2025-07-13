@@ -13,7 +13,8 @@ namespace ECS
         QUAD = 0,
         CUBE = 1,
         STATIC_MESH = 2,
-        SKELETAL_MESH = 3
+        SKELETAL_MESH = 3,
+        LIGHT = 4
     };
 
     struct MeshData 

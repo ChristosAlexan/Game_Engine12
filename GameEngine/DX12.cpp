@@ -261,6 +261,7 @@ void DX12::CreateDescriptorHeaps()
 
 void DX12::InitializeShaders()
 {
+    DXGI_FORMAT default_format = DXGI_FORMAT_R8G8B8A8_UNORM;
     {
         DXCShaderCompiler compiler;
 
@@ -277,11 +278,17 @@ void DX12::InitializeShaders()
             { "BONEINDICES",   0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format);
 
         // Create Gbuffer pipelineState
+        DXGI_FORMAT formats[GBUFFER_TEXTURES_NUM];
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ALBEDO] = (DXGI_FORMAT)GBUFFER_RENDER_TARGETS_FORMAT::FORMAT_ALBEDO;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::NORMAL] = (DXGI_FORMAT)GBUFFER_RENDER_TARGETS_FORMAT::FORMAT_NORMAL;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ROUGH_METAL] = (DXGI_FORMAT)GBUFFER_RENDER_TARGETS_FORMAT::FORMAT_ROUGH_METAL;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::WORLDPOS_DEPTH] = (DXGI_FORMAT)GBUFFER_RENDER_TARGETS_FORMAT::FORMAT_WORLDPOS_DEPTH;
+
         psBlob = compiler.CompileShader(L"GBufferPS.hlsl", L"Main", L"ps_6_7");
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats);
     }
 
     {
@@ -295,12 +302,12 @@ void DX12::InitializeShaders()
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_2D, inputLayout, layoutSize, 1);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_2D, inputLayout, layoutSize, 1, &default_format);
     }
   
 }
 
-void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size, UINT num_renderTargets)
+void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, const DXGI_FORMAT* formats)
 {
     HRESULT hr;
 
@@ -318,7 +325,7 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = num_renderTargets;
     for(UINT i = 0; i < psoDesc.NumRenderTargets; ++i)
-        psoDesc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.RTVFormats[i] = formats[i];
     psoDesc.SampleDesc.Count = 1;
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -369,16 +376,17 @@ void DX12::InitializeBuffers()
     dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 8 MB
 
     CD3DX12_DESCRIPTOR_RANGE srvRangeGbuffer;
-    srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0);
+    srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0); // space0
     CD3DX12_DESCRIPTOR_RANGE srvRange;
-    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1);
+    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1); // space1
     
-    CD3DX12_ROOT_PARAMETER rootParams[5];
+    CD3DX12_ROOT_PARAMETER rootParams[6];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 VS
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParams[3].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+    rootParams[3].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b1 VS
     rootParams[4].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParams[5].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b1 PS
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,

@@ -29,7 +29,6 @@ namespace ECS
 
 
 		material->name = materialDesc.name;
-		material->baseColor = materialDesc.baseColor;
 		material->roughness = materialDesc.roughness;
 		material->metalness = materialDesc.metalness;
 		material->useAlbedoMap = materialDesc.useAlbedoMap;

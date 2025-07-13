@@ -1,6 +1,4 @@
-// BasicShader.hlsl
-
-#include "General.hlsli"
+#include "General_VS.hlsli"
 
 struct VSInput
 {

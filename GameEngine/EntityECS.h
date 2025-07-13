@@ -2,6 +2,7 @@
 #include "MeshGenerators.h"
 #include "TransformECS.h"
 #include "MaterialECS.h"
+#include "LightECS.h"
 
 namespace ECS
 {
@@ -15,9 +16,10 @@ namespace ECS
 		TransformComponent transform = {};
 		MaterialDesc materialDesc = MaterialDesc::Default();
 		AnimatorComponent animComponent;
+		LightComponent light;
 		bool visible = true;
-		bool castShadows = true;
-		bool hasMaterial = true;
+		bool castShadows = false;
+		bool hasTextures = false;
 		bool hasAnimation = false;
 	};
 }

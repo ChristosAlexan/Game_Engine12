@@ -21,42 +21,55 @@ namespace ECS
 			nlohmann::json entityJson;
 
 			entityJson["name"] = entityDesc.name;
-			entityJson["filePath"] = entityDesc.filePath;
-			entityJson["hasAnimation"] = entityDesc.hasAnimation;
-			entityJson["hasMaterial"] = entityDesc.hasMaterial;
 			entityJson["meshType"] = entityDesc.meshType;
-		
+			entityJson["materialName"] = entityDesc.materialDesc.name;
+			if (entityDesc.meshType != ECS::MESH_TYPE::LIGHT)
+			{
+				entityJson["filePath"] = entityDesc.filePath;
+				entityJson["hasAnimation"] = entityDesc.hasAnimation;
+				entityJson["hasTextures"] = entityDesc.hasTextures;
 
+
+				
+				entityJson["albedoTextureName"] = entityDesc.materialDesc.albedoTextureName;
+				entityJson["albedoTexturePath"] = entityDesc.materialDesc.albedoTexturePath;
+				entityJson["normalTextureName"] = entityDesc.materialDesc.normalTextureName;
+				entityJson["normalTexturePath"] = entityDesc.materialDesc.normalTexturePath;
+				entityJson["metalRoughnessTextureName"] = entityDesc.materialDesc.metalRoughnessTextureName;
+				entityJson["metalRoughnessTexturePath"] = entityDesc.materialDesc.metalRoughnessTexturePath;
+				entityJson["useAlbedoMap"] = entityDesc.materialDesc.useAlbedoMap;
+				entityJson["useNormalMap"] = entityDesc.materialDesc.useNormalMap;
+				entityJson["useMetalRoughnessMap"] = entityDesc.materialDesc.useMetalRoughnessMap;
+				entityJson["roughness"] = entityDesc.materialDesc.roughness;
+				entityJson["metalness"] = entityDesc.materialDesc.metalness;
+				entityJson["tex_format"] = entityDesc.materialDesc.tex_format;
+
+				if (entityDesc.hasAnimation)
+				{
+					entityJson["AnimSize"] = entityDesc.anim_filePaths.size();
+					for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
+					{
+						entityJson["AnimFiles" + std::to_string(i)] = entityDesc.anim_filePaths[i];
+					}
+				}
+			}
+		
 			entityJson["transform"] = {
 		   {"position", {transform.position.x, transform.position.y, transform.position.z}},
 		   {"rotation", {transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w}},
 		   {"scale",    {transform.scale.x, transform.scale.y, transform.scale.z}}
 			};
 
-			entityJson["materialName"] = entityDesc.materialDesc.name;
-			entityJson["albedoTextureName"] = entityDesc.materialDesc.albedoTextureName;
-			entityJson["albedoTexturePath"] = entityDesc.materialDesc.albedoTexturePath;
-			entityJson["normalTextureName"] = entityDesc.materialDesc.normalTextureName;
-			entityJson["normalTexturePath"] = entityDesc.materialDesc.normalTexturePath;
-			entityJson["metalRoughnessTextureName"] = entityDesc.materialDesc.metalRoughnessTextureName;
-			entityJson["metalRoughnessTexturePath"] = entityDesc.materialDesc.metalRoughnessTexturePath;
-			entityJson["useAlbedoMap"] = entityDesc.materialDesc.useAlbedoMap;
-			entityJson["useNormalMap"] = entityDesc.materialDesc.useNormalMap;
-			entityJson["useMetalRoughnessMap"] = entityDesc.materialDesc.useMetalRoughnessMap;
-			entityJson["roughness"] = entityDesc.materialDesc.roughness;
-			entityJson["metalness"] = entityDesc.materialDesc.metalness;
-			entityJson["tex_format"] = entityDesc.materialDesc.tex_format;
 
-			if (entityDesc.hasAnimation)
-			{
-				entityJson["AnimSize"] = entityDesc.anim_filePaths.size();
-				for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
-				{
-					entityJson["AnimFiles" + std::to_string(i)] = entityDesc.anim_filePaths[i];
-				}
-			}
-		
 			
+		
+			if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
+			{
+				entityJson["lightType"] = entityDesc.light.lightType;
+				entityJson["attenuation"] = entityDesc.light.attenuation;
+				entityJson["strength"] = entityDesc.light.strength;
+				entityJson["color"] = { entityDesc.light.color.x, entityDesc.light.color.y, entityDesc.light.color.z };
+			}
 
 			sceneJson["entities"].push_back(entityJson);
 		}
@@ -77,46 +90,60 @@ namespace ECS
 			EntityDesc entityDesc;
 
 			entityDesc.name = entityJson["name"];
-			entityDesc.filePath = entityJson["filePath"];
-			entityDesc.hasAnimation = entityJson["hasAnimation"];
-			entityDesc.hasMaterial = entityJson["hasAnimation"];
-			entityDesc.hasMaterial = entityJson["hasMaterial"];
 			entityDesc.meshType = entityJson["meshType"];
 			entityDesc.materialName = entityJson["materialName"];
-
-			const auto& t = entityJson["transform"];
-
-			entityDesc.transform.position = { t["position"][0], t["position"][1], t["position"][2] };
-			entityDesc.transform.rotation = { t["rotation"][0], t["rotation"][1], t["rotation"][2], t["rotation"][3] };
-			entityDesc.transform.scale = { t["scale"][0], t["scale"][1], t["scale"][2] };
-
-
 			entityDesc.materialDesc.name = entityJson["materialName"];
-			entityDesc.materialDesc.albedoTextureName = entityJson["albedoTextureName"];
-			entityDesc.materialDesc.albedoTexturePath = entityJson["albedoTexturePath"];
-			entityDesc.materialDesc.normalTextureName = entityJson["normalTextureName"];
-			entityDesc.materialDesc.normalTexturePath = entityJson["normalTexturePath"];
-			entityDesc.materialDesc.metalRoughnessTextureName = entityJson["metalRoughnessTextureName"];
-			entityDesc.materialDesc.metalRoughnessTexturePath = entityJson["metalRoughnessTexturePath"];
-
-			entityDesc.materialDesc.useAlbedoMap = entityJson["useAlbedoMap"];
-			entityDesc.materialDesc.useNormalMap = entityJson["useNormalMap"];
-			entityDesc.materialDesc.useMetalRoughnessMap = entityJson["useMetalRoughnessMap"];
-			entityDesc.materialDesc.roughness = entityJson["roughness"];
-			entityDesc.materialDesc.metalness = entityJson["metalness"];
-			entityDesc.materialDesc.tex_format = entityJson["tex_format"];
-
-			if (entityDesc.hasAnimation)
+	
+			if(entityDesc.meshType != ECS::MESH_TYPE::LIGHT)
 			{
-				int animSize = entityJson["AnimSize"];
-				entityDesc.anim_filePaths.resize(animSize);
+				entityDesc.filePath = entityJson["filePath"];
+				entityDesc.hasAnimation = entityJson["hasAnimation"];
+				entityDesc.hasTextures = entityJson["hasTextures"];
+			
+				entityDesc.materialDesc.albedoTextureName = entityJson["albedoTextureName"];
+				entityDesc.materialDesc.albedoTexturePath = entityJson["albedoTexturePath"];
+				entityDesc.materialDesc.normalTextureName = entityJson["normalTextureName"];
+				entityDesc.materialDesc.normalTexturePath = entityJson["normalTexturePath"];
+				entityDesc.materialDesc.metalRoughnessTextureName = entityJson["metalRoughnessTextureName"];
+				entityDesc.materialDesc.metalRoughnessTexturePath = entityJson["metalRoughnessTexturePath"];
 
-				for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
+				entityDesc.materialDesc.roughness = entityJson["roughness"];
+				entityDesc.materialDesc.metalness = entityJson["metalness"];
+				entityDesc.materialDesc.tex_format = entityJson["tex_format"];
+
+
+				entityDesc.materialDesc.useAlbedoMap = entityJson["useAlbedoMap"];
+				entityDesc.materialDesc.useNormalMap = entityJson["useNormalMap"];
+				entityDesc.materialDesc.useMetalRoughnessMap = entityJson["useMetalRoughnessMap"];
+
+				if (entityDesc.hasAnimation)
 				{
-					entityDesc.anim_filePaths[i] = entityJson["AnimFiles" + std::to_string(i)];
+					int animSize = entityJson["AnimSize"];
+					entityDesc.anim_filePaths.resize(animSize);
+
+					for (int i = 0; i < entityDesc.anim_filePaths.size(); ++i)
+					{
+						entityDesc.anim_filePaths[i] = entityJson["AnimFiles" + std::to_string(i)];
+					}
 				}
 			}
 			
+			const auto& trans = entityJson["transform"];
+
+			entityDesc.transform.position = { trans["position"][0], trans["position"][1], trans["position"][2] };
+			entityDesc.transform.rotation = { trans["rotation"][0], trans["rotation"][1], trans["rotation"][2], trans["rotation"][3] };
+			entityDesc.transform.scale = { trans["scale"][0], trans["scale"][1], trans["scale"][2] };
+
+		
+			if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
+			{
+				entityDesc.light.lightType = entityJson["lightType"];
+				entityDesc.light.attenuation = entityJson["attenuation"];
+				entityDesc.light.strength = entityJson["strength"];
+				const auto& color = entityJson["color"];
+				entityDesc.light.color = { color[0], color[1], color[2] };
+				entityDesc.materialDesc.baseColor = entityDesc.light.color;
+			}
 
 			scene->GetEntityFactory()->AddEntity(scene, entityDesc);
 		}

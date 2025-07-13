@@ -1,7 +1,7 @@
 #include "MeshGenerators.h"
 #include "AssetManager.h"
 
-ECS::MeshData GenerateCubeMesh()
+ECS::MeshData GenerateCubeMesh(ECS::EntityDesc& entityDesc)
 {
 	ECS::MeshData mesh;
 
@@ -55,7 +55,7 @@ ECS::MeshData GenerateCubeMesh()
     return mesh;
 }
 
-ECS::MeshData GenerateQuadMesh()
+ECS::MeshData GenerateQuadMesh(ECS::EntityDesc& entityDesc)
 {
 	ECS::MeshData mesh;
 	mesh.vertices.push_back(Vertex(-1.0f, -1.0f, 0.0f, 0.0f, 1.0f));

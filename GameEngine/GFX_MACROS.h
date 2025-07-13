@@ -1,4 +1,5 @@
 #pragma once
+#include <dxgiformat.h>
 #define GBUFFER_TEXTURES_NUM 4 // Total number of gbuffer render targets
 
 enum GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS

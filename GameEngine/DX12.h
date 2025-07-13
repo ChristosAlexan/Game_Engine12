@@ -26,7 +26,7 @@ public:
 	void CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc);
 	void CreateDescriptorHeaps();
 	void InitializeShaders();
-	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, D3D12_INPUT_ELEMENT_DESC* inputLayout, UINT size, UINT num_renderTargets);
+	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, const DXGI_FORMAT* formats);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();

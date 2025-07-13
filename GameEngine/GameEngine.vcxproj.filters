@@ -246,6 +246,9 @@
     <ClCompile Include="GBuffer.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -431,6 +434,12 @@
     <ClInclude Include="GFX_MACROS.h">
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LightECS.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader12.hlsl">
@@ -451,7 +460,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="General.hlsli">
+    <None Include="General_VS.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
+    <None Include="General_PS.hlsli">
       <Filter>Shaders12</Filter>
     </None>
   </ItemGroup>
