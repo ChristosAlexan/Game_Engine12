@@ -2,9 +2,23 @@
 #include<Windows.h>
 #include "ErrorLogger.h"
 
+void EnableConsole()
+{
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+	freopen("CONIN$", "r", stdin);
+
+	std::ios::sync_with_stdio(); // Sync iostream with C stdio
+}
+
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PSTR lpCmdLine, INT nCmdShow)
 {
+#ifdef _DEBUG
+	EnableConsole();
+#endif
+
 	HRESULT hr = CoInitialize(NULL);
 	if (FAILED(hr))
 	{
@@ -12,8 +26,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return -1;
 	}
 
-	const int w = 1920;
-	const int h = 1080;
+	const int w = 1600;
+	const int h = 900;
 	Engine engine;
 	if (engine.Initialize("DXEngine", "Window", w, h))
 	{

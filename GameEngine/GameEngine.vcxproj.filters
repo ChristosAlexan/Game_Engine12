@@ -293,9 +293,6 @@
     <ClInclude Include="DXCShaderCompiler.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConstantBuffer12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shapes12.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
@@ -315,9 +312,6 @@
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="ComponentStorage12.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ECSHeader.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="MeshManager.h">
@@ -439,6 +433,9 @@
     </ClInclude>
     <ClInclude Include="LightManager.h">
       <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.h">
+      <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

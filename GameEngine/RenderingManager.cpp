@@ -70,6 +70,7 @@ namespace ECS
 		CB_VS_AnimationShader skinningCB = {};
 		CB_PS_SimpleShader psCB = {};
 		CB_PS_Material psMaterialCB = {};
+		CB_PS_Camera psCameraCB = {};
 
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Gbuffer.Get());
 
@@ -107,6 +108,9 @@ namespace ECS
 		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
 		psMaterialCB.padding = 0.0f;
 		
+		psCameraCB.cameraPos = camera.GetPositionFloat3();
+		psCameraCB.padding1 = 0.0f;
+
 		if (m_dx12.GetCmdList())
 		{
 			if (dynamicCB)
@@ -115,6 +119,7 @@ namespace ECS
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, dynamicCB->Allocate(psMaterialCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(6, dynamicCB->Allocate(psCameraCB));
 			}
 
 			if(renderComponent.hasTextures)

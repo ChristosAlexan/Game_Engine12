@@ -1,6 +1,68 @@
 {
     "entities": [
         {
+            "color": [
+                1.0,
+                0.0,
+                0.0
+            ],
+            "lightType": -858993460,
+            "materialName": "LightMaterial",
+            "meshType": 4,
+            "name": "Light",
+            "radius": 3.0999999046325684,
+            "strength": 3.9000000953674316,
+            "transform": {
+                "position": [
+                    -1.8279999494552612,
+                    1.4447550773620605,
+                    3.0894339084625244
+                ],
+                "rotation": [
+                    0.0008684243657626212,
+                    0.9991077184677124,
+                    0.026198895648121834,
+                    -0.033116791397333145
+                ],
+                "scale": [
+                    0.10003652423620224,
+                    0.10000000149011612,
+                    0.1000194400548935
+                ]
+            }
+        },
+        {
+            "color": [
+                0.20000000298023224,
+                0.6000000238418579,
+                0.8999999761581421
+            ],
+            "lightType": -858993460,
+            "materialName": "LightMaterial",
+            "meshType": 4,
+            "name": "Light1",
+            "radius": 2.0999999046325684,
+            "strength": 12.399999618530273,
+            "transform": {
+                "position": [
+                    0.7665413618087769,
+                    1.0736217498779297,
+                    2.8214080333709717
+                ],
+                "rotation": [
+                    0.0008684243657626212,
+                    0.9991077184677124,
+                    0.026198895648121834,
+                    -0.033116791397333145
+                ],
+                "scale": [
+                    0.10003788769245148,
+                    0.10000000149011612,
+                    0.1000194400548935
+                ]
+            }
+        },
+        {
             "albedoTextureName": "defaultAlbedo1",
             "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf",
@@ -32,6 +94,44 @@
                     0.4800005555152893,
                     0.4799995720386505,
                     0.48000064492225647
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "floorAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/floor.glb",
+            "hasAnimation": false,
+            "hasTextures": true,
+            "materialName": "FloorMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "floorMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "metalness": 0.0,
+            "name": "Floor",
+            "normalTextureName": "floorNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -0.48443225026130676,
+                    -0.004080059472471476,
+                    2.8082528114318848
+                ],
+                "rotation": [
+                    -0.18508628010749817,
+                    0.6869789958000183,
+                    -0.6781949996948242,
+                    -0.18399576842784882
+                ],
+                "scale": [
+                    12.508774757385254,
+                    7.710642337799072,
+                    0.09413950145244598
                 ]
             },
             "useAlbedoMap": true,
@@ -77,37 +177,6 @@
             "useAlbedoMap": true,
             "useMetalRoughnessMap": true,
             "useNormalMap": true
-        },
-        {
-            "attenuation": 0.0,
-            "color": [
-                1.0,
-                0.0,
-                0.0
-            ],
-            "lightType": 0,
-            "materialName": "LightMaterial",
-            "meshType": 4,
-            "name": "Light",
-            "strength": 0.0,
-            "transform": {
-                "position": [
-                    0.012385645881295204,
-                    2.2393229007720947,
-                    -0.4806768596172333
-                ],
-                "rotation": [
-                    0.0008683830383233726,
-                    0.9991077184677124,
-                    0.02619858644902706,
-                    -0.033117134124040604
-                ],
-                "scale": [
-                    0.10000212490558624,
-                    0.10000000149011612,
-                    0.10000171512365341
-                ]
-            }
         },
         {
             "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",

@@ -14,9 +14,9 @@ namespace ECS
 		nlohmann::json sceneJson;
 		sceneJson["entities"] = nlohmann::json::array();
 
-		auto renderGroup = scene->GetRegistry().group<TransformComponent, RenderComponent, EntityDesc>();
+		auto group = scene->GetRegistry().group<>(entt::get<TransformComponent, RenderComponent, EntityDesc>);
 
-		for (auto [entity, transform, renderComponent, entityDesc] : renderGroup.each())
+		for (auto [entity, transform, renderComponent, entityDesc] : group.each())
 		{
 			nlohmann::json entityJson;
 
@@ -65,10 +65,15 @@ namespace ECS
 		
 			if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 			{
-				entityJson["lightType"] = entityDesc.light.lightType;
-				entityJson["attenuation"] = entityDesc.light.attenuation;
-				entityJson["strength"] = entityDesc.light.strength;
-				entityJson["color"] = { entityDesc.light.color.x, entityDesc.light.color.y, entityDesc.light.color.z };
+				if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
+				{
+					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
+					entityJson["lightType"] = lightComponent.lightType;
+					entityJson["radius"] = lightComponent.radius;
+					entityJson["strength"] = lightComponent.strength;
+					entityJson["color"] = { lightComponent.color.x, lightComponent.color.y, lightComponent.color.z };
+				}
+		
 			}
 
 			sceneJson["entities"].push_back(entityJson);
@@ -137,12 +142,12 @@ namespace ECS
 		
 			if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 			{
-				entityDesc.light.lightType = entityJson["lightType"];
-				entityDesc.light.attenuation = entityJson["attenuation"];
-				entityDesc.light.strength = entityJson["strength"];
+				entityDesc.lightComponent.lightType = entityJson["lightType"];
+				entityDesc.lightComponent.radius = entityJson["radius"];
+				entityDesc.lightComponent.strength = entityJson["strength"];
 				const auto& color = entityJson["color"];
-				entityDesc.light.color = { color[0], color[1], color[2] };
-				entityDesc.materialDesc.baseColor = entityDesc.light.color;
+				entityDesc.lightComponent.color = { color[0], color[1], color[2] };
+				entityDesc.materialDesc.baseColor = entityDesc.lightComponent.color;
 			}
 
 			scene->GetEntityFactory()->AddEntity(scene, entityDesc);

@@ -47,6 +47,11 @@ namespace ECS
 		return nullptr;
 	}
 
+	void SceneManager::SetupLights()
+	{
+		GetCurrentScene()->AccumulateLights();
+	}
+
 	RenderingManager* SceneManager::GetRenderingManager()
 	{
 		return m_renderingManager.get();

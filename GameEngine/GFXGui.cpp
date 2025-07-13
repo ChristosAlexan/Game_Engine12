@@ -15,7 +15,6 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-
 	
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -34,14 +33,20 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	init_info.NumFramesInFlight = 2;
 	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	init_info.SrvDescriptorHeap = descriptorHeap;
+
 	static auto handle = descAllocator->Allocate();
 	init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu) {
 		*out_cpu = handle.cpuHandle;
 		*out_gpu = handle.gpuHandle;
 		};
 
-	init_info.SrvDescriptorFreeFn = nullptr;
-
+	init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo* info,
+		D3D12_CPU_DESCRIPTOR_HANDLE cpu,
+		D3D12_GPU_DESCRIPTOR_HANDLE gpu)
+		{
+			
+		};
+	
 	result = ImGui_ImplDX12_Init(&init_info);
 
 	if (!result)
@@ -58,12 +63,12 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 {
 	float closestT = FLT_MAX;
 	auto scene = sceneManager->GetCurrentScene();
-	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent>();
+	auto renderGroup = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 	for (auto [entity, transform, renderComponent] : renderGroup.each())
 	{
 		Ray ray = RaycastPicking(screenWidth, screenHeight, camera);
 
-		if (IntersectsAABB(ray, scene->GetWorldAABB(&transform, &renderComponent), m_hitT) && (m_hitT < closestT))
+		if (IntersectsAABB(ray, GetWorldAABB(&transform, &renderComponent), m_hitT) && (m_hitT < closestT))
 		{
 			closestT = m_hitT;
 			m_closestEntity = entity;
@@ -144,6 +149,21 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 				label = "blendDuration##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 				ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
 			}
+			if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
+			{
+				if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
+				{
+					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
+					std::string label;
+					label = "Color##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1, 0);
+					label = "Radius##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.1, 0);
+					label = "Strength##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.1, 0);
+				}
+			}
+
 		}
 		
 
@@ -176,11 +196,11 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 {
 
 	auto scene = sceneManager->GetCurrentScene();
-	auto renderGroup = scene->GetRegistry().group<ECS::TransformComponent, ECS::RenderComponent, AnimatorComponent>();
+	auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent, AnimatorComponent>);
 
 	ImGui::Begin(scene->GetName().c_str());
 
-	for (auto [entity, transform, renderComponent, animComponent] : renderGroup.each())
+	for (auto [entity, transform, renderComponent, animComponent] : group.each())
 	{
 		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
 		if (ImGui::CollapsingHeader(entityLabel.c_str()))

@@ -16,7 +16,7 @@ namespace ECS
 		TransformComponent transform = {};
 		MaterialDesc materialDesc = MaterialDesc::Default();
 		AnimatorComponent animComponent;
-		LightComponent light;
+		LightComponent lightComponent;
 		bool visible = true;
 		bool castShadows = false;
 		bool hasTextures = false;

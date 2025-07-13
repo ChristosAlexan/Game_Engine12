@@ -3,6 +3,8 @@
 #include "TransformECS.h"
 #include "Camera.h"
 #include "imgui_internal.h"
+#include "RenderingECS.h"
+
 
 struct Ray {
 	DirectX::XMVECTOR origin;
@@ -94,12 +96,65 @@ inline inline Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& ca
 	return { rayOrigin, rayDir };
 }
 
+inline void GenerateAABB(ECS::AABB& aabb, ECS::RenderComponent* renderComp)
+{
+	DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
+	DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
+
+	for (const auto& vertex : renderComp->mesh->cpuMesh.vertices)
+	{
+		DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
+		min = DirectX::XMVectorMin(min, pos);
+		max = DirectX::XMVectorMax(max, pos);
+	}
+
+	aabb.min = min;
+	aabb.max = max;
+}
+
+inline ECS::AABB UpdateAABB(ECS::AABB& aabb, DirectX::XMMATRIX& worldMatrix, ECS::RenderComponent* renderComp)
+{
+	DirectX::XMFLOAT3 minF, maxF;
+
+	DirectX::XMStoreFloat3(&minF, aabb.min);
+	DirectX::XMStoreFloat3(&maxF, aabb.max);
+
+	// 8 corners of the AABB
+	DirectX::XMVECTOR corners[8] = {
+		DirectX::XMVectorSet(minF.x, minF.y, minF.z, 1.0f),
+		DirectX::XMVectorSet(maxF.x, minF.y, minF.z, 1.0f),
+		DirectX::XMVectorSet(minF.x, maxF.y, minF.z, 1.0f),
+		DirectX::XMVectorSet(maxF.x, maxF.y, minF.z, 1.0f),
+		DirectX::XMVectorSet(minF.x, minF.y, maxF.z, 1.0f),
+		DirectX::XMVectorSet(maxF.x, minF.y, maxF.z, 1.0f),
+		DirectX::XMVectorSet(minF.x, maxF.y, maxF.z, 1.0f),
+		DirectX::XMVectorSet(maxF.x, maxF.y, maxF.z, 1.0f),
+	};
+
+	DirectX::XMVECTOR newMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
+	DirectX::XMVECTOR newMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
+
+	// Transform all corners and find new min/max
+	for (int i = 0; i < 8; ++i) {
+		DirectX::XMVECTOR cornerWorld = XMVector3TransformCoord(corners[i], worldMatrix);
+		newMin = DirectX::XMVectorMin(newMin, cornerWorld);
+		newMax = DirectX::XMVectorMax(newMax, cornerWorld);
+	}
+
+	return { newMin, newMax };
+}
+
+inline ECS::AABB GetWorldAABB(ECS::TransformComponent* trans, ECS::RenderComponent* renderComp)
+{
+	return UpdateAABB(trans->aabb, trans->worldMatrix, renderComp);
+}
+
 inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")
 {
 	DirectX::XMFLOAT4X4 m;
 	DirectX::XMStoreFloat4x4(&m, mat);
 
-	std::ostringstream oss;
+	std::ostringstream oss{};
 	if (label && *label)
 		oss << label << ":\n";
 
@@ -111,3 +166,4 @@ inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")
 
 	OutputDebugStringA(oss.str().c_str());
 }
+

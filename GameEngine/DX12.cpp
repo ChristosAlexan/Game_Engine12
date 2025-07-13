@@ -11,6 +11,27 @@ DX12::DX12()
     timer.Start();
 }
 
+DX12::~DX12()
+{
+    // Wait for the gpu to release the resources
+    WaitForGPU(commandQueue.Get(), fence.Get(), fenceEvent, fenceValue);
+    swapChain.Reset();
+    commandQueue.Reset();
+    fence.Reset();
+    device.Reset();
+}
+
+void DX12::WaitForGPU(ID3D12CommandQueue* commandQueue, ID3D12Fence* fence, HANDLE fenceEvent, UINT64& fenceValue)
+{
+    const UINT64 fenceSignal = ++fenceValue;
+    commandQueue->Signal(fence, fenceSignal);
+
+    if (fence->GetCompletedValue() < fenceSignal)
+    {
+        fence->SetEventOnCompletion(fenceSignal, fenceEvent);
+        WaitForSingleObject(fenceEvent, INFINITE);
+    }
+}
 
 void DX12::ResetCommandAllocator()
 {
@@ -28,14 +49,7 @@ void DX12::SubmitCommand()
     const UINT64 currentFence = fenceValue;
 
     // Ensure upload completes before rendering
-    commandQueue->Signal(fence.Get(), fenceValue);
-    fenceValue++;
-
-    if (fence->GetCompletedValue() < currentFence)
-    {
-        fence->SetEventOnCompletion(currentFence, fenceEvent);
-        WaitForSingleObject(fenceEvent, INFINITE);
-    }
+    WaitForGPU(commandQueue.Get(), fence.Get(), fenceEvent, fenceValue);
 }
 
 void DX12::InitDescAllocator(ID3D12DescriptorHeap* heap)
@@ -100,13 +114,13 @@ void DX12::CreateDeviceAndFactory()
     UINT dxgiFactoryFlags = 0;
   
 
-//#if defined(_DEBUG)
+#ifdef _DEBUG
     Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
     if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
         debugController->EnableDebugLayer();
         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
     }
-//#endif
+#endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));
 
@@ -379,14 +393,19 @@ void DX12::InitializeBuffers()
     srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0); // space0
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1); // space1
+    CD3DX12_DESCRIPTOR_RANGE srvStructuredBuffer;
+    srvStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
     
-    CD3DX12_ROOT_PARAMETER rootParams[6];
-    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0 VS
-    rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 PS
-    rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParams[3].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b1 VS
-    rootParams[4].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParams[5].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b1 PS
+    CD3DX12_ROOT_PARAMETER rootParams[8];
+    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
+    rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
+    rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
+    rootParams[3].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b1 VS : skinning data
+    rootParams[4].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space0: PS Gbuffer textures
+    rootParams[5].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b1: PS Material
+    rootParams[6].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b2: PS Camera
+    rootParams[7].InitAsDescriptorTable(1, &srvStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
+
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,
@@ -442,7 +461,7 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
     dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     // Clear render target to a color
-    const float clearColor[] = { 0.1f, 0.1f, 0.3f, 1.0f };
+    const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     commandList->ClearDepthStencilView(
         dsvHandle,

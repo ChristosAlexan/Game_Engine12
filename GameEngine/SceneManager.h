@@ -18,6 +18,7 @@ namespace ECS
 		void LoadScene(const std::string& sceneName, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 		void SetCurrentScene(std::string sceneName);
 		Scene* GetCurrentScene() const;
+		void SetupLights();
 		RenderingManager* GetRenderingManager();
 		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
 		

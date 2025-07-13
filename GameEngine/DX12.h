@@ -17,6 +17,8 @@ class DX12
 {
 public:
 	DX12();
+	~DX12();
+	void WaitForGPU(ID3D12CommandQueue* commandQueue, ID3D12Fence* fence, HANDLE fenceEvent, UINT64& fenceValue);
 	void Initialize(HWND hwnd, int& width, int& height);
 	void CreateDeviceAndFactory();
 	void CreateCommandObjects();

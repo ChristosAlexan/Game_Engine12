@@ -1,7 +1,6 @@
 #pragma once
 #include "MeshGenerators.h"
 #include "EntityECS.h"
-#include "ECSHeader.h"
 #include <entt/entt.hpp>
 
 namespace ECS

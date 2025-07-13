@@ -1,6 +1,7 @@
 #include "EntityFactory.h"
 #include "AssetManager.h"
 #include "Scene.h"
+#include "MathHelpers.h"
 
 namespace ECS
 {
@@ -28,18 +29,23 @@ namespace ECS
 		renderComponent.hasTextures = entityDesc.hasTextures;
 		renderComponent.meshType = entityDesc.meshType;
 
+		// Generate AABB from mesh data offline
+		GenerateAABB(entityDesc.transform.aabb, &renderComponent);
+
 		if(entityDesc.meshType == ECS::MESH_TYPE::SKELETAL_MESH || entityDesc.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
 
 		if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{
 			LightComponent lightComponent;
-			lightComponent.attenuation = 1.0f;
-			lightComponent.color = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+			lightComponent.radius = entityDesc.lightComponent.radius;
+			lightComponent.strength = entityDesc.lightComponent.strength;
+			lightComponent.color = entityDesc.lightComponent.color;
 			renderComponent.material->baseColor = DirectX::XMFLOAT4(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
 
 			m_registry->emplace<LightComponent>(id, lightComponent);
 		}
+
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);

@@ -15,7 +15,16 @@ namespace ECS
 		LightType lightType;
 		DirectX::XMFLOAT3 color;
 		float strength;
-		float attenuation;
+		float radius;
+	};
+
+	struct GPULight
+	{
+		DirectX::XMFLOAT3 position; // 12 bytes
+		float strength;             // 4 bytes
+
+		DirectX::XMFLOAT3 color;    // 12 bytes
+		float radius;				// 4 bytes
 	};
 }
 

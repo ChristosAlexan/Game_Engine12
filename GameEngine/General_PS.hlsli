@@ -9,3 +9,18 @@ cbuffer CB_PS_Material : register(b1)
     bool useRoughnessMetal; // 1 byte
     float padding; // 4 bytes
 };
+
+cbuffer CB_PS_Camera : register(b2)
+{
+    float3 cameraPos;
+    float padding1;
+};
+
+struct GPULight
+{
+    float3 positionViewSpace;
+    float strength;
+
+    float3 color;
+    float radius;
+};

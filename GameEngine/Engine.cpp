@@ -42,7 +42,6 @@ void Engine::Update(int width, int height)
 	
 	if (heldKeys.contains(SDLK_ESCAPE))
 	{
-		SDL_DestroyWindow(game_window.GetSDLWindow());
 		bStopEngine = true;
 	}
 
@@ -64,11 +63,9 @@ void Engine::Update(int width, int height)
 		ImGui_ImplSDL3_ProcessEvent(&event);
 		switch (event.type) {
 		case SDL_EVENT_QUIT:
-			SDL_DestroyWindow(game_window.GetSDLWindow());
 			bStopEngine = true;
 			break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-			SDL_DestroyWindow(game_window.GetSDLWindow());
 			bStopEngine = true;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -163,6 +160,13 @@ void Engine::Update(int width, int height)
 	// Render the scene to a fullscreen quad adn finish rendering
 	m_sceneManager->GetRenderingManager()->RenderGbufferFullscreen();
 	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+
+
+	if (bStopEngine)
+	{
+		SDL_DestroyWindow(game_window.GetSDLWindow());
+		return;
+	}
 }
 
 void Engine::InitializeSceneManager()
@@ -183,6 +187,7 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
+	m_sceneManager->SetupLights();
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
 

@@ -19,6 +19,7 @@ namespace ECS
 	{
 		m_registry = entt::registry{};
 		m_entityFactory = std::make_unique<EntityFactory>(m_registry, device, cmdList);
+		m_lightManager = std::make_shared<LightManager>();
 	}
 
 	entt::entity Scene::CreateEntity()
@@ -50,8 +51,14 @@ namespace ECS
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
+	void Scene::AccumulateLights()
+	{
+		m_lightManager->Initialize(this);
+	}
+
 	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
+		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
 		auto group = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
 		for (auto [entity, transformComponent, renderComponent, animatorComponent] : group.each())
 		{
@@ -59,54 +66,6 @@ namespace ECS
 			GetRenderingManager()->Render(this, camera, dynamicCB, transformComponent, renderComponent, animatorComponent);
 		}
 	}	
-
-	AABB Scene::GenerateAABB(AABB& aabb, DirectX::XMMATRIX& worldMatrix, RenderComponent* renderComp)
-	{
-		DirectX::XMFLOAT3 minF, maxF;
-		DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-		DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
-
-		for (const auto& vertex : renderComp->mesh->cpuMesh.vertices)
-		{
-			DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
-			min = DirectX::XMVectorMin(min, pos);
-			max = DirectX::XMVectorMax(max, pos);
-		}
-
-		aabb.min = min;
-		aabb.max = max;
-		DirectX::XMStoreFloat3(&minF, aabb.min);
-		XMStoreFloat3(&maxF, aabb.max);
-
-		// 8 corners of the AABB
-		DirectX::XMVECTOR corners[8] = {
-			DirectX::XMVectorSet(minF.x, minF.y, minF.z, 1.0f),
-			DirectX::XMVectorSet(maxF.x, minF.y, minF.z, 1.0f),
-			DirectX::XMVectorSet(minF.x, maxF.y, minF.z, 1.0f),
-			DirectX::XMVectorSet(maxF.x, maxF.y, minF.z, 1.0f),
-			DirectX::XMVectorSet(minF.x, minF.y, maxF.z, 1.0f),
-			DirectX::XMVectorSet(maxF.x, minF.y, maxF.z, 1.0f),
-			DirectX::XMVectorSet(minF.x, maxF.y, maxF.z, 1.0f),
-			DirectX::XMVectorSet(maxF.x, maxF.y, maxF.z, 1.0f),
-		};
-
-		DirectX::XMVECTOR newMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-		DirectX::XMVECTOR newMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
-
-		// Transform all corners and find new min/max
-		for (int i = 0; i < 8; ++i) {
-			DirectX::XMVECTOR cornerWorld = XMVector3TransformCoord(corners[i], worldMatrix);
-			newMin = DirectX::XMVectorMin(newMin, cornerWorld);
-			newMax = DirectX::XMVectorMax(newMax, cornerWorld);
-		}
-
-		return { newMin, newMax };
-	}
-
-	AABB Scene::GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp)
-	{
-		return GenerateAABB(trans->aabb, trans->worldMatrix, renderComp);
-	}
 
 	const std::string Scene::GetName() const
 	{
@@ -141,6 +100,10 @@ namespace ECS
 	EntityFactory* Scene::GetEntityFactory() const
 	{
 		return m_entityFactory.get();
+	}
+	LightManager* Scene::GetLightManager() const
+	{
+		return m_lightManager.get();
 	}
 	SaveLoadSystem& Scene::GetSaveLoadSystems()
 	{

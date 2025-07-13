@@ -4,7 +4,7 @@
 RenderTargetTexture::RenderTargetTexture()
 {
 }
-//DXGI_FORMAT_R8G8B8A8_UNORM
+
 HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator, 
 	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, 
 	const uint32_t width, const uint32_t height, std::vector<DXGI_FORMAT>& formats, const uint32_t renderTargets_size)
@@ -17,9 +17,6 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 	m_rtvHandles.resize(m_renderTargets_size);
 	m_cpuHandle.resize(m_renderTargets_size);
 	m_gpuHandle.resize(m_renderTargets_size);
-
-
-
 
 	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
 	{
@@ -88,7 +85,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE RenderTargetTexture::GetSrvGpuHandle(uint32_t index)
 
 void RenderTargetTexture::SetRenderTarget(ID3D12GraphicsCommandList* cmdList, D3D12_CPU_DESCRIPTOR_HANDLE& dsvHandle)
 {
-	const float clearColor[] = { 0.1f, 0.1f, 0.4f, 1.0f };
+	const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	cmdList->OMSetRenderTargets(m_renderTargets_size, m_rtvHandles.data(), FALSE, &dsvHandle);
 	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
 	{
