@@ -1,7 +1,6 @@
 #pragma once
 #include "RenderingECS.h"
-#include "ModelData.h"
-#include "TransformECS.h"
+#include <entt/entt.hpp>
 
 namespace ECS
 {
@@ -10,8 +9,7 @@ namespace ECS
 	{
 	public:
 		AnimationManager();
-		void Update(float dt, Scene* scene,
-			TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent);
+		void Update(float dt, Scene* scene, entt::entity& entity, ECS::RenderComponent& renderComponent);
 	};
 
 }

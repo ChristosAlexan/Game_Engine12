@@ -60,8 +60,8 @@ namespace ECS
 		m_gBuffer.GetGbufferRenderTargetTexture().RenderFullScreenQuad(m_dx12.GetCmdList(), m_dx12.rtvHeap.Get(), m_dx12.dsvHeap.Get(), m_dx12.frameIndex, m_dx12.rtvDescriptorSize, m_dx12.pipelineState_2D.Get());
 	}
 
-	void RenderingManager::Render(Scene* scene, Camera& camera, DynamicUploadBuffer* dynamicCB, 
-		TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent)
+	void RenderingManager::Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
+		TransformComponent& transformComponent, RenderComponent& renderComponent)
 	{
 		if (!scene)
 			return;
@@ -92,14 +92,31 @@ namespace ECS
 
 		skinningCB.HasAnim = renderComponent.hasAnimation;
 
-		if (renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH && renderComponent.hasAnimation && !animatorComponent.finalTransforms.empty())
+		if (renderComponent.hasAnimation)
 		{
-			memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
+			if (scene->GetRegistry().all_of<AnimatorComponent>(entity))
+			{
+				AnimatorComponent& animatorComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
+				if (!animatorComponent.finalTransforms.empty())
+				{
+					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
+				}
+			}
 		}
-
+		
 		psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 		psCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-		psMaterialCB.color = renderComponent.material->baseColor;
+
+		if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
+		{
+			if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
+			{
+				ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
+				psMaterialCB.color = DirectX::XMFLOAT4(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
+			}
+		}
+		else
+			psMaterialCB.color = renderComponent.material->baseColor;
 		psMaterialCB.hasTextures = renderComponent.hasTextures;
 		psMaterialCB.metalness = renderComponent.material->metalness;
 		psMaterialCB.roughness = renderComponent.material->roughness;

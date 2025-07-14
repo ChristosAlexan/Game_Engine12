@@ -24,8 +24,8 @@ namespace ECS
 		void ResetRenderTargets();
 		void SetGbufferRenderTarget();
 		void RenderGbufferFullscreen();
-		void Render(Scene* scene, Camera& camera, DynamicUploadBuffer* dynamicCB,
-			TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent);
+		void Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB,
+			TransformComponent& transformComponent, RenderComponent& renderComponent);
 
 	private:
 		DX12 m_dx12;

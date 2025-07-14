@@ -59,11 +59,11 @@ namespace ECS
 	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
 		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
-		auto group = GetRegistry().group<TransformComponent, RenderComponent, AnimatorComponent>();
-		for (auto [entity, transformComponent, renderComponent, animatorComponent] : group.each())
+		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
+		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
-			GetAnimationManager()->Update(dt, this, transformComponent, renderComponent, animatorComponent);
-			GetRenderingManager()->Render(this, camera, dynamicCB, transformComponent, renderComponent, animatorComponent);
+			GetAnimationManager()->Update(dt, this, entity, renderComponent);
+			GetRenderingManager()->Render(this, entity, camera, dynamicCB, transformComponent, renderComponent);
 		}
 	}	
 

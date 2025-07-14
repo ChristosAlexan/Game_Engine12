@@ -18,9 +18,15 @@ cbuffer CB_PS_Camera : register(b2)
 
 struct GPULight
 {
-    float3 positionViewSpace;
+    float3 position;
     float strength;
 
     float3 color;
     float radius;
+    
+    float4 direction;
+    
+    uint lighType;
+    float cutoff;
+    float2 padding;
 };

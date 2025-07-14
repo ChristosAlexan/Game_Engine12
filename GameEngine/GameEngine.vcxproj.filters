@@ -448,7 +448,7 @@
     <FxCompile Include="VertexShader_2D.hlsl">
       <Filter>Shaders12\Vertex Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShader_2D.hlsl">
+    <FxCompile Include="PixelShader_lightPass.hlsl">
       <Filter>Shaders12\Pixel Shaders</Filter>
     </FxCompile>
     <FxCompile Include="GBufferPS.hlsl">
@@ -461,6 +461,9 @@
       <Filter>Shaders12</Filter>
     </None>
     <None Include="General_PS.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
+    <None Include="Math_Helpers.hlsli">
       <Filter>Shaders12</Filter>
     </None>
   </ItemGroup>

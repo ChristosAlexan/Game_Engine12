@@ -1,16 +1,21 @@
 #include "AnimationManager.h"
 #include "Scene.h"
+#include "ModelData.h"
 
 ECS::AnimationManager::AnimationManager()
 {
 }
 
-void ECS::AnimationManager::Update(float dt, Scene* scene,
-	TransformComponent& transformComponent, RenderComponent& renderComponent, AnimatorComponent& animatorComponent)
+void ECS::AnimationManager::Update(float dt, Scene* scene, entt::entity& entity, ECS::RenderComponent& renderComponent)
 {
 	if (renderComponent.hasAnimation)
 	{
-		renderComponent.model->BuildFlatHierarchy(animatorComponent);
-		renderComponent.model->CalculateFinalTransformBlend(dt, animatorComponent);
+		if (scene->GetRegistry().all_of<AnimatorComponent>(entity))
+		{
+			AnimatorComponent& animatorComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
+			renderComponent.model->BuildFlatHierarchy(animatorComponent);
+			renderComponent.model->CalculateFinalTransformBlend(dt, animatorComponent);
+		}
+		
 	}	
 }

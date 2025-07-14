@@ -2,32 +2,33 @@
     "entities": [
         {
             "color": [
-                1.0,
-                0.0,
-                0.0
+                1.2999999523162842,
+                1.2000000476837158,
+                1.7999999523162842
             ],
-            "lightType": -858993460,
+            "cutoff": 0.699999988079071,
+            "lightType": 1,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light",
-            "radius": 3.0999999046325684,
-            "strength": 3.9000000953674316,
+            "radius": 11.600000381469727,
+            "strength": 10.0,
             "transform": {
                 "position": [
-                    -1.8279999494552612,
-                    1.4447550773620605,
-                    3.0894339084625244
+                    -1.4711664915084839,
+                    2.343132257461548,
+                    0.07662782818078995
                 ],
                 "rotation": [
-                    0.0008684243657626212,
-                    0.9991077184677124,
-                    0.026198895648121834,
-                    -0.033116791397333145
+                    0.25108200311660767,
+                    0.7249307632446289,
+                    -0.4229878783226013,
+                    0.4821975529193878
                 ],
                 "scale": [
-                    0.10003652423620224,
-                    0.10000000149011612,
-                    0.1000194400548935
+                    0.10007601976394653,
+                    0.10000144690275192,
+                    0.1000201478600502
                 ]
             }
         },
@@ -37,17 +38,18 @@
                 0.6000000238418579,
                 0.8999999761581421
             ],
-            "lightType": -858993460,
+            "cutoff": 1.940000057220459,
+            "lightType": 2,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light1",
-            "radius": 2.0999999046325684,
+            "radius": 4.119999885559082,
             "strength": 12.399999618530273,
             "transform": {
                 "position": [
-                    0.7665413618087769,
-                    1.0736217498779297,
-                    2.8214080333709717
+                    3.487804889678955,
+                    2.04591965675354,
+                    0.6964573264122009
                 ],
                 "rotation": [
                     0.0008684243657626212,
@@ -56,7 +58,7 @@
                     -0.033116791397333145
                 ],
                 "scale": [
-                    0.10003788769245148,
+                    0.10005287826061249,
                     0.10000000149011612,
                     0.1000194400548935
                 ]
@@ -102,25 +104,25 @@
         },
         {
             "albedoTextureName": "floorAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
-            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/floor.glb",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mahogfloor_basecolor.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/floorCube.gltf",
             "hasAnimation": false,
             "hasTextures": true,
             "materialName": "FloorMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "floorMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mat_metallic-mat_smoothness.dds",
             "metalness": 0.0,
             "name": "Floor",
             "normalTextureName": "floorNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mahogfloor_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.48443225026130676,
-                    -0.004080059472471476,
-                    2.8082528114318848
+                    -0.4304926097393036,
+                    -0.0037846420891582966,
+                    2.776789665222168
                 ],
                 "rotation": [
                     -0.18508628010749817,
@@ -158,20 +160,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -5.822595119476318,
-                    -2.8973698817935656e-07,
-                    0.26237770915031433
+                    -5.8215556144714355,
+                    0.2990567684173584,
+                    0.2780376076698303
                 ],
                 "rotation": [
-                    0.0008683651103638113,
+                    0.0008683709311299026,
                     0.9991077184677124,
-                    0.02619839645922184,
+                    0.026198463514447212,
                     -0.03311740234494209
                 ],
                 "scale": [
-                    2.520020008087158,
+                    2.520052433013916,
                     2.5199995040893555,
-                    2.52001690864563
+                    2.5200443267822266
                 ]
             },
             "useAlbedoMap": true,
@@ -198,20 +200,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.6140018701553345,
-                    -0.20220507681369781,
-                    3.844590187072754
+                    -1.1675482988357544,
+                    0.5149532556533813,
+                    -3.099079132080078
                 ],
                 "rotation": [
-                    0.0008683709311299026,
+                    0.0008683921187184751,
                     0.9991077184677124,
-                    0.026198463514447212,
-                    -0.03311740234494209
+                    0.026198646053671837,
+                    -0.0331168957054615
                 ],
                 "scale": [
-                    2.520055055618286,
+                    2.5204596519470215,
                     2.5199995040893555,
-                    2.5200469493865967
+                    2.5203652381896973
                 ]
             },
             "useAlbedoMap": true,

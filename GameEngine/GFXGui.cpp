@@ -135,20 +135,24 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 		auto scene = sceneManager->GetCurrentScene();
 		entt::entity entity = static_cast<entt::entity>(m_closestEntity);
 
-		if (scene->GetRegistry().all_of<ECS::RenderComponent>(entity) && scene->GetRegistry().all_of<AnimatorComponent>(entity))
+		if (scene->GetRegistry().all_of<ECS::RenderComponent>(entity))
 		{
 			ECS::RenderComponent& renderComponent = scene->GetRegistry().get<ECS::RenderComponent>(entity);
-			AnimatorComponent& animComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
 
-			if (renderComponent.hasAnimation)
+			if (scene->GetRegistry().all_of<AnimatorComponent>(entity))
 			{
+				AnimatorComponent& animComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
 
-				std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-				ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
+				if (renderComponent.hasAnimation)
+				{
+					std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
 
-				label = "blendDuration##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-				ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
+					label = "blendDuration##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
+				}
 			}
+			
 			if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
 			{
 				if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
@@ -158,15 +162,15 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 					label = "Color##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1, 0);
 					label = "Radius##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.1, 0);
+					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.01, 0);
 					label = "Strength##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.1, 0);
+					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.01, 0);
+					label = "Cutoff##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					ImGui::DragFloat(label.c_str(), &lightComponent.cutoff, 0.01, 0);
 				}
 			}
-
 		}
 		
-
 		DirectX::XMMATRIX worldMatrix = m_closestTransform->worldMatrix;
 
 		float matrix[16];

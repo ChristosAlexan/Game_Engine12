@@ -16,7 +16,6 @@ namespace ECS
 
 		auto id = scene->CreateEntity();
 	
-		entityDesc.animComponent = AnimatorComponent{};
 
 		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
@@ -38,8 +37,10 @@ namespace ECS
 		if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{
 			LightComponent lightComponent;
+			lightComponent.lightType = entityDesc.lightComponent.lightType;
 			lightComponent.radius = entityDesc.lightComponent.radius;
 			lightComponent.strength = entityDesc.lightComponent.strength;
+			lightComponent.cutoff = entityDesc.lightComponent.cutoff;
 			lightComponent.color = entityDesc.lightComponent.color;
 			renderComponent.material->baseColor = DirectX::XMFLOAT4(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
 
@@ -49,7 +50,13 @@ namespace ECS
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
-		m_registry->emplace<AnimatorComponent>(id, entityDesc.animComponent);
+
+		if (entityDesc.hasAnimation)
+		{
+			entityDesc.animComponent = AnimatorComponent{};
+			m_registry->emplace<AnimatorComponent>(id, entityDesc.animComponent);
+		}
+			
 		
 		return id;
 	}

@@ -61,7 +61,13 @@ namespace ECS
 			light.color = m_lights[i]->color;
 			light.radius = m_lights[i]->radius;
 			light.strength = m_lights[i]->strength;
+			light.cutoff = m_lights[i]->cutoff;
+			//light.direction = DirectX::XMFLOAT4(m_lights[i]->direction.x, m_lights[i]->direction.y, m_lights[i]->direction.z,1.0f);
+			light.direction = m_lightTransforms[i]->rotation;
+			light.lightType = (uint32_t)m_lights[i]->lightType;
 			light.position = m_lightTransforms[i]->position;
+		
+			light.padding = DirectX::XMFLOAT2(0.0f, 0.0f);
 			m_gpuLights[i] = light;
 
 			m_lightBuffer.UploadData(cmdList, m_gpuLights);

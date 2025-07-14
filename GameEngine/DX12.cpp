@@ -309,7 +309,7 @@ void DX12::InitializeShaders()
         DXCShaderCompiler compiler;
 
         auto vsBlob = compiler.CompileShader(L"VertexShader_2D.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"PixelShader_2D.hlsl", L"Main", L"ps_6_7");
+        auto psBlob = compiler.CompileShader(L"PixelShader_lightPass.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },

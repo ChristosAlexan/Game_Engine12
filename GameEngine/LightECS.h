@@ -16,6 +16,7 @@ namespace ECS
 		DirectX::XMFLOAT3 color;
 		float strength;
 		float radius;
+		float cutoff;
 	};
 
 	struct GPULight
@@ -25,6 +26,11 @@ namespace ECS
 
 		DirectX::XMFLOAT3 color;    // 12 bytes
 		float radius;				// 4 bytes
+		DirectX::XMFLOAT4 direction; // 16 bytes
+
+		uint32_t lightType; // 4 bytes
+		float cutoff;		// 4 bytes
+		DirectX::XMFLOAT2 padding; // 8 bytes
 	};
 }
 

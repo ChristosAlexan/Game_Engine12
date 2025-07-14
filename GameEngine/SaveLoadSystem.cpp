@@ -68,9 +68,10 @@ namespace ECS
 				if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
 				{
 					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
-					entityJson["lightType"] = lightComponent.lightType;
+					entityJson["lightType"] = (uint32_t)lightComponent.lightType;
 					entityJson["radius"] = lightComponent.radius;
 					entityJson["strength"] = lightComponent.strength;
+					entityJson["cutoff"] = lightComponent.cutoff;
 					entityJson["color"] = { lightComponent.color.x, lightComponent.color.y, lightComponent.color.z };
 				}
 		
@@ -145,6 +146,7 @@ namespace ECS
 				entityDesc.lightComponent.lightType = entityJson["lightType"];
 				entityDesc.lightComponent.radius = entityJson["radius"];
 				entityDesc.lightComponent.strength = entityJson["strength"];
+				entityDesc.lightComponent.cutoff = entityJson["cutoff"];
 				const auto& color = entityJson["color"];
 				entityDesc.lightComponent.color = { color[0], color[1], color[2] };
 				entityDesc.materialDesc.baseColor = entityDesc.lightComponent.color;
