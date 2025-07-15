@@ -14,6 +14,8 @@ float GeometrySmith(float3 N, float3 V, float3 L, float roughness);
 
 float3 PointLight(float3 albedo, float3 normal, float metallic, float roughness, float3 worldPos, float3 F0, uint index);
 float3 SpotLight(float3 albedo, float3 normal, float metallic, float roughness, float3 worldPos, float3 F0, uint index);
+float3 dirLight(float3 albedo, float3 normal, float metallic, float roughness, float3 worldPos, float3 F0, uint index);
+
 float3 BlinnPhongPointLight(float3 albedo, float3 normal, float3 worldPos, uint index);
 
 Texture2D albedoTexture : register(t0, space0);
@@ -46,12 +48,13 @@ float4 Main(PSInput input) : SV_TARGET
     F0 = lerp(F0, albedo.rgb, metalness);
     float3 Lo = float3(0, 0, 0);
     
-    for (uint i = 0; i < 2; ++i)
+    for (uint i = 0; i < 3; ++i)
     {
         switch (g_Lights[i].lighType)
         {
             case 0: // Directional
             {
+                    Lo += dirLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i);
                     break;
             }
             case 1: // Spot
@@ -177,6 +180,33 @@ float3 SpotLight(float3 albedo, float3 normal, float metallic, float roughness, 
     
     float NdotL = max(dot(normal, L), 0.0f);
     
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+float3 dirLight(float3 albedo, float3 normal, float metallic, float roughness, float3 worldPos, float3 F0, uint index)
+{
+    float3 V = normalize(cameraPos.xyz - worldPos.xyz);
+    
+    float3 L = normalize(-g_Lights[index].direction.xyz);
+  
+    float3 H = normalize(V + L);
+        
+    float3 radiance = g_Lights[index].color.xyz * g_Lights[index].strength;
+
+        
+    float NDF = DistributionGGX(normal, H, roughness);
+    float G = GeometrySmith(normal, V, L, roughness);
+    float3 F = fresnelSchlick(max(dot(H, V), 0.0f), F0);
+  
+    float3 nominator = NDF * G * F;
+    float denominator = 4 * max(dot(normal, V), 0.0f) * max(dot(normal, L), 0.0f) + 0.001;
+    float3 specular = (nominator / denominator);
+        
+    float3 kS = F;
+    float3 kD = float3(1.0f, 1.0f, 1.0f) - kS;
+    kD *= 1.0f - metallic;
+        
+    float NdotL = max(dot(normal, L), 0.0f);
     return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 

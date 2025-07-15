@@ -214,8 +214,12 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 			std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(entity));
 
 			ImGui::DragFloat3(posOffset.c_str(), &transform.position.x, 0.05f);
-			ImGui::DragFloat3(rotOffset.c_str(), &transform.rotation.x, 0.05f);
 			ImGui::DragFloat3(scaleOffset.c_str(), &transform.scale.x, 0.05f);
+			if (ImGui::DragFloat4(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.01f)) {
+				DirectX::XMVECTOR q = DirectX::XMLoadFloat4(&m_closestTransform->rotation);
+				q = DirectX::XMQuaternionNormalize(q);
+				DirectX::XMStoreFloat4(&m_closestTransform->rotation, q);
+			}
 
 			if(renderComponent.hasAnimation)
 			{
