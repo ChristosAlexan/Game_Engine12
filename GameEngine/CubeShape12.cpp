@@ -9,40 +9,40 @@ void CubeShape12::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* co
 	std::vector<Vertex> vertices;
 
 	// +Y (Top face)
-	vertices.push_back(Vertex(-1, 1, -1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	vertices.push_back(Vertex(1, 1, -1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	vertices.push_back(Vertex(1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	vertices.push_back(Vertex(-1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, -1));
+	vertices.push_back(Vertex(-1, 1, -1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	vertices.push_back(Vertex(1, 1, -1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	vertices.push_back(Vertex(1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	vertices.push_back(Vertex(-1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
 
 	// -Y (Bottom face)
-	vertices.push_back(Vertex(-1, -1, 1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	vertices.push_back(Vertex(1, -1, 1, 1, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	vertices.push_back(Vertex(1, -1, -1, 1, 1, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	vertices.push_back(Vertex(-1, -1, -1, 0, 1, 0, -1, 0, 1, 0, 0, 0, 0, 1));
+	vertices.push_back(Vertex(-1, -1, 1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	vertices.push_back(Vertex(1, -1, 1, 1, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	vertices.push_back(Vertex(1, -1, -1, 1, 1, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	vertices.push_back(Vertex(-1, -1, -1, 0, 1, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
 
 	// +X (Right face)
-	vertices.push_back(Vertex(1, 1, 1, 0, 0, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	vertices.push_back(Vertex(1, 1, -1, 1, 0, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	vertices.push_back(Vertex(1, -1, -1, 1, 1, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	vertices.push_back(Vertex(1, -1, 1, 0, 1, 1, 0, 0, 0, 0, -1, 0, 1, 0));
+	vertices.push_back(Vertex(1, 1, 1, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, 1, -1, 1, 0, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, -1, -1, 1, 1, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, -1, 1, 0, 1, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
 
 	// -X (Left face)
-	vertices.push_back(Vertex(-1, 1, -1, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	vertices.push_back(Vertex(-1, 1, 1, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	vertices.push_back(Vertex(-1, -1, 1, 1, 1, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	vertices.push_back(Vertex(-1, -1, -1, 0, 1, -1, 0, 0, 0, 0, 1, 0, 1, 0));
+	vertices.push_back(Vertex(-1, 1, -1, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, 1, 1, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, -1, 1, 1, 1, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, -1, -1, 0, 1, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
 
 	// +Z (Front face)
-	vertices.push_back(Vertex(-1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(1, -1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(-1, -1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, -1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, -1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
 
 	// -Z (Back face)
-	vertices.push_back(Vertex(1, 1, -1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(-1, 1, -1, 1, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(-1, -1, -1, 1, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	vertices.push_back(Vertex(1, -1, -1, 0, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, 1, -1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, 1, -1, 1, 0, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(-1, -1, -1, 1, 1, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	vertices.push_back(Vertex(1, -1, -1, 0, 1, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
 	
 	std::vector<uint32_t> indices = {
 	0,2,1, 0,3,2,    // Top face

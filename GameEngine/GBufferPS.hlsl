@@ -5,7 +5,7 @@ struct PSInput
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
-    float3 tangent : TANGENT;
+    float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
     float4 boneweights : TEXCOORD1;
@@ -29,15 +29,26 @@ GBufferOutput Main(PSInput input)
     GBufferOutput output;
     float3 worldPos = input.worldPos;
     float4 albedo = float4(albedoTexture.Sample(gSampler, input.uv).rgb, 1.0f);
-    float3 normal = normalize(normalTexture.Sample(gSampler, input.uv).xyz * input.normal);
-    float metalness = metalRougnessMaskTexture.Sample(gSampler, input.uv).r;
+    float3 normal = normalTexture.Sample(gSampler, input.uv).xyz;
+    normal = normalize(normal * 2.0f - 1.0f);
+    // TBN matrix
+    float3 N = normalize(input.normal);
+    float3 T = normalize(input.tangent.xyz);
+    float sign = input.tangent.w;
+    float3 B = sign * normalize(cross(N, T)); // reconstruct binormals
+
+    float3x3 TBN = float3x3(T, B, N);
+
+    float3 worldNormal = normalize(mul(normal, TBN));
+    
+    float metalness = metalRougnessMaskTexture.Sample(gSampler, input.uv).b;
     float roughness = metalRougnessMaskTexture.Sample(gSampler, input.uv).g;
     float depth = input.position.z / input.position.w;
     
     if(hasTextures)
     {
         output.albedo = albedo;
-        output.normal = float4(normal, 1.0f);
+        output.normal = float4(worldNormal, 1.0f);
         output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
     }
     else
@@ -47,6 +58,6 @@ GBufferOutput Main(PSInput input)
         output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
     }
     output.worldPosDepth = float4(worldPos, depth);
-    
+
     return output;
 }

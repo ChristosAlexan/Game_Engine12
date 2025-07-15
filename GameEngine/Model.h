@@ -6,6 +6,12 @@
 #include "TransformECS.h"
 #include <tiny_gltf.h>
 
+struct MikkMeshWrapper
+{
+	std::vector<Vertex>* vertices;
+	std::vector<uint32_t>* indices;
+};
+
 class Model
 {
 public:
@@ -34,9 +40,6 @@ public:
 
 	void LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, Node* parent, uint32_t nodeIndex);
 
-private:
-
-
 public:
 	std::string name;
 	
@@ -48,8 +51,6 @@ private:
 
 
 	ECS::MeshData m_cpuMesh;
-	std::vector<Vertex> m_vertices;
-	std::vector<uint32_t> m_indices;
 
 	std::vector<DirectX::XMMATRIX> inverseBindMatrices;
 	std::unordered_map<int, int> nodeToJointMap;
@@ -61,4 +62,3 @@ private:
 	std::vector<Node*> nodes;
 	uint32_t totalNodeCount = 0;
 };
-

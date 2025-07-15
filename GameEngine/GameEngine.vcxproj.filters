@@ -249,6 +249,9 @@
     <ClCompile Include="LightManager.cpp">
       <Filter>ECS\Source</Filter>
     </ClCompile>
+    <ClCompile Include="mikktspace.c">
+      <Filter>TINYGLTF\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -436,6 +439,9 @@
     </ClInclude>
     <ClInclude Include="StructuredBuffer.h">
       <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mikktspace.h">
+      <Filter>TINYGLTF\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

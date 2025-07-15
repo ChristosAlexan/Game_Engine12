@@ -7,7 +7,67 @@
 #include "ErrorLogger.h"
 #include "Vertex.h"
 #include "MeshData.h"
+#include "mikktspace.h"
 
+
+int GetNumFaces(const SMikkTSpaceContext* context)
+{
+    auto* mesh = reinterpret_cast<MikkMeshWrapper*>(context->m_pUserData);
+    return static_cast<int>(mesh->indices->size() / 3);
+}
+
+int GetNumVerticesOfFace(const SMikkTSpaceContext* context, int face)
+{
+    return 3; // always triangles
+}
+
+void GetPosition(const SMikkTSpaceContext* context, float posOut[3], int face, int vert)
+{
+    auto* mesh = reinterpret_cast<MikkMeshWrapper*>(context->m_pUserData);
+    const uint32_t index = (*mesh->indices)[face * 3 + vert];
+    const Vertex& v = (*mesh->vertices)[index];
+    posOut[0] = v.pos.x;
+    posOut[1] = v.pos.y;
+    posOut[2] = v.pos.z;
+}
+
+void GetNormal(const SMikkTSpaceContext* context, float normOut[3], int face, int vert)
+{
+    auto* mesh = reinterpret_cast<MikkMeshWrapper*>(context->m_pUserData);
+    const uint32_t index = (*mesh->indices)[face * 3 + vert];
+    const Vertex& v = (*mesh->vertices)[index];
+    normOut[0] = v.normal.x;
+    normOut[1] = v.normal.y;
+    normOut[2] = v.normal.z;
+}
+
+void GetTexCoord(const SMikkTSpaceContext* context, float uvOut[2], int face, int vert)
+{
+    auto* mesh = reinterpret_cast<MikkMeshWrapper*>(context->m_pUserData);
+    const uint32_t index = (*mesh->indices)[face * 3 + vert];
+    const Vertex& v = (*mesh->vertices)[index];
+    uvOut[0] = v.texCoord.x;
+    uvOut[1] = v.texCoord.y;
+}
+
+void SetTangentSpace(const SMikkTSpaceContext* pContext, const float tangent[3], float fSign, int face, int vert)
+{
+    MikkMeshWrapper* wrapper = static_cast<MikkMeshWrapper*>(pContext->m_pUserData);
+    int index = (*wrapper->indices)[face * 3 + vert];
+
+    (*wrapper->vertices)[index].tangent = DirectX::XMFLOAT4(tangent[0], tangent[1], tangent[2], tangent[3]);
+
+    // Optional: compute binormal if needed
+    if (fSign < 0.0f)
+    {
+        const DirectX::XMFLOAT3& normal = (*wrapper->vertices)[index].normal;
+        DirectX::XMVECTOR n = DirectX::XMLoadFloat3(&normal);
+        DirectX::XMVECTOR t = DirectX::XMLoadFloat4(&(*wrapper->vertices)[index].tangent);
+        DirectX::XMVECTOR b = DirectX::XMVector3Cross(n, t);
+        b = DirectX::XMVectorScale(b, fSign);
+        DirectX::XMStoreFloat3(&(*wrapper->vertices)[index].binormal, b);
+    }
+}
 
 DirectX::XMMATRIX Node::getLocalMatrix()
 {
@@ -60,18 +120,29 @@ bool Model::LoadModel(const std::string& filepath)
         LoadNode(node, models[0], nullptr, scene.nodes[i]);
     }
 
+    // Generate tangents
+    SMikkTSpaceInterface mikktInterface = {};
+    mikktInterface.m_getNumFaces = GetNumFaces;
+    mikktInterface.m_getNumVerticesOfFace = GetNumVerticesOfFace;
+    mikktInterface.m_getPosition = GetPosition;
+    mikktInterface.m_getNormal = GetNormal;
+    mikktInterface.m_getTexCoord = GetTexCoord;
+    mikktInterface.m_setTSpaceBasic = SetTangentSpace;
+   
+    MikkMeshWrapper wrapper = { &m_cpuMesh.vertices, &m_cpuMesh.indices };
+   
+    SMikkTSpaceContext context = {};
+    context.m_pInterface = &mikktInterface;
+    context.m_pUserData = &wrapper;
+   
+    genTangSpaceDefault(&context);
+
     LoadSkeleton(models[0]);
 
     for (auto& model : models)
     {
         LoadAnimations(model);
     }
-    
-    
-
-    m_cpuMesh.vertices = m_vertices;
-    m_cpuMesh.indices = m_indices;
-
 }
 
 void Model::SetAnimFiles(const std::vector<std::string>& animFiles)
@@ -125,10 +196,11 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
     {
         const tinygltf::Mesh mesh = input.meshes[inputNode.mesh];
         // Iterate through all primitives of this node's mesh
-        for (size_t i = 0; i < mesh.primitives.size(); i++) {
+        for (size_t i = 0; i < mesh.primitives.size(); i++) 
+        {
             const tinygltf::Primitive& glTFPrimitive = mesh.primitives[i];
-            uint32_t firstIndex = static_cast<uint32_t>(m_indices.size());
-            uint32_t vertexStart = static_cast<uint32_t>(m_vertices.size());
+            uint32_t firstIndex = static_cast<uint32_t>(m_cpuMesh.indices.size());
+            uint32_t vertexStart = static_cast<uint32_t>(m_cpuMesh.vertices.size());
             uint32_t indexCount = 0;
             // Vertices
             {
@@ -137,6 +209,7 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                 const float* texCoordsBuffer = nullptr;
                 const float* weightsBuffer = nullptr;
                 const uint16_t* jointsBuffer = nullptr;
+                const float* tangentsBuffer = nullptr;
                 size_t vertexCount = 0;
 
                 // Get buffer data for vertex positions
@@ -169,6 +242,11 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                     const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
                     jointsBuffer = reinterpret_cast<const uint16_t*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
                 }
+                if (glTFPrimitive.attributes.find("TANGENT") != glTFPrimitive.attributes.end()) {
+                    const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("TANGENT")->second];
+                    const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
+                    tangentsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+                }
 
                 // Append data to model's vertex buffer
                 for (size_t vertexOffset = 0; vertexOffset < vertexCount; ++vertexOffset) {
@@ -176,8 +254,10 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                     vert.pos = positionBuffer ? DirectX::XMFLOAT3(positionBuffer[0 + (vertexOffset * 3)], positionBuffer[1 + (vertexOffset * 3)], positionBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0, 0, 0);
                     vert.normal = normalsBuffer ? DirectX::XMFLOAT3(normalsBuffer[0 + (vertexOffset * 3)], normalsBuffer[1 + (vertexOffset * 3)], normalsBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0,0,0);
                     vert.texCoord = texCoordsBuffer ? DirectX::XMFLOAT2(texCoordsBuffer[0 + (vertexOffset * 2)], texCoordsBuffer[1 + (vertexOffset * 2)]) : DirectX::XMFLOAT2(0, 0);
-                    vert.tangent = DirectX::XMFLOAT3(0, 0, 0);
-                    vert.binormal = DirectX::XMFLOAT3(0, 0, 0);
+
+
+                    
+
 
                     if (weightsBuffer)
                     {
@@ -209,8 +289,24 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                         vert.boneIndices[2] = 0;
                         vert.boneIndices[3] = 0;
                     }
-                    
-                    m_vertices.push_back(vert);
+
+                   if (tangentsBuffer)
+                   {
+                       using namespace DirectX;
+                       vert.tangent.x = tangentsBuffer[0 + (vertexOffset * 4)];
+                       vert.tangent.y = tangentsBuffer[1 + (vertexOffset * 4)];
+                       vert.tangent.z = tangentsBuffer[2 + (vertexOffset * 4)];
+                       vert.tangent.w = tangentsBuffer[3 + (vertexOffset * 4)];
+                       // generate binormals(bitangents)
+                       DirectX::XMVECTOR tangent = DirectX::XMLoadFloat4(&vert.tangent);
+                       DirectX::XMVector3Normalize(tangent);
+                       DirectX::XMVECTOR binormal = DirectX::XMLoadFloat3(&vert.binormal);
+                       DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vert.normal);
+                   
+                       binormal = DirectX::XMVector3Cross(normal, tangent) * vert.tangent.w;
+                   }
+                 
+                   m_cpuMesh.vertices.push_back(vert);
                 }
             }
 
@@ -227,21 +323,21 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                 case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
                     const uint32_t* buf = reinterpret_cast<const uint32_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
                     for (size_t index = 0; index < accessor.count; index++) {
-                        m_indices.push_back(buf[index] + vertexStart);
+                        m_cpuMesh.indices.push_back(buf[index] + vertexStart);
                     }
                     break;
                 }
                 case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
                     const uint16_t* buf = reinterpret_cast<const uint16_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
                     for (size_t index = 0; index < accessor.count; index++) {
-                        m_indices.push_back(buf[index] + vertexStart);
+                        m_cpuMesh.indices.push_back(buf[index] + vertexStart);
                     }
                     break;
                 }
                 case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
                     const uint8_t* buf = reinterpret_cast<const uint8_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
                     for (size_t index = 0; index < accessor.count; index++) {
-                        m_indices.push_back(buf[index] + vertexStart);
+                        m_cpuMesh.indices.push_back(buf[index] + vertexStart);
                     }
                     break;
                 }

@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "ErrorLogger.h"
 #include "GameWindow.h"
+#include <cassert>
 
 namespace ECS
 {
@@ -99,7 +100,10 @@ namespace ECS
 				AnimatorComponent& animatorComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
 				if (!animatorComponent.finalTransforms.empty())
 				{
-					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), sizeof(skinningCB.skinningMatrix));
+					size_t matrixCount = animatorComponent.finalTransforms.size();
+					assert(matrixCount <= sizeof(skinningCB.skinningMatrix));
+					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), matrixCount * sizeof(DirectX::XMMATRIX));
+				
 				}
 			}
 		}
@@ -125,7 +129,7 @@ namespace ECS
 		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
 		psMaterialCB.padding = 0.0f;
 		
-		psCameraCB.cameraPos = camera.GetPositionFloat3();
+		psCameraCB.cameraPos = camera.pos;
 		psCameraCB.padding1 = 0.0f;
 
 		if (m_dx12.GetCmdList())

@@ -1,3 +1,5 @@
+static const float PI = 3.14159265359;
+
 // To calculate quaternion rotations
 float3 RotateVectorByQuaternion(float3 v, float4 q)
 {

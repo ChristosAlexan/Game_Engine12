@@ -12,6 +12,7 @@
     "stb",
     "utfcpp",
     "zlib",
-	"tinygltf"
+	"tinygltf",
+	"d3d12-memory-allocator"
   ]
 }

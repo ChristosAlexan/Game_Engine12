@@ -275,6 +275,7 @@
     <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="MeshGenerators.cpp" />
     <ClCompile Include="MeshManager.cpp" />
+    <ClCompile Include="mikktspace.c" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="RectShape12.cpp" />
     <ClCompile Include="RenderingManager.cpp" />
@@ -334,6 +335,7 @@
     <ClInclude Include="MeshData.h" />
     <ClInclude Include="MeshGenerators.h" />
     <ClInclude Include="MeshManager.h" />
+    <ClInclude Include="mikktspace.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelData.h" />
     <ClInclude Include="RectShape12.h" />

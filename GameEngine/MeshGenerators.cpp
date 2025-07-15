@@ -7,40 +7,40 @@ ECS::MeshData GenerateCubeMesh(ECS::EntityDesc& entityDesc)
 
 
 	// +Y (Top face)
-	mesh.vertices.push_back(Vertex(-1, 1, -1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	mesh.vertices.push_back(Vertex(1, 1, -1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	mesh.vertices.push_back(Vertex(1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, -1));
-	mesh.vertices.push_back(Vertex(-1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, -1));
+	mesh.vertices.push_back(Vertex(-1, 1, -1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	mesh.vertices.push_back(Vertex(1, 1, -1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	mesh.vertices.push_back(Vertex(1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
+	mesh.vertices.push_back(Vertex(-1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, -1));
 
 	// -Y (Bottom face)
-	mesh.vertices.push_back(Vertex(-1, -1, 1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	mesh.vertices.push_back(Vertex(1, -1, 1, 1, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	mesh.vertices.push_back(Vertex(1, -1, -1, 1, 1, 0, -1, 0, 1, 0, 0, 0, 0, 1));
-	mesh.vertices.push_back(Vertex(-1, -1, -1, 0, 1, 0, -1, 0, 1, 0, 0, 0, 0, 1));
+	mesh.vertices.push_back(Vertex(-1, -1, 1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	mesh.vertices.push_back(Vertex(1, -1, 1, 1, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	mesh.vertices.push_back(Vertex(1, -1, -1, 1, 1, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
+	mesh.vertices.push_back(Vertex(-1, -1, -1, 0, 1, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1));
 
 	// +X (Right face)
-	mesh.vertices.push_back(Vertex(1, 1, 1, 0, 0, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, 1, -1, 1, 0, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, -1, -1, 1, 1, 1, 0, 0, 0, 0, -1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, -1, 1, 0, 1, 1, 0, 0, 0, 0, -1, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, 1, 1, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, 1, -1, 1, 0, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, -1, -1, 1, 1, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, -1, 1, 0, 1, 1, 0, 0, 0, 0, -1, 0, 0, 1, 0));
 
 	// -X (Left face)
-	mesh.vertices.push_back(Vertex(-1, 1, -1, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, 1, 1, 1, 0, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, -1, 1, 1, 1, -1, 0, 0, 0, 0, 1, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, -1, -1, 0, 1, -1, 0, 0, 0, 0, 1, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, 1, -1, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, 1, 1, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, -1, 1, 1, 1, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, -1, -1, 0, 1, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0));
 
 	// +Z (Front face)
-	mesh.vertices.push_back(Vertex(-1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, -1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, -1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, -1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, -1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0));
 
 	// -Z (Back face)
-	mesh.vertices.push_back(Vertex(1, 1, -1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, 1, -1, 1, 0, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(-1, -1, -1, 1, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
-	mesh.vertices.push_back(Vertex(1, -1, -1, 0, 1, 0, 0, -1, -1, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, 1, -1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, 1, -1, 1, 0, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(-1, -1, -1, 1, 1, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
+	mesh.vertices.push_back(Vertex(1, -1, -1, 0, 1, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0));
 
 
 	mesh.indices = { 

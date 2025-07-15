@@ -6,37 +6,37 @@
                 1.2000000476837158,
                 1.7999999523162842
             ],
-            "cutoff": 0.699999988079071,
+            "cutoff": 0.7699999809265137,
             "lightType": 1,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light",
-            "radius": 11.600000381469727,
-            "strength": 10.0,
+            "radius": 11.449999809265137,
+            "strength": 50.0,
             "transform": {
                 "position": [
-                    -1.4711664915084839,
-                    2.343132257461548,
-                    0.07662782818078995
+                    -4.122549057006836,
+                    2.632944107055664,
+                    -0.44161108136177063
                 ],
                 "rotation": [
-                    0.25108200311660767,
-                    0.7249307632446289,
-                    -0.4229878783226013,
-                    0.4821975529193878
+                    0.06588326394557953,
+                    0.836857259273529,
+                    -0.16701678931713104,
+                    0.5171409845352173
                 ],
                 "scale": [
-                    0.10007601976394653,
-                    0.10000144690275192,
-                    0.1000201478600502
+                    0.10007593780755997,
+                    0.10000176727771759,
+                    0.10002017766237259
                 ]
             }
         },
         {
             "color": [
-                0.20000000298023224,
-                0.6000000238418579,
-                0.8999999761581421
+                0.8999999761581421,
+                0.30000001192092896,
+                0.30000001192092896
             ],
             "cutoff": 1.940000057220459,
             "lightType": 2,
@@ -44,12 +44,12 @@
             "meshType": 4,
             "name": "Light1",
             "radius": 4.119999885559082,
-            "strength": 12.399999618530273,
+            "strength": 10.0,
             "transform": {
                 "position": [
-                    3.487804889678955,
-                    2.04591965675354,
-                    0.6964573264122009
+                    6.680339336395264,
+                    2.3699896335601807,
+                    0.26860564947128296
                 ],
                 "rotation": [
                     0.0008684243657626212,
@@ -58,7 +58,7 @@
                     -0.033116791397333145
                 ],
                 "scale": [
-                    0.10005287826061249,
+                    0.10006501525640488,
                     0.10000000149011612,
                     0.1000194400548935
                 ]
@@ -104,18 +104,18 @@
         },
         {
             "albedoTextureName": "floorAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mahogfloor_basecolor.dds",
-            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/floorCube.gltf",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/floor.glb",
             "hasAnimation": false,
             "hasTextures": true,
             "materialName": "FloorMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "floorMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mat_metallic-mat_smoothness.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_metallic-curved-wet-cobble_roughness.dds",
             "metalness": 0.0,
             "name": "Floor",
             "normalTextureName": "floorNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor1/mahogfloor_normal.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_normal-dx.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
@@ -144,36 +144,36 @@
             "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
             "AnimSize": 1,
             "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
             "hasAnimation": true,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
             "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
             "name": "Robo",
             "normalTextureName": "roboNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -5.8215556144714355,
-                    0.2990567684173584,
-                    0.2780376076698303
+                    3.9750335216522217,
+                    0.3375568985939026,
+                    -1.107358694076538
                 ],
                 "rotation": [
-                    0.0008683709311299026,
+                    0.0008683862397447228,
                     0.9991077184677124,
-                    0.026198463514447212,
-                    -0.03311740234494209
+                    0.026198601350188255,
+                    -0.033117007464170456
                 ],
                 "scale": [
-                    2.520052433013916,
+                    2.520338535308838,
                     2.5199995040893555,
-                    2.5200443267822266
+                    2.5202832221984863
                 ]
             },
             "useAlbedoMap": true,
@@ -184,18 +184,18 @@
             "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
             "AnimSize": 1,
             "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
             "hasAnimation": true,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
             "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
             "name": "Robo",
             "normalTextureName": "roboNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {

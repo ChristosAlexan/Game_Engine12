@@ -5,7 +5,7 @@ struct VSInput
     float3 position : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
-    float3 tangent : TANGENT;
+    float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float4 boneWeights : BONEWEIGHTS;
     uint4 boneIndices : BONEINDICES;
@@ -15,7 +15,7 @@ struct PSInput
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
-    float3 tangent : TANGENT;
+    float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
     float4 boneweights : TEXCOORD1;
@@ -42,7 +42,7 @@ PSInput Main(VSInput input)
         {
             skinnedPos += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.position, 1.0f)).xyz;
             n += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.normal, 0.0f)).xyz;
-            t += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.tangent, 0.0f)).xyz;
+            t += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.tangent.xyz, 0.0f)).xyz;
             b += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.binormal, 0.0f)).xyz;
     
         }
@@ -50,8 +50,6 @@ PSInput Main(VSInput input)
         output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(skinnedPos, 1.0f))));
         output.normal = normalize(mul(worldMatrix, float4(n, 0.0f)));
         output.tangent = normalize(mul(worldMatrix, float4(t, 0.0f)));
-        output.binormal = normalize(mul(worldMatrix, float4(b, 0.0f)));
-   
         output.worldPos = mul(worldMatrix, float4(skinnedPos, 1.0f));
     
         float4 debugColor = float4(skinningMatrices[input.boneIndices[0]][0][0], 0.0f, 0.0f, 1.0f);
@@ -61,12 +59,10 @@ PSInput Main(VSInput input)
     {
         output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(input.position, 1.0f))));
         output.normal = normalize(mul(worldMatrix, float4(input.normal, 0.0f)));
-        output.tangent = normalize(mul(worldMatrix, float4(input.tangent, 0.0f)));
-        output.binormal = normalize(mul(worldMatrix, float4(input.binormal, 0.0f)));
-   
+        output.tangent = normalize(mul(worldMatrix, float4(input.tangent.xyz, 0.0f)));
         output.worldPos = mul(worldMatrix, float4(input.position, 1.0f));
     }
-  
+
     output.uv = input.uv;
  
     return output;
