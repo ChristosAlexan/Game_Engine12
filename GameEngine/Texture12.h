@@ -18,9 +18,11 @@ public:
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 	void LoadFromFileDDS(const std::string& filename,
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
-
+	void LoadFromFileHDR(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 	
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
+	void TransitionToRTV(ID3D12GraphicsCommandList* cmdList);
+	void TransitionToSRV(ID3D12GraphicsCommandList* cmdList);
 public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_cpuHandle{};
@@ -28,5 +30,7 @@ public:
 	std::string m_debugName;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_uploadBuffer;
+	UINT m_width = 0;
+	UINT m_height = 0;
 };
 

@@ -7,6 +7,8 @@
 #include "TransformECS.h"
 #include "RenderTargetTexture.h"
 #include "GBuffer.h"
+#include "HDR_IMAGE.h"
+#include "CubeMap.h"
 
 class GameWindow;
 namespace ECS
@@ -22,15 +24,20 @@ namespace ECS
 		GFXGui& GetGFXGui();
 		GBuffer& GetGbuffer();
 		void ResetRenderTargets();
-		void SetGbufferRenderTarget();
+		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderGbufferFullscreen();
+		void RenderCubeMap(Camera& camera, DynamicUploadBuffer* dynamicCB, CubeMap& cubeMap);
 		void Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB,
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
+
+		void RenderFullScreenQuad(RenderTargetTexture& renderTexture, UINT rootParameterIndex);
 
 	private:
 		DX12 m_dx12;
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
+	public:
+		CubeMap m_cubeMap1;
 	};
 }
 

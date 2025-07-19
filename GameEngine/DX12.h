@@ -28,15 +28,18 @@ public:
 	void CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc);
 	void CreateDescriptorHeaps();
 	void InitializeShaders();
-	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, const DXGI_FORMAT* formats);
+	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, 
+		const UINT num_renderTargets, const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode = D3D12_CULL_MODE_BACK);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
 	void TransitionBackBufferToPresent();
+	void SetRenderTargetToBackBuffer();
 	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
-	void ResetCommandAllocator();
+	void ResetCommands();
+	void ResetCommandList();
 	void SubmitCommand();
 	void InitDescAllocator(ID3D12DescriptorHeap* heap);
 
@@ -60,7 +63,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	UINT frameIndex = 0;
 	UINT rtvDescriptorSize;
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer, pipelineState_Cubemap, pipelineState_CubemapDebug;
 private:
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 	Microsoft::WRL::ComPtr<IDXGISwapChain3> swapChain;

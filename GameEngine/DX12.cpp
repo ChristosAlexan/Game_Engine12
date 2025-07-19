@@ -33,13 +33,17 @@ void DX12::WaitForGPU(ID3D12CommandQueue* commandQueue, ID3D12Fence* fence, HAND
     }
 }
 
-void DX12::ResetCommandAllocator()
+void DX12::ResetCommands()
 {
     // Reset command list before issuing GPU uploads
     commandAllocator->Reset();
-    commandList->Reset(commandAllocator.Get(), nullptr);
+    ResetCommandList();
 }
 
+void DX12::ResetCommandList()
+{
+    commandList->Reset(commandAllocator.Get(), nullptr);
+}
 void DX12::SubmitCommand()
 {
     // Finish and execute upload
@@ -105,7 +109,7 @@ void DX12::Initialize(HWND hwnd, int& width, int& height)
     InitializeShaders();
     InitDescAllocator(sharedSrvHeap.Get());
 
-    ResetCommandAllocator();
+    ResetCommands();
 }
 
 void DX12::CreateDeviceAndFactory()
@@ -171,7 +175,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     rtvHeapDesc.NumDescriptors = 2;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
+    
     HRESULT hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
     COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
   
@@ -182,7 +186,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     swapChainDesc.BufferCount = 2;
     swapChainDesc.Width = width;
     swapChainDesc.Height = height;
-    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.SampleDesc.Count = 1;
@@ -218,13 +222,19 @@ void DX12::CreateFenceAndSyncObjects()
 
 void DX12::CreateSamplerStates()
 {
-    samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(
-        0,                                // shaderRegister (s0)
-        D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
-        D3D12_TEXTURE_ADDRESS_MODE_WRAP, // addressU
-        D3D12_TEXTURE_ADDRESS_MODE_WRAP, // addressV
-        D3D12_TEXTURE_ADDRESS_MODE_WRAP  // addressW
-    );
+    samplerDesc = CD3DX12_STATIC_SAMPLER_DESC();
+    samplerDesc.ShaderRegister = 0;
+    samplerDesc.RegisterSpace = 0;
+    samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    //samplerDesc.MaxAnisotropy = D3D12_REQ_MAXANISOTROPY;
+    samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 }
 
 void DX12::CreateRootSignature(CD3DX12_ROOT_SIGNATURE_DESC& rootSigDesc)
@@ -275,7 +285,7 @@ void DX12::CreateDescriptorHeaps()
 
 void DX12::InitializeShaders()
 {
-    DXGI_FORMAT default_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    DXGI_FORMAT default_format = DXGI_FORMAT_R16G16B16A16_FLOAT;
     {
         DXCShaderCompiler compiler;
 
@@ -318,20 +328,48 @@ void DX12::InitializeShaders()
         UINT layoutSize = _countof(inputLayout);
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_2D, inputLayout, layoutSize, 1, &default_format);
     }
+
+    {
+        DXCShaderCompiler compiler;
+
+        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Cubemap_PS.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Cubemap, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
+    }
+
+    {
+        DXCShaderCompiler compiler;
+
+        auto vsBlob = compiler.CompileShader(L"CubemapDebug_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"CubemapDebug_PS.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_CubemapDebug, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
+    }
   
 }
 
-void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, const DXGI_FORMAT* formats)
+void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, 
+    const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode)
 {
     HRESULT hr;
-
+    
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputLayout, size };
     psoDesc.pRootSignature = rootSignature.Get();
     psoDesc.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
     psoDesc.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+    psoDesc.RasterizerState.CullMode = cull_mode;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDesc.DepthStencilState.DepthEnable = TRUE;
     psoDesc.DepthStencilState.StencilEnable = FALSE;
@@ -391,12 +429,16 @@ void DX12::InitializeBuffers()
 
     CD3DX12_DESCRIPTOR_RANGE srvRangeGbuffer;
     srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0); // space0
+    CD3DX12_DESCRIPTOR_RANGE cubeMapRangeGbuffer;
+    cubeMapRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4); // space0 cubeMap
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1); // space1
+    CD3DX12_DESCRIPTOR_RANGE hdrTextRange;
+    hdrTextRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 3); // space3
     CD3DX12_DESCRIPTOR_RANGE srvStructuredBuffer;
     srvStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
     
-    CD3DX12_ROOT_PARAMETER rootParams[8];
+    CD3DX12_ROOT_PARAMETER rootParams[10];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -405,7 +447,8 @@ void DX12::InitializeBuffers()
     rootParams[5].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b1: PS Material
     rootParams[6].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b2: PS Camera
     rootParams[7].InitAsDescriptorTable(1, &srvStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
-
+    rootParams[8].InitAsDescriptorTable(1, &hdrTextRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space3: PS cubemap textures
+    rootParams[9].InitAsDescriptorTable(1, &cubeMapRangeGbuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space0: PS Gbuffer cubeMap texture
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,
@@ -436,25 +479,8 @@ void DX12::TransitionBackBufferToPresent()
     commandList->ResourceBarrier(1, &m_barrier);
 }
 
-void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
+void DX12::SetRenderTargetToBackBuffer()
 {
-    // Reset allocator and command list
-    ResetCommandAllocator();
-    dynamicCB->Reset();
-
-    TransitionBackBufferToRTV();
-    ID3D12DescriptorHeap* heaps[] = { sharedSrvHeap.Get() };
-    commandList->SetDescriptorHeaps(1, heaps);
-
-    commandList->SetGraphicsRootSignature(rootSignature.Get());
-    commandList->SetPipelineState(pipelineState.Get());
-
-    D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
-    D3D12_RECT scissorRect = { 0, 0, width, height };
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissorRect);
- 
-
     // Set render target
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, rtvDescriptorSize);
     // Set depth-stencil
@@ -471,7 +497,27 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
         0,
         nullptr
     );
+}
+void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
+{
+    // Reset allocator and command list
+    ResetCommands();
+    dynamicCB->Reset();
 
+    TransitionBackBufferToRTV();
+    ID3D12DescriptorHeap* heaps[] = { sharedSrvHeap.Get() };
+    commandList->SetDescriptorHeaps(1, heaps);
+
+    commandList->SetGraphicsRootSignature(rootSignature.Get());
+    commandList->SetPipelineState(pipelineState.Get());
+
+    D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
+    D3D12_RECT scissorRect = { 0, 0, width, height };
+    commandList->RSSetViewports(1, &viewport);
+    commandList->RSSetScissorRects(1, &scissorRect);
+ 
+
+    SetRenderTargetToBackBuffer();
 }
 
 void DX12::EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt)

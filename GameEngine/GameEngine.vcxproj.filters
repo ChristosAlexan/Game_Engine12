@@ -252,6 +252,12 @@
     <ClCompile Include="mikktspace.c">
       <Filter>TINYGLTF\Source</Filter>
     </ClCompile>
+    <ClCompile Include="HDR_IMAGE.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMap.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -443,6 +449,12 @@
     <ClInclude Include="mikktspace.h">
       <Filter>TINYGLTF\Header</Filter>
     </ClInclude>
+    <ClInclude Include="HDR_IMAGE.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMap.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader12.hlsl">
@@ -459,6 +471,18 @@
     </FxCompile>
     <FxCompile Include="GBufferPS.hlsl">
       <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Cubemap_PS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Cubemap_VS.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="CubemapDebug_PS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="CubemapDebug_VS.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

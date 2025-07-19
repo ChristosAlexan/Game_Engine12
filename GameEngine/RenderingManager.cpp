@@ -21,17 +21,16 @@ namespace ECS
 			return false;
 		}
 		
-		InitializeRenderTargets(width, height);
-
 		return true;
 	}
 
 	void RenderingManager::InitializeRenderTargets(int& width, int& height)
 	{
 		m_gBuffer.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height);
+		m_cubeMap1.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator());
 	}
 
-	 DX12& RenderingManager::GetDX12()
+	DX12& RenderingManager::GetDX12()
 	{
 		return m_dx12;
 	}
@@ -48,17 +47,28 @@ namespace ECS
 
 	void RenderingManager::ResetRenderTargets()
 	{
+		m_cubeMap1.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
 		m_gBuffer.GetGbufferRenderTargetTexture().Reset(m_dx12.GetCmdList());
 	}
 
-	void RenderingManager::SetGbufferRenderTarget()
+	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
 	{
-		m_gBuffer.GetGbufferRenderTargetTexture().SetRenderTarget(m_dx12.GetCmdList(), m_dx12.dsvHandle);
+		renderTarget.SetRenderTarget(m_dx12.GetCmdList(), m_dx12.dsvHandle, clearColor);
 	}
 
 	void RenderingManager::RenderGbufferFullscreen()
 	{
-		m_gBuffer.GetGbufferRenderTargetTexture().RenderFullScreenQuad(m_dx12.GetCmdList(), m_dx12.rtvHeap.Get(), m_dx12.dsvHeap.Get(), m_dx12.frameIndex, m_dx12.rtvDescriptorSize, m_dx12.pipelineState_2D.Get());
+		RenderFullScreenQuad(m_gBuffer.GetGbufferRenderTargetTexture(), 4);
+	}
+
+	void RenderingManager::RenderCubeMap(Camera& camera, DynamicUploadBuffer* dynamicCB, CubeMap& cubeMap)
+	{
+		if (cubeMap.bRender)
+		{
+			cubeMap.Render(GetDX12(), camera, m_dx12.pipelineState_Cubemap.Get(), 8);
+			cubeMap.bRender = false;
+		}
+	
 	}
 
 	void RenderingManager::Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
@@ -79,11 +89,11 @@ namespace ECS
 		DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transformComponent.rotation);
 		DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transformComponent.scale);
 
-		DirectX::XMMATRIX scale_mat = DirectX::XMMatrixScalingFromVector(scale_vec);
-		DirectX::XMMATRIX rot_mat = DirectX::XMMatrixRotationQuaternion(rot_vec);
-		DirectX::XMMATRIX pos_mat = DirectX::XMMatrixTranslationFromVector(pos_vec);
+		DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(scale_vec);
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(rot_vec);
+		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(pos_vec);
 
-		transformComponent.worldMatrix = scale_mat * rot_mat * pos_mat;
+		transformComponent.worldMatrix = S * R * T;
 
 	
 		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
@@ -147,5 +157,25 @@ namespace ECS
 				scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), m_dx12.GetCmdList(), 2);
 			renderComponent.mesh->Draw(m_dx12.GetCmdList());
 		}
+	}
+
+	void RenderingManager::RenderFullScreenQuad(RenderTargetTexture& renderTexture, UINT rootParameterIndex)
+	{
+		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap()};
+		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
+		// Transition to SRV
+		renderTexture.TransitionToSRV(m_dx12.GetCmdList());
+		// Set render target
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_dx12.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), m_dx12.frameIndex, m_dx12.rtvDescriptorSize);
+		// Set depth-stencil
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		m_dx12.GetCmdList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, renderTexture.GetSrvGpuHandle(0));
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+		//m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(8, m_cubeMap1.hdr_map1.GetHDRtexture().GetGPUHandle());
+		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_2D.Get());
+		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
+		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
 	}
 }

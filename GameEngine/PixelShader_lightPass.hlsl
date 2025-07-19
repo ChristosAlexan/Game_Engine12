@@ -22,6 +22,8 @@ Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
 Texture2D metalRoughnessMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
+TextureCube cubeMapTexture : register(t4, space0);
+//Texture2D cubeMapTexture : register(t0, space3);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -42,9 +44,9 @@ float4 Main(PSInput input) : SV_TARGET
     float depth = worldPosDepthTexture.Sample(gSampler, input.uv).w; // w is depth
    
     float3 V = normalize(cameraPos.xyz - worldPos.xyz);
-    float3 ambient = float3(0.1f, 0.1f, 0.1f);
+
     normal = normalize(normal.xyz);
-    float3 F0 = float3(0.08f, 0.08f, 0.08f);
+    float3 F0 = float3(0.04f, 0.04f, 0.04f);
     F0 = lerp(F0, albedo.rgb, metalness);
     float3 Lo = float3(0, 0, 0);
     
@@ -73,8 +75,16 @@ float4 Main(PSInput input) : SV_TARGET
     float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0f), F0, roughness);
     float3 kS = F;
     float3 kD = 1.0f - kS;
+ 
     
-    return float4(Lo + albedo.rgb * ambient, 1.0f);
+    float3 R = reflect(-V, normal);
+    float3 reflection = normalize(cubeMapTexture.Sample(gSampler, R)).rgb * metalness;
+    float3 specular = reflection * (F);
+    
+    float3 ambient = float3(0.0f, 0.0f, 0.0f);
+    float ambientStrenght = 1.0;
+    ambient = (kD * albedo.rgb + specular) * ambientStrenght;
+    return float4(ambient + Lo, 1.0f);
 }
 
 float3 fresnelSchlick(float cosTheta, float3 F0)

@@ -37,6 +37,10 @@ bool Engine::StopEngine()
 
 void Engine::Update(int width, int height)
 {
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
+	D3D12_RECT scissorRect = { 0, 0, width, height };
+
 	timer.CalculateDeltaTime(dt, fps);
 	timer.Restart();
 	
@@ -50,9 +54,18 @@ void Engine::Update(int width, int height)
 	// Reset all render targets before rendering
 	m_sceneManager->GetRenderingManager()->ResetRenderTargets();
 	// Render the scene to the geometry pass
-	m_sceneManager->GetRenderingManager()->SetGbufferRenderTarget();
+	float clearColor[] = { 0,0,0,1 };
+	m_sceneManager->GetRenderingManager()->SetRenderTarget(m_sceneManager->GetRenderingManager()->GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
 	// Update current scene(animations, rendering etc.)
 	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
+	// Render cube map
+	m_sceneManager->GetRenderingManager()->RenderCubeMap(camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get(), m_sceneManager->GetRenderingManager()->m_cubeMap1);
+
+	// Reset view port to camera
+	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 1000.0f);
+	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
+	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
@@ -157,8 +170,10 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
-	// Render the scene to a fullscreen quad adn finish rendering
 	m_sceneManager->GetRenderingManager()->RenderGbufferFullscreen();
+
+	// Render cube map debug
+	//m_sceneManager->GetRenderingManager()->m_cubeMap1.RenderDebug(m_sceneManager->GetRenderingManager()->GetDX12(), camera, 4);
 	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 
 
@@ -188,10 +203,10 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
 	m_sceneManager->SetupLights();
+	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
-
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 100.0f);
+	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 1000.0f);
 	camera.SetPosition(0, 0, 0);
 }

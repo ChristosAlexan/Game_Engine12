@@ -28,13 +28,3 @@ void GBuffer::ResetRenderTarget(ID3D12GraphicsCommandList* cmdList)
 {
 	m_gBufferTexture.Reset(cmdList);
 }
-
-void GBuffer::GBufferPass(ID3D12GraphicsCommandList* cmdList, D3D12_CPU_DESCRIPTOR_HANDLE& dsvHandle)
-{
-	m_gBufferTexture.SetRenderTarget(cmdList, dsvHandle);
-}
-
-void GBuffer::LightPass()
-{
-
-}

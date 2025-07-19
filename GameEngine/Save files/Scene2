@@ -2,21 +2,86 @@
     "entities": [
         {
             "color": [
-                1.0,
-                0.0,
-                0.0
+                4.699999809265137,
+                4.0,
+                5.0
             ],
-            "lightType": -858993460,
+            "cutoff": 0.7699999809265137,
+            "lightType": 0,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light",
-            "radius": 2.799999952316284,
-            "strength": 3.9000000953674316,
+            "radius": 1.0,
+            "strength": 10.0,
             "transform": {
                 "position": [
-                    -3.6981589794158936,
-                    2.1311535835266113,
-                    4.272486686706543
+                    -3.0443625450134277,
+                    2.7805116176605225,
+                    1.6548908948898315
+                ],
+                "rotation": [
+                    0.7327431440353394,
+                    -0.3552281856536865,
+                    -0.3428530693054199,
+                    -0.46835044026374817
+                ],
+                "scale": [
+                    0.10007596015930176,
+                    0.10000310838222504,
+                    0.10002030432224274
+                ]
+            }
+        },
+        {
+            "color": [
+                2.9000000953674316,
+                2.0999999046325684,
+                4.0
+            ],
+            "cutoff": 0.6399999856948853,
+            "lightType": 1,
+            "materialName": "LightMaterial",
+            "meshType": 4,
+            "name": "Light",
+            "radius": 11.449999809265137,
+            "strength": 52.040000915527344,
+            "transform": {
+                "position": [
+                    -4.122549057006836,
+                    2.632944107055664,
+                    -0.44161108136177063
+                ],
+                "rotation": [
+                    0.15805849432945251,
+                    0.7930204272270203,
+                    -0.3151887059211731,
+                    0.4967818558216095
+                ],
+                "scale": [
+                    0.10007624328136444,
+                    0.10000195354223251,
+                    0.1000201478600502
+                ]
+            }
+        },
+        {
+            "color": [
+                3.4000000953674316,
+                2.4000000953674316,
+                0.30000001192092896
+            ],
+            "cutoff": 1.940000057220459,
+            "lightType": 2,
+            "materialName": "LightMaterial",
+            "meshType": 4,
+            "name": "Light1",
+            "radius": 4.119999885559082,
+            "strength": 10.989999771118164,
+            "transform": {
+                "position": [
+                    6.680339336395264,
+                    2.3699896335601807,
+                    0.26860564947128296
                 ],
                 "rotation": [
                     0.0008684243657626212,
@@ -25,42 +90,49 @@
                     -0.033116791397333145
                 ],
                 "scale": [
-                    0.10007213801145554,
+                    0.10006501525640488,
                     0.10000000149011612,
                     0.1000194400548935
                 ]
             }
         },
         {
-            "color": [
-                0.20000000298023224,
-                0.6000000238418579,
-                0.8999999761581421
-            ],
-            "lightType": -858993460,
-            "materialName": "LightMaterial",
-            "meshType": 4,
-            "name": "Light1",
-            "radius": 2.0999999046325684,
-            "strength": 12.399999618530273,
+            "albedoTextureName": "ballAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-basecolor.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/sphere.gltf",
+            "hasAnimation": false,
+            "hasTextures": true,
+            "materialName": "ballMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "ballMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-metallic-smoothness.dds",
+            "metalness": 0.0,
+            "name": "Ball",
+            "normalTextureName": "ballNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
             "transform": {
                 "position": [
-                    3.861616373062134,
-                    2.04591965675354,
-                    0.6716492176055908
+                    0.9914461970329285,
+                    1.6868406534194946,
+                    -0.2812844216823578
                 ],
                 "rotation": [
-                    0.0008684243657626212,
-                    0.9991077184677124,
-                    0.026198895648121834,
-                    -0.033116791397333145
+                    0.6940166354179382,
+                    0.07607047259807587,
+                    0.05821211636066437,
+                    0.7135584354400635
                 ],
                 "scale": [
-                    0.10005106776952744,
-                    0.10000000149011612,
-                    0.1000194400548935
+                    0.4799993336200714,
+                    0.48001164197921753,
+                    0.48001009225845337
                 ]
-            }
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
         },
         {
             "albedoTextureName": "defaultAlbedo1",
@@ -85,15 +157,15 @@
                     -0.36575549840927124
                 ],
                 "rotation": [
-                    -0.17148323357105255,
-                    0.7271724343299866,
-                    -0.6350224018096924,
-                    -0.1963678002357483
+                    0.6940166354179382,
+                    0.07607053220272064,
+                    0.0582120344042778,
+                    0.7135584354400635
                 ],
                 "scale": [
-                    0.4800005555152893,
-                    0.4799995720386505,
-                    0.48000064492225647
+                    0.4799993336200714,
+                    0.4800000786781311,
+                    0.4800027310848236
                 ]
             },
             "useAlbedoMap": true,
@@ -109,28 +181,28 @@
             "materialName": "FloorMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "floorMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_metallic-curved-wet-cobble_roughness.dds",
             "metalness": 0.0,
             "name": "Floor",
             "normalTextureName": "floorNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_albedo.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/floor/curved-wet-cobble_normal-dx.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.4304926097393036,
-                    -0.0037846420891582966,
-                    2.776789665222168
+                    -0.4301416873931885,
+                    0.1965063363313675,
+                    2.7792704105377197
                 ],
                 "rotation": [
-                    -0.18508628010749817,
+                    -0.18508629500865936,
                     0.6869789958000183,
                     -0.6781949996948242,
-                    -0.18399576842784882
+                    -0.1839957982301712
                 ],
                 "scale": [
-                    12.508774757385254,
-                    7.710642337799072,
+                    11.999981880187988,
+                    11.999999046325684,
                     0.09413950145244598
                 ]
             },
@@ -142,36 +214,36 @@
             "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
             "AnimSize": 1,
             "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
             "hasAnimation": true,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
             "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
             "name": "Robo",
             "normalTextureName": "roboNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -5.8215556144714355,
-                    0.2990567684173584,
-                    0.2780376076698303
+                    3.9750335216522217,
+                    0.3375568985939026,
+                    -1.107358694076538
                 ],
                 "rotation": [
-                    0.0008683709311299026,
+                    0.0008683862397447228,
                     0.9991077184677124,
-                    0.026198463514447212,
-                    -0.03311740234494209
+                    0.026198601350188255,
+                    -0.033117007464170456
                 ],
                 "scale": [
-                    2.520052433013916,
+                    2.520338535308838,
                     2.5199995040893555,
-                    2.5200443267822266
+                    2.5202832221984863
                 ]
             },
             "useAlbedoMap": true,
@@ -182,36 +254,36 @@
             "AnimFiles0": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/walk.glb",
             "AnimSize": 1,
             "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_albedo.dds",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/Robo model/idle.glb",
             "hasAnimation": true,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
             "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_metalness-robo_roughness.dds",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
             "name": "Robo",
             "normalTextureName": "roboNormal",
-            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo/robo_normal.dds",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/robo model/robo_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.6127711534500122,
-                    0.15192531049251556,
-                    3.8631343841552734
+                    -1.1680946350097656,
+                    0.35762572288513184,
+                    -3.1073176860809326
                 ],
                 "rotation": [
-                    0.0008683737833052874,
+                    0.0008683922933414578,
                     0.9991077184677124,
-                    0.026198526844382286,
-                    -0.03311731293797493
+                    0.026198651641607285,
+                    -0.0331168957054615
                 ],
                 "scale": [
-                    2.5201077461242676,
+                    2.5205018520355225,
                     2.5199995040893555,
-                    2.5201058387756348
+                    2.5203652381896973
                 ]
             },
             "useAlbedoMap": true,

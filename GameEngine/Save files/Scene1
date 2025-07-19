@@ -2,9 +2,9 @@
     "entities": [
         {
             "color": [
-                4.699999809265137,
-                4.0,
-                5.0
+                5.099999904632568,
+                3.700000047683716,
+                2.5
             ],
             "cutoff": 0.7699999809265137,
             "lightType": 0,
@@ -12,7 +12,7 @@
             "meshType": 4,
             "name": "Light",
             "radius": 1.0,
-            "strength": 1.0,
+            "strength": 3.0,
             "transform": {
                 "position": [
                     -3.0443625450134277,
@@ -20,31 +20,31 @@
                     1.6548908948898315
                 ],
                 "rotation": [
-                    0.7415377497673035,
-                    -0.3833184242248535,
-                    -0.002365145133808255,
-                    -0.5506207346916199
+                    0.7327431440353394,
+                    -0.3552281856536865,
+                    -0.3428530693054199,
+                    -0.46835044026374817
                 ],
                 "scale": [
                     0.10007596015930176,
-                    0.10000260174274445,
-                    0.10002012550830841
+                    0.10000310838222504,
+                    0.10002030432224274
                 ]
             }
         },
         {
             "color": [
-                1.2999999523162842,
-                1.2000000476837158,
-                1.7999999523162842
+                2.9000000953674316,
+                2.0999999046325684,
+                4.0
             ],
-            "cutoff": 0.7699999809265137,
+            "cutoff": 0.6399999856948853,
             "lightType": 1,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light",
             "radius": 11.449999809265137,
-            "strength": 50.0,
+            "strength": 52.040000915527344,
             "transform": {
                 "position": [
                     -4.122549057006836,
@@ -52,31 +52,31 @@
                     -0.44161108136177063
                 ],
                 "rotation": [
-                    0.06588326394557953,
-                    0.836857259273529,
-                    -0.16701678931713104,
-                    0.5171409845352173
+                    0.15805849432945251,
+                    0.7930204272270203,
+                    -0.3151887059211731,
+                    0.4967818558216095
                 ],
                 "scale": [
-                    0.10007593780755997,
-                    0.10000176727771759,
-                    0.10002017766237259
+                    0.10007624328136444,
+                    0.10000195354223251,
+                    0.1000201478600502
                 ]
             }
         },
         {
             "color": [
-                0.8999999761581421,
-                0.30000001192092896,
-                0.30000001192092896
+                26.899999618530273,
+                0.20000000298023224,
+                0.800000011920929
             ],
-            "cutoff": 1.940000057220459,
+            "cutoff": 5.070000171661377,
             "lightType": 2,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "Light1",
-            "radius": 4.119999885559082,
-            "strength": 10.0,
+            "radius": 4.579999923706055,
+            "strength": 6.28000020980835,
             "transform": {
                 "position": [
                     6.680339336395264,
@@ -97,6 +97,82 @@
             }
         },
         {
+            "albedoTextureName": "ballAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-basecolor.dds",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/sphere.gltf",
+            "hasAnimation": false,
+            "hasTextures": true,
+            "materialName": "ballMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "ballMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-metallic-smoothness.dds",
+            "metalness": 0.0,
+            "name": "Ball",
+            "normalTextureName": "ballNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/ball/iron-rusted4-normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    1.0378501415252686,
+                    1.7484807968139648,
+                    1.7785028219223022
+                ],
+                "rotation": [
+                    0.6940166354179382,
+                    0.07607047259807587,
+                    0.05821211636066437,
+                    0.7135584354400635
+                ],
+                "scale": [
+                    0.4799993336200714,
+                    0.48001527786254883,
+                    0.48001208901405334
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "cubeAlbedo",
+            "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/cube/albedo.png",
+            "filePath": "G:/gltf models/glTF-Sample-Models-main/Custom/cube/cube.glb",
+            "hasAnimation": false,
+            "hasTextures": true,
+            "materialName": "cubeMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "cubeMetalRougness",
+            "metalRoughnessTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/cube/sky_metallic-sky_smoothness.png",
+            "metalness": 0.0,
+            "name": "Cube",
+            "normalTextureName": "cubeNormal",
+            "normalTexturePath": "G:/gltf models/glTF-Sample-Models-main/Custom/cube/sky_normal.jpg",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -0.04632239788770676,
+                    1.4873911142349243,
+                    -0.2519361674785614
+                ],
+                "rotation": [
+                    0.6940166354179382,
+                    0.07607047259807587,
+                    0.05821211636066437,
+                    0.7135584354400635
+                ],
+                "scale": [
+                    0.4799993336200714,
+                    0.4800153970718384,
+                    0.4800122082233429
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
             "albedoTextureName": "defaultAlbedo1",
             "albedoTexturePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/Default_albedo.dds",
             "filePath": "G:/gltf models/glTF-Sample-Models-main/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf",
@@ -114,20 +190,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    5.579414367675781,
-                    1.0556082725524902,
-                    -0.36575549840927124
+                    2.5443663597106934,
+                    2.0817012786865234,
+                    -0.3280860483646393
                 ],
                 "rotation": [
-                    -0.17148323357105255,
-                    0.7271724343299866,
-                    -0.6350224018096924,
-                    -0.1963678002357483
+                    0.6940165758132935,
+                    0.07607048004865646,
+                    0.058212120085954666,
+                    0.7135584354400635
                 ],
                 "scale": [
-                    0.4800005555152893,
-                    0.4799995720386505,
-                    0.48000064492225647
+                    0.4799993336200714,
+                    0.48003318905830383,
+                    0.4800221920013428
                 ]
             },
             "useAlbedoMap": true,
@@ -152,19 +228,19 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.4304926097393036,
-                    -0.0037846420891582966,
-                    2.776789665222168
+                    -0.4304371178150177,
+                    0.027948398143053055,
+                    2.77718186378479
                 ],
                 "rotation": [
-                    -0.18508628010749817,
+                    -0.18508629500865936,
                     0.6869789958000183,
                     -0.6781949996948242,
-                    -0.18399576842784882
+                    -0.1839957982301712
                 ],
                 "scale": [
-                    12.508774757385254,
-                    7.710642337799072,
+                    11.999981880187988,
+                    11.999999046325684,
                     0.09413950145244598
                 ]
             },
@@ -192,20 +268,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    3.9750335216522217,
-                    0.3375568985939026,
-                    -1.107358694076538
+                    -1.7148888111114502,
+                    1.3675191402435303,
+                    -0.23154932260513306
                 ],
                 "rotation": [
-                    0.0008683862397447228,
+                    0.0008683925843797624,
                     0.9991077184677124,
-                    0.026198601350188255,
-                    -0.033117007464170456
+                    0.02619866095483303,
+                    -0.0331168957054615
                 ],
                 "scale": [
-                    2.520338535308838,
+                    2.520624876022339,
                     2.5199995040893555,
-                    2.5202832221984863
+                    2.5203652381896973
                 ]
             },
             "useAlbedoMap": true,
@@ -232,18 +308,18 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.1675482988357544,
-                    0.5149532556533813,
-                    -3.099079132080078
+                    -1.1680946350097656,
+                    0.35762572288513184,
+                    -3.1073176860809326
                 ],
                 "rotation": [
-                    0.0008683921187184751,
+                    0.0008683922933414578,
                     0.9991077184677124,
-                    0.026198646053671837,
+                    0.026198651641607285,
                     -0.0331168957054615
                 ],
                 "scale": [
-                    2.5204596519470215,
+                    2.5205018520355225,
                     2.5199995040893555,
                     2.5203652381896973
                 ]
