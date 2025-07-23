@@ -41,8 +41,9 @@ SamplerState gSampler : register(s0);
 float4 Main(PSInput input) : SV_TARGET
 {
     const float MAX_REF_LOD = 5.0f;
-    const float exposure = 0.3f;
+    const float exposure = 0.5f;
     const float gamma = 2.2f;
+    float ambientStrength = 1.0f;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
     float mask = metalRoughnessMaskTexture.Sample(gSampler, input.uv).b;
@@ -88,6 +89,7 @@ float4 Main(PSInput input) : SV_TARGET
     float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0f), F0, roughness);
     float3 kS = F;
     float3 kD = 1.0f - kS;
+    kD *= 1.0 - metalness;
     float3 irradiance = irradianceTexture.Sample(gSampler, normal.rgb).rgb;
     float3 diffuse = irradiance * albedo.rgb;
     
@@ -96,10 +98,9 @@ float4 Main(PSInput input) : SV_TARGET
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
     float3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    float ambientStrenght = 0.05f;
-    float3 ambient = (kD * diffuse + specular) * ambientStrenght;
+    float3 ambient = (kD * diffuse + specular) * ambientStrength;
     float3 color = ambient + Lo;
-    
+
     color = ReinhardToneMapping(color, exposure);
     color = pow(color, float3(1.0f / gamma, 1.0f / gamma, 1.0f / gamma));
     return float4(color, 1.0);
