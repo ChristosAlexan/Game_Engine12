@@ -226,8 +226,8 @@ void DX12::CreateSamplerStates()
     samplerDesc.ShaderRegister = 0;
     samplerDesc.RegisterSpace = 0;
     samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-    samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-    //samplerDesc.MaxAnisotropy = D3D12_REQ_MAXANISOTROPY;
+    samplerDesc.Filter = D3D12_FILTER_ANISOTROPIC;
+    samplerDesc.MaxAnisotropy = D3D12_REQ_MAXANISOTROPY;
     samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -345,6 +345,32 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
+        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"IrradianceConvolutionPS.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_IrradianceConv, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
+    }
+
+    {
+        DXCShaderCompiler compiler;
+
+        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"PrefilterPS.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Prefilter, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
+    }
+
+    {
+        DXCShaderCompiler compiler;
+
         auto vsBlob = compiler.CompileShader(L"CubemapDebug_VS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"CubemapDebug_PS.hlsl", L"Main", L"ps_6_7");
 
@@ -355,7 +381,20 @@ void DX12::InitializeShaders()
         UINT layoutSize = _countof(inputLayout);
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_CubemapDebug, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
     }
-  
+
+    {
+        DXCShaderCompiler compiler;
+
+        auto vsBlob = compiler.CompileShader(L"VertexShader_2D.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"BRDF_PS.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Brdf, inputLayout, layoutSize, 1, &default_format, D3D12_CULL_MODE_NONE);
+    }
 }
 
 void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, 
@@ -429,16 +468,23 @@ void DX12::InitializeBuffers()
 
     CD3DX12_DESCRIPTOR_RANGE srvRangeGbuffer;
     srvRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBUFFER_TEXTURES_NUM, 0, 0); // space0
-    CD3DX12_DESCRIPTOR_RANGE cubeMapRangeGbuffer;
-    cubeMapRangeGbuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4); // space0 cubeMap
+    CD3DX12_DESCRIPTOR_RANGE cubeMapRange;
+    cubeMapRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4); // space0 cubeMap
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1); // space1
     CD3DX12_DESCRIPTOR_RANGE hdrTextRange;
     hdrTextRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 3); // space3
     CD3DX12_DESCRIPTOR_RANGE srvStructuredBuffer;
     srvStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
-    
-    CD3DX12_ROOT_PARAMETER rootParams[10];
+
+    CD3DX12_DESCRIPTOR_RANGE prefilterRange;
+    prefilterRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 4); // t0 space4 prefilterMap
+    CD3DX12_DESCRIPTOR_RANGE irradianceRange;
+    irradianceRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 4); // t1 space4 irradianceMap
+    CD3DX12_DESCRIPTOR_RANGE brdfRange;
+    brdfRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 4); // t2 space4 brdfMap
+
+    CD3DX12_ROOT_PARAMETER rootParams[15];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -448,7 +494,14 @@ void DX12::InitializeBuffers()
     rootParams[6].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b2: PS Camera
     rootParams[7].InitAsDescriptorTable(1, &srvStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
     rootParams[8].InitAsDescriptorTable(1, &hdrTextRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space3: PS cubemap textures
-    rootParams[9].InitAsDescriptorTable(1, &cubeMapRangeGbuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space0: PS Gbuffer cubeMap texture
+    rootParams[9].InitAsDescriptorTable(1, &cubeMapRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space0: PS Gbuffer cubeMap texture
+    rootParams[10].InitAsConstantBufferView(3, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b3: PS PBR buffer
+
+    rootParams[11].InitAsDescriptorTable(1, &prefilterRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space4: PS prefilter map
+    rootParams[12].InitAsDescriptorTable(1, &irradianceRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space4: PS irradiance map
+    rootParams[13].InitAsDescriptorTable(1, &brdfRange, D3D12_SHADER_VISIBILITY_PIXEL); // t2 space4: PS brdf map
+
+    rootParams[14].InitAsConstantBufferView(4, 0, D3D12_SHADER_VISIBILITY_PIXEL);  // b4: PS lights' data
 
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init(_countof(rootParams), rootParams, 1, &samplerDesc,

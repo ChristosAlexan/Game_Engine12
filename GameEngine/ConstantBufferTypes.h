@@ -39,3 +39,16 @@ struct CB_PS_Camera
 	DirectX::XMFLOAT3 cameraPos;
 	float padding1;
 };
+
+struct CB_PS_PBR
+{
+	float mip_roughness;
+	DirectX::XMFLOAT3 padding2;
+};
+
+struct CB_PS_LIGHTS
+{
+	uint32_t totalLights;
+	DirectX::XMFLOAT3 padding3;
+};
+

@@ -25,19 +25,26 @@ namespace ECS
 		GBuffer& GetGbuffer();
 		void ResetRenderTargets();
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
-		void RenderGbufferFullscreen();
-		void RenderCubeMap(Camera& camera, DynamicUploadBuffer* dynamicCB, CubeMap& cubeMap);
+		void LightPass(Scene* scene);
+		void RenderPbrPass(Camera& camera, DynamicUploadBuffer* dynamicCB);
 		void Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB,
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
+		void RenderBRDF(RenderTargetTexture& renderTexture);
 
-		void RenderFullScreenQuad(RenderTargetTexture& renderTexture, UINT rootParameterIndex);
+	private:
+		void RenderLightPass(Scene* scene, RenderTargetTexture& renderTexture, UINT rootParameterIndex);
 
 	private:
 		DX12 m_dx12;
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
 	public:
-		CubeMap m_cubeMap1;
+
+		HDR_IMAGE hdr_map1;
+		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
+		RenderTargetTexture m_brdfMap;
+
+		bool bRenderPbrPass = true;
 	};
 }
 

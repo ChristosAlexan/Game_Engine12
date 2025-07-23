@@ -58,9 +58,10 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->SetRenderTarget(m_sceneManager->GetRenderingManager()->GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
 	// Update current scene(animations, rendering etc.)
 	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
-	// Render cube map
-	m_sceneManager->GetRenderingManager()->RenderCubeMap(camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get(), m_sceneManager->GetRenderingManager()->m_cubeMap1);
+	// Render cube maps, irradiance, prefilter and brdf maps
+	m_sceneManager->GetRenderingManager()->RenderPbrPass(camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
 
+	//m_sceneManager->GetRenderingManager()->GetDX12().TransitionBackBufferToPresent();
 	// Reset view port to camera
 	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 1000.0f);
 	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
@@ -170,7 +171,8 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
-	m_sceneManager->GetRenderingManager()->RenderGbufferFullscreen();
+	m_sceneManager->GetRenderingManager()->LightPass(m_sceneManager->GetCurrentScene());
+	//m_sceneManager->GetRenderingManager()->RenderBRDF(m_sceneManager->GetRenderingManager()->m_brdfMap);
 
 	// Render cube map debug
 	//m_sceneManager->GetRenderingManager()->m_cubeMap1.RenderDebug(m_sceneManager->GetRenderingManager()->GetDX12(), camera, 4);

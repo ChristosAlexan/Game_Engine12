@@ -9,6 +9,9 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, 
 	const uint32_t width, const uint32_t height, std::vector<DXGI_FORMAT>& formats, const uint32_t renderTargets_size)
 {
+	m_width = width;
+	m_height = height;
+
 	HRESULT hr;
 	m_srvHeap = sharedRsvHeap;
 	m_renderTargets_size = renderTargets_size;
@@ -80,8 +83,9 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 
 HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator,
 	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator,
-	const uint32_t width, const uint32_t height)
+	const uint32_t width, const uint32_t height, const UINT16 mipLevels)
 {
+	m_mipLevels = mipLevels;
 	m_width = width;
 	m_height = height;
 
@@ -90,7 +94,7 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 	m_renderTargets_size = 6;
 	m_rtvHeaps.resize(1);
 	m_renderTextures.resize(1);
-	m_rtvHandles.resize(6);
+	m_rtvHandles.resize(6 * mipLevels);
 	m_cpuHandle.resize(1);
 	m_gpuHandle.resize(1);
 
@@ -100,7 +104,7 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 	desc.Width = width;
 	desc.Height = height;
 	desc.DepthOrArraySize = 6; // 6 faces
-	desc.MipLevels = 1;
+	desc.MipLevels = mipLevels;
 	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
@@ -116,7 +120,7 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 
 	// Create Render Target Views
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-	rtvHeapDesc.NumDescriptors = 6;
+	rtvHeapDesc.NumDescriptors = 6 * mipLevels;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeaps[0]));
@@ -129,25 +133,30 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 	COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
 
 
-	
-	for (UINT face = 0; face < 6; ++face)
+	for (UINT mip = 0; mip < mipLevels; ++mip)
 	{
-		m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // Size of the rtvHeap
+		for (UINT face = 0; face < 6; ++face)
+		{
+			UINT offset = face + mip * 6;
 
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-		rtvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		rtvDesc.Texture2DArray.MipSlice = 0;
-		rtvDesc.Texture2DArray.FirstArraySlice = face;
-		rtvDesc.Texture2DArray.ArraySize = 1;
-		rtvDesc.Texture2DArray.PlaneSlice = 0;
+			m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // Size of the rtvHeap
 
-		m_rtvHandles[face] = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			m_rtvHeaps[0]->GetCPUDescriptorHandleForHeapStart(),
-			face, m_rtvDescriptorSize);
+			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+			rtvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+			rtvDesc.Texture2DArray.MipSlice = mip;
+			rtvDesc.Texture2DArray.FirstArraySlice = face;
+			rtvDesc.Texture2DArray.ArraySize = 1;
+			rtvDesc.Texture2DArray.PlaneSlice = 0;
 
-		device->CreateRenderTargetView(m_renderTextures[0].Get(), &rtvDesc, m_rtvHandles[face]);
+			m_rtvHandles[offset] = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+				m_rtvHeaps[0]->GetCPUDescriptorHandleForHeapStart(),
+				offset, m_rtvDescriptorSize);
+
+			device->CreateRenderTargetView(m_renderTextures[0].Get(), &rtvDesc, m_rtvHandles[offset]);
+		}
 	}
+
 	
 	TransitionToSRV(cmdList);
 

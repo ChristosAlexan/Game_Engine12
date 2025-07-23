@@ -16,6 +16,18 @@ cbuffer CB_PS_Camera : register(b2)
     float padding1;
 };
 
+cbuffer CB_PS_PBR : register(b3)
+{
+    float mip_roughness;
+    float3 padding2;
+};
+
+cbuffer CB_PS_Lights : register(b4)
+{
+    uint totalLights;
+    float3 padding3;
+};
+
 struct GPULight
 {
     float3 position;

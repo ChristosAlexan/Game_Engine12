@@ -26,8 +26,15 @@ namespace ECS
 
 	void RenderingManager::InitializeRenderTargets(int& width, int& height)
 	{
+		hdr_map1.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), "Data/HDR/voortrekker_interior_2k.hdr");
+
 		m_gBuffer.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height);
-		m_cubeMap1.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator());
+		m_cubeMap1.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 512, 512);
+		m_irradianceMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 32, 32);
+		m_prefilterMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 512, 512, 5);
+
+		std::vector<DXGI_FORMAT> formats = {DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT};
+		m_brdfMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 512, 512, formats, 1);
 	}
 
 	DX12& RenderingManager::GetDX12()
@@ -48,7 +55,10 @@ namespace ECS
 	void RenderingManager::ResetRenderTargets()
 	{
 		m_cubeMap1.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
+		m_irradianceMap.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
+		m_prefilterMap.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
 		m_gBuffer.GetGbufferRenderTargetTexture().Reset(m_dx12.GetCmdList());
+		m_brdfMap.Reset(m_dx12.GetCmdList());
 	}
 
 	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
@@ -56,19 +66,24 @@ namespace ECS
 		renderTarget.SetRenderTarget(m_dx12.GetCmdList(), m_dx12.dsvHandle, clearColor);
 	}
 
-	void RenderingManager::RenderGbufferFullscreen()
+	void RenderingManager::LightPass(Scene* scene)
 	{
-		RenderFullScreenQuad(m_gBuffer.GetGbufferRenderTargetTexture(), 4);
+		RenderLightPass(scene, m_gBuffer.GetGbufferRenderTargetTexture(), 4);
 	}
 
-	void RenderingManager::RenderCubeMap(Camera& camera, DynamicUploadBuffer* dynamicCB, CubeMap& cubeMap)
+	void RenderingManager::RenderPbrPass(Camera& camera, DynamicUploadBuffer* dynamicCB)
 	{
-		if (cubeMap.bRender)
+		if (bRenderPbrPass)
 		{
-			cubeMap.Render(GetDX12(), camera, m_dx12.pipelineState_Cubemap.Get(), 8);
-			cubeMap.bRender = false;
+			m_cubeMap1.Render(GetDX12(), camera, m_dx12.pipelineState_Cubemap.Get(), 8, hdr_map1.GetHDRtexture().GetGPUHandle());
+			// Render the irradiance map
+			m_irradianceMap.Render(GetDX12(), camera, m_dx12.pipelineState_IrradianceConv.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+			// Render the prefilter map
+			m_prefilterMap.RenderMips(GetDX12(), camera, m_dx12.pipelineState_Prefilter.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+			// Render the brdf map
+			RenderBRDF(m_brdfMap);
+			bRenderPbrPass = false;
 		}
-	
 	}
 
 	void RenderingManager::Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
@@ -127,6 +142,7 @@ namespace ECS
 			{
 				ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
 				psMaterialCB.color = DirectX::XMFLOAT4(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
+
 			}
 		}
 		else
@@ -141,6 +157,7 @@ namespace ECS
 		
 		psCameraCB.cameraPos = camera.pos;
 		psCameraCB.padding1 = 0.0f;
+
 
 		if (m_dx12.GetCmdList())
 		{
@@ -159,8 +176,62 @@ namespace ECS
 		}
 	}
 
-	void RenderingManager::RenderFullScreenQuad(RenderTargetTexture& renderTexture, UINT rootParameterIndex)
+	void RenderingManager::RenderBRDF(RenderTargetTexture& renderTexture)
 	{
+		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
+		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
+		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Brdf.Get());
+
+
+		float aspect = static_cast<float>(renderTexture.m_width) / static_cast<float>(renderTexture.m_height);
+		float nearZ = 0.01f;
+		float farZ = 1000.0f;
+		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
+		DirectX::XMVECTOR position = DirectX::XMVectorZero();
+		D3D12_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = static_cast<float>(renderTexture.m_width);
+		viewport.Height = static_cast<float>(renderTexture.m_height);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
+		scissorRect.top = 0;
+		scissorRect.right = renderTexture.m_width;
+		scissorRect.bottom = renderTexture.m_height;
+
+		m_dx12.GetCmdList()->RSSetViewports(1, &viewport);
+		m_dx12.GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
+
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		
+		m_dx12.GetCmdList()->OMSetRenderTargets(1, &renderTexture.m_rtvHandles[0], FALSE, &dsvHandle);
+		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		m_dx12.GetCmdList()->ClearRenderTargetView(renderTexture.m_rtvHandles[0], clearColor, 0, nullptr);
+		m_dx12.GetCmdList()->ClearDepthStencilView(
+			dsvHandle,
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f,
+			0,
+			0,
+			nullptr
+		);
+	
+		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
+		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
+
+		// Transition to SRV
+		renderTexture.TransitionToSRV(m_dx12.GetCmdList());
+	}
+
+	void RenderingManager::RenderLightPass(Scene* scene, RenderTargetTexture& renderTexture, UINT rootParameterIndex)
+	{
+		CB_PS_LIGHTS lights_data = {};
+
 		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap()};
 		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
 		// Transition to SRV
@@ -171,8 +242,21 @@ namespace ECS
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
 		m_dx12.GetCmdList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, renderTexture.GetSrvGpuHandle(0));
-		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
-		//m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(8, m_cubeMap1.hdr_map1.GetHDRtexture().GetGPUHandle());
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap.GetSrvGpuHandle(0));
+
+		// Get all the light components in the scene
+		auto view = scene->GetRegistry().view<LightComponent>();
+		std::size_t totalLights = view.size();
+		lights_data.totalLights = totalLights;
+		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
+
+		if (m_dx12.dynamicCB)
+		{
+			m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(14, m_dx12.dynamicCB->Allocate(lights_data));
+		}
+	
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_2D.Get());
 		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
