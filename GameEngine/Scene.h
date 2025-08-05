@@ -7,6 +7,7 @@
 #include "SaveLoadSystem.h"
 #include "RenderingECS.h"
 #include "LightManager.h"
+#include "TransformManager.h"
 
 namespace ECS
 {
@@ -26,6 +27,7 @@ namespace ECS
 		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
+		void BuildTLAS();
 		void AccumulateLights();
 		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
 
@@ -38,6 +40,7 @@ namespace ECS
 		RenderingManager* GetRenderingManager() const;
 		EntityFactory* GetEntityFactory() const;
 		LightManager* GetLightManager() const;
+		TransformManager* GetTransformManager() const;
 		SaveLoadSystem& GetSaveLoadSystems();
 
 	private:
@@ -50,6 +53,7 @@ namespace ECS
 		std::shared_ptr<AnimationManager> m_animationManager;
 		std::shared_ptr<RenderingManager> m_renderingManager;
 		std::shared_ptr<LightManager> m_lightManager;
+		std::shared_ptr<TransformManager> m_transformManager;
 
 		UINT m_NextEntityID = 0;
 		entt::registry m_registry;

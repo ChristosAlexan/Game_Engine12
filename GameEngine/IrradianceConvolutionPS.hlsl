@@ -14,11 +14,11 @@ float4 Main(PSInput input) : SV_TARGET
 {
     float3 dir = normalize(input.worldDir);
     float3 irradiance = float3(0.0f, 0.0f, 0.0f);
-    float3 up = abs(dir.y) < 0.999f ? float3(0.0, 1.0, 0.0) : float3(1.0, 0.0, 0.0);
+    float3 up = abs(dir.y);
     float3 right = normalize(cross(up, dir));
     up = normalize(cross(dir, right));
     
-    float sampleDelta = 0.025;
+    float sampleDelta = 0.01;
     float nrSamples = 0.0;
     
     for (float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta)

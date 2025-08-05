@@ -2,9 +2,18 @@
 #include "COMException.h"
 #include <DirectXTex.h>
 #include "ErrorLogger.h"
+#include <iostream>
 
 Texture12::Texture12()
 {
+}
+
+Texture12::~Texture12()
+{
+	if (m_resource) 
+	{
+		m_resource.Reset();
+	}
 }
 
 void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator)
@@ -109,7 +118,7 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 	texDesc.Height = static_cast<UINT>(metadata.height);
 	texDesc.DepthOrArraySize = 1;
 	texDesc.MipLevels = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.Format = metadata.format;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -154,7 +163,7 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.Format = metadata.format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
@@ -244,6 +253,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandle() const
 	return m_gpuHandle;
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandleUAV() const
+{
+	return m_gpuHandleUAV;
+}
+
 void Texture12::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 {
 	auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -261,4 +275,62 @@ void Texture12::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
 	cmdList->ResourceBarrier(1, &barrierToSRV);
+}
+
+void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator, const UINT width, const UINT height)
+{
+	// texture descriptor
+	D3D12_RESOURCE_DESC texDesc = {};
+	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	texDesc.Width = width;
+	texDesc.Height = height;
+	texDesc.DepthOrArraySize = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
+	HRESULT hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
+		&texDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		nullptr, IID_PPV_ARGS(&m_resource));
+	if (FAILED(hr))
+		ErrorLogger::Log(hr, "Failed to create texture resource!");
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.Format = texDesc.Format;
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+
+	// Create UAV
+	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
+	m_cpuHandleUAV = handle.cpuHandle;
+	m_gpuHandleUAV = handle.gpuHandle;
+
+	device->CreateUnorderedAccessView(m_resource.Get(), nullptr, &uavDesc, m_cpuHandleUAV);
+
+	// Create SRV
+	handle = descriptorAllocator->Allocate();
+	m_cpuHandle = handle.cpuHandle;
+	m_gpuHandle = handle.gpuHandle;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
+}
+
+void Texture12::Reset(ID3D12GraphicsCommandList* cmdList)
+{
+	auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_resource.Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	cmdList->ResourceBarrier(1, &barrierToRTV);
+	
 }

@@ -33,6 +33,7 @@ Texture2D worldPosDepthTexture : register(t3, space0);
 TextureCube prefilterTexture : register(t0, space4);
 TextureCube irradianceTexture : register(t1, space4);
 Texture2D brdfTexture : register(t2, space4);
+Texture2D raytracingTexture : register(t3, space4);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -41,9 +42,9 @@ SamplerState gSampler : register(s0);
 float4 Main(PSInput input) : SV_TARGET
 {
     const float MAX_REF_LOD = 5.0f;
-    const float exposure = 0.5f;
+    const float exposure = 0.4f;
     const float gamma = 2.2f;
-    float ambientStrength = 1.0f;
+    float ambientStrength = 0.5f;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
     float mask = metalRoughnessMaskTexture.Sample(gSampler, input.uv).b;
@@ -103,6 +104,9 @@ float4 Main(PSInput input) : SV_TARGET
 
     color = ReinhardToneMapping(color, exposure);
     color = pow(color, float3(1.0f / gamma, 1.0f / gamma, 1.0f / gamma));
+    
+    
+    float3 raytracing = raytracingTexture.Sample(gSampler, input.uv);
     return float4(color, 1.0);
 }
 

@@ -157,9 +157,6 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 		}
 	}
 
-	
-	TransitionToSRV(cmdList);
-
 	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
 	m_cpuHandle[0] = handle.cpuHandle;
 	m_gpuHandle[0] = handle.gpuHandle;

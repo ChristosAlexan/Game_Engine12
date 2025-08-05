@@ -31,7 +31,7 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	init_info.Device = device;
 	init_info.CommandQueue = cmdQueue;
 	init_info.NumFramesInFlight = 2;
-	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	init_info.RTVFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	init_info.SrvDescriptorHeap = descriptorHeap;
 
 	static auto handle = descAllocator->Allocate();

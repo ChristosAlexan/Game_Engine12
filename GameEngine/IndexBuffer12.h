@@ -67,4 +67,10 @@ public:
 
 		return S_OK;
 	}
+
+
+	D3D12_GPU_VIRTUAL_ADDRESS GetIndexBufferVirtualAddress() const
+	{
+		return indexBuffer->GetGPUVirtualAddress();
+	}
 };

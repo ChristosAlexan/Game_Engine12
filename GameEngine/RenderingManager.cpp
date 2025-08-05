@@ -35,6 +35,16 @@ namespace ECS
 
 		std::vector<DXGI_FORMAT> formats = {DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT};
 		m_brdfMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 512, 512, formats, 1);
+
+		GetDX12().m_textureUAV = std::make_unique<Texture12>();
+		GetDX12().m_textureUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
+		m_raytracingMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height, formats, 1);
+	}
+
+	void RenderingManager::BuildTLAS(Scene* scene)
+	{
+		// Build TLAS for raytracing
+		m_tlasBuilder.Build(scene);
 	}
 
 	DX12& RenderingManager::GetDX12()
@@ -54,11 +64,8 @@ namespace ECS
 
 	void RenderingManager::ResetRenderTargets()
 	{
-		m_cubeMap1.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
-		m_irradianceMap.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
-		m_prefilterMap.GetCubeMapRenderTargetTexture().Reset(m_dx12.GetCmdList());
-		m_gBuffer.GetGbufferRenderTargetTexture().Reset(m_dx12.GetCmdList());
-		m_brdfMap.Reset(m_dx12.GetCmdList());
+		m_gBuffer.ResetRenderTargets(m_dx12.GetCmdList());
+		m_raytracingMap.Reset(m_dx12.GetCmdList());
 	}
 
 	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
@@ -68,7 +75,7 @@ namespace ECS
 
 	void RenderingManager::LightPass(Scene* scene)
 	{
-		RenderLightPass(scene, m_gBuffer.GetGbufferRenderTargetTexture(), 4);
+		RenderLightPass(scene);
 	}
 
 	void RenderingManager::RenderPbrPass(Camera& camera, DynamicUploadBuffer* dynamicCB)
@@ -81,12 +88,12 @@ namespace ECS
 			// Render the prefilter map
 			m_prefilterMap.RenderMips(GetDX12(), camera, m_dx12.pipelineState_Prefilter.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
 			// Render the brdf map
-			RenderBRDF(m_brdfMap);
+			RenderBRDF();
 			bRenderPbrPass = false;
 		}
 	}
 
-	void RenderingManager::Render(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
+	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
 		TransformComponent& transformComponent, RenderComponent& renderComponent)
 	{
 		if (!scene)
@@ -99,18 +106,6 @@ namespace ECS
 		CB_PS_Camera psCameraCB = {};
 
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Gbuffer.Get());
-
-		DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&transformComponent.position);
-		DirectX::XMVECTOR rot_vec = DirectX::XMLoadFloat4(&transformComponent.rotation);
-		DirectX::XMVECTOR scale_vec = DirectX::XMLoadFloat3(&transformComponent.scale);
-
-		DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(scale_vec);
-		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(rot_vec);
-		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(pos_vec);
-
-		transformComponent.worldMatrix = S * R * T;
-
-	
 		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
 		vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
 		vsCB.worldMatrix = DirectX::XMMatrixTranspose(transformComponent.worldMatrix);
@@ -176,14 +171,14 @@ namespace ECS
 		}
 	}
 
-	void RenderingManager::RenderBRDF(RenderTargetTexture& renderTexture)
+	void RenderingManager::RenderBRDF()
 	{
 		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
 		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Brdf.Get());
 
 
-		float aspect = static_cast<float>(renderTexture.m_width) / static_cast<float>(renderTexture.m_height);
+		float aspect = static_cast<float>(m_brdfMap.m_width) / static_cast<float>(m_brdfMap.m_height);
 		float nearZ = 0.01f;
 		float farZ = 1000.0f;
 		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
@@ -191,16 +186,16 @@ namespace ECS
 		D3D12_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(renderTexture.m_width);
-		viewport.Height = static_cast<float>(renderTexture.m_height);
+		viewport.Width = static_cast<float>(m_brdfMap.m_width);
+		viewport.Height = static_cast<float>(m_brdfMap.m_height);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 
 		D3D12_RECT scissorRect = {};
 		scissorRect.left = 0;
 		scissorRect.top = 0;
-		scissorRect.right = renderTexture.m_width;
-		scissorRect.bottom = renderTexture.m_height;
+		scissorRect.right = m_brdfMap.m_width;
+		scissorRect.bottom = m_brdfMap.m_height;
 
 		m_dx12.GetCmdList()->RSSetViewports(1, &viewport);
 		m_dx12.GetCmdList()->RSSetScissorRects(1, &scissorRect);
@@ -208,9 +203,9 @@ namespace ECS
 
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
 		
-		m_dx12.GetCmdList()->OMSetRenderTargets(1, &renderTexture.m_rtvHandles[0], FALSE, &dsvHandle);
+		m_dx12.GetCmdList()->OMSetRenderTargets(1, &m_brdfMap.m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		m_dx12.GetCmdList()->ClearRenderTargetView(renderTexture.m_rtvHandles[0], clearColor, 0, nullptr);
+		m_dx12.GetCmdList()->ClearRenderTargetView(m_brdfMap.m_rtvHandles[0], clearColor, 0, nullptr);
 		m_dx12.GetCmdList()->ClearDepthStencilView(
 			dsvHandle,
 			D3D12_CLEAR_FLAG_DEPTH,
@@ -224,27 +219,87 @@ namespace ECS
 		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
 
-		// Transition to SRV
-		renderTexture.TransitionToSRV(m_dx12.GetCmdList());
+		m_brdfMap.TransitionToSRV(GetDX12().GetCmdList());
 	}
 
-	void RenderingManager::RenderLightPass(Scene* scene, RenderTargetTexture& renderTexture, UINT rootParameterIndex)
+	void RenderingManager::DispatchRays()
 	{
+		// Transition back to unorder access
+		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetDX12().m_textureUAV->m_resource.Get(),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+
+		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetRootSignature());
+		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
+		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(15, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(16, GetDX12().m_textureUAV->GetGPUHandleUAV());
+
+		GetDX12().DispatchRaytracing();
+
+		// Transition to shader resource
+		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetDX12().m_textureUAV->m_resource.Get(),
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+
+		RenderRayTracingToRenderTarget();
+	}
+
+	void RenderingManager::RenderLightPass(Scene* scene)
+	{
+		m_gBuffer.GetGbufferRenderTargetTexture().TransitionToSRV(GetDX12().GetCmdList());
 		CB_PS_LIGHTS lights_data = {};
 
-		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap()};
+		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
 		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
-		// Transition to SRV
-		renderTexture.TransitionToSRV(m_dx12.GetCmdList());
-		// Set render target
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_dx12.GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), m_dx12.frameIndex, m_dx12.rtvDescriptorSize);
-		// Set depth-stencil
+
+		float aspect = static_cast<float>(GetDX12().GetScreenWidth()) / static_cast<float>(GetDX12().GetScreenHeight());
+		float nearZ = 0.01f;
+		float farZ = 1000.0f;
+		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
+		DirectX::XMVECTOR position = DirectX::XMVectorZero();
+		D3D12_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = static_cast<float>(GetDX12().GetScreenWidth());
+		viewport.Height = static_cast<float>(GetDX12().GetScreenHeight());
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
+		scissorRect.top = 0;
+		scissorRect.right = GetDX12().GetScreenWidth();
+		scissorRect.bottom = GetDX12().GetScreenHeight();
+
+		m_dx12.GetCmdList()->RSSetViewports(1, &viewport);
+		m_dx12.GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
+
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(GetDX12().GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), GetDX12().frameIndex, GetDX12().rtvDescriptorSize);
+
 		m_dx12.GetCmdList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, renderTexture.GetSrvGpuHandle(0));
+		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		m_dx12.GetCmdList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		m_dx12.GetCmdList()->ClearDepthStencilView(
+			dsvHandle,
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f,
+			0,
+			0,
+			nullptr
+		);
+
+
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture().GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap.GetSrvGpuHandle(0));
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap.GetSrvGpuHandle(0));
 
 		// Get all the light components in the scene
 		auto view = scene->GetRegistry().view<LightComponent>();
@@ -256,10 +311,63 @@ namespace ECS
 		{
 			m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(14, m_dx12.dynamicCB->Allocate(lights_data));
 		}
-	
+
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_2D.Get());
 		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
+	}
+
+	void RenderingManager::RenderRayTracingToRenderTarget()
+	{
+
+		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
+		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
+		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_raytracingRenderTarget.Get());
+
+		float aspect = static_cast<float>(m_raytracingMap.m_width) / static_cast<float>(m_raytracingMap.m_height);
+		float nearZ = 0.01f;
+		float farZ = 1000.0f;
+		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
+		DirectX::XMVECTOR position = DirectX::XMVectorZero();
+		D3D12_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = static_cast<float>(m_raytracingMap.m_width);
+		viewport.Height = static_cast<float>(m_raytracingMap.m_height);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
+		scissorRect.top = 0;
+		scissorRect.right = m_raytracingMap.m_width;
+		scissorRect.bottom = m_raytracingMap.m_height;
+
+		m_dx12.GetCmdList()->RSSetViewports(1, &viewport);
+		m_dx12.GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
+
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+		m_dx12.GetCmdList()->OMSetRenderTargets(1, &m_raytracingMap.m_rtvHandles[0], FALSE, &dsvHandle);
+		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		m_dx12.GetCmdList()->ClearRenderTargetView(m_raytracingMap.m_rtvHandles[0], clearColor, 0, nullptr);
+		m_dx12.GetCmdList()->ClearDepthStencilView(
+			dsvHandle,
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f,
+			0,
+			0,
+			nullptr
+		);
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(17, GetDX12().m_textureUAV->GetGPUHandle());
+		
+		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
+		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
+
+
+		m_raytracingMap.TransitionToSRV(GetDX12().GetCmdList());
 	}
 }

@@ -246,6 +246,7 @@
     <ClCompile Include="AnimationManager.cpp" />
     <ClCompile Include="AppTimer.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="BLASBuilder.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="COMException.cpp" />
     <ClCompile Include="CubeMap.cpp" />
@@ -288,6 +289,8 @@
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Shapes12.cpp" />
     <ClCompile Include="Texture12.cpp" />
+    <ClCompile Include="TLASBuilder.cpp" />
+    <ClCompile Include="TransformManager.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="StringHelper.cpp" />
   </ItemGroup>
@@ -295,6 +298,7 @@
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="AppTimer.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="BLASBuilder.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="COMException.h" />
     <ClInclude Include="ComponentStorage12.h" />
@@ -342,6 +346,7 @@
     <ClInclude Include="mikktspace.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelData.h" />
+    <ClInclude Include="RayTraceData.h" />
     <ClInclude Include="RectShape12.h" />
     <ClInclude Include="RenderingECS.h" />
     <ClInclude Include="RenderingManager.h" />
@@ -354,7 +359,9 @@
     <ClInclude Include="StringHelper.h" />
     <ClInclude Include="StructuredBuffer.h" />
     <ClInclude Include="Texture12.h" />
+    <ClInclude Include="TLASBuilder.h" />
     <ClInclude Include="TransformECS.h" />
+    <ClInclude Include="TransformManager.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer12.h" />
   </ItemGroup>
@@ -435,6 +442,17 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="RaytracingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="PixelShader12.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Pixel</ShaderType>
@@ -471,6 +489,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="RayTracingShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">6.7</ShaderModel>
+    </FxCompile>
     <FxCompile Include="VertexShader12.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Vertex</ShaderType>
@@ -502,6 +532,7 @@
     <None Include="General_VS.hlsli" />
     <None Include="Math_Helpers.hlsli" />
     <None Include="packages.config" />
+    <None Include="RayTraceCommon.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

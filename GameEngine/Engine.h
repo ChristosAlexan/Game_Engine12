@@ -16,7 +16,7 @@ class Engine
 public:
 	Engine();
 
-	bool Initialize(std::string window_title, std::string window_class, int width, int height);
+	bool Initialize(int width, int height);
 	bool StopEngine();
 	void Update(int width, int height);
 

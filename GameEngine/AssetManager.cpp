@@ -1,5 +1,8 @@
 #include "AssetManager.h"
+#include "RenderingManager.h"
 #include "ErrorLogger.h"
+#include "BLASBuilder.h"
+#include "DX12.h"
 
 namespace ECS
 {
@@ -7,14 +10,14 @@ namespace ECS
 	{
 	}
 
-	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(DX12& dx12, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
 		if (m_meshes.contains(entityDesc.name))
 			return m_meshes.at(entityDesc.name);
 
-		OutputDebugStringA(( "Name = " + entityDesc.name + "\n").c_str());
 		MeshData data;
 		Model model;
+		BLASBuilder blas_builder;
 
 		switch (entityDesc.meshType)
 		{
@@ -40,6 +43,14 @@ namespace ECS
 		auto mesh = std::make_shared<GpuMesh>();
 		mesh->cpuMesh = std::move(data);
 		mesh->Upload(device, cmdList);
+
+		if (entityDesc.meshType != ECS::MESH_TYPE::LIGHT)
+		{
+			mesh->blas = std::make_shared<BLAS>(blas_builder.Build(dx12.GetDevice(), dx12.GetCmdList(),
+			mesh->vertexBuffer.GetVertexBufferVirtualAddress(), mesh->vertexCount, mesh->vertexBuffer.vbView.StrideInBytes,
+			mesh->indexBuffer.GetIndexBufferVirtualAddress(), mesh->indexCount, mesh->indexBuffer.ibView.Format));
+		}
+
 		m_meshes.emplace(entityDesc.name, mesh);
 
 		return m_meshes.at(entityDesc.name);

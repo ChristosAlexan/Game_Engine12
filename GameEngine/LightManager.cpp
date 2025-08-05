@@ -17,9 +17,10 @@ namespace ECS
 		m_lightBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuLights.size());
 
 		DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+	
 		m_cpuHandle = allocator.cpuHandle;
 		m_gpuHandle = allocator.gpuHandle;
-
+		
 		m_lightBuffer.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuHandle);
 	
 	}
@@ -73,7 +74,12 @@ namespace ECS
 			m_lightBuffer.UploadData(cmdList, m_gpuLights);
 			
 		}
-
+		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_lightBuffer.GetResource(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
+		);
+		cmdList->ResourceBarrier(1, &barrier);
 		cmdList->SetGraphicsRootDescriptorTable(
 			7, // Root parameter structured buffer index is 7
 			m_gpuHandle

@@ -29,7 +29,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	const int w = 1600;
 	const int h = 900;
 	Engine engine;
-	if (engine.Initialize("DXEngine", "Window", w, h))
+	if (engine.Initialize(w, h))
 	{
 		while (engine.StopEngine() != true)
 		{

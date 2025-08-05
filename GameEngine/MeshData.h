@@ -5,6 +5,7 @@
 #include <vector>
 #include "Vertex.h"
 #include "MaterialECS.h"
+#include "RayTraceData.h"
 
 namespace ECS
 {
@@ -27,14 +28,17 @@ namespace ECS
     {
         VertexBuffer12<Vertex> vertexBuffer;
         IndexBuffer12 indexBuffer;
+        uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
         MeshData cpuMesh;
+        std::shared_ptr<BLAS> blas;
 
         void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
         {
             vertexBuffer.Initialize(device, cmdList, cpuMesh.vertices.data(), cpuMesh.vertices.size());
             indexBuffer.Initialize(device, cmdList, cpuMesh.indices.data(), (uint32_t)cpuMesh.indices.size());
             indexCount = static_cast<uint32_t>(cpuMesh.indices.size());
+            vertexCount = static_cast<uint32_t>(cpuMesh.vertices.size());
         }
 
         void Draw(ID3D12GraphicsCommandList* cmdList) 

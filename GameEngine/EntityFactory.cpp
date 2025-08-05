@@ -1,5 +1,6 @@
 #include "EntityFactory.h"
 #include "AssetManager.h"
+#include "RenderingManager.h"
 #include "Scene.h"
 #include "MathHelpers.h"
 
@@ -17,7 +18,7 @@ namespace ECS
 		auto id = scene->CreateEntity();
 	
 
-		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(entityDesc, m_registry, id, m_device, m_cmdList);
+		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(scene->GetRenderingManager()->GetDX12(), entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
 
 		RenderComponent renderComponent = {};
@@ -46,7 +47,7 @@ namespace ECS
 
 			m_registry->emplace<LightComponent>(id, lightComponent);
 		}
-
+		
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);

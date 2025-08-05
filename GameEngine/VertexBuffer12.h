@@ -10,12 +10,7 @@ class VertexBuffer12
 public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer;
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexUploadBuffer;
-
 	D3D12_VERTEX_BUFFER_VIEW vbView = {};
-	D3D12_INDEX_BUFFER_VIEW ibView = {};
 
 public:
 	VertexBuffer12()
@@ -75,4 +70,9 @@ public:
 
 		return S_OK;
 	}
+
+    D3D12_GPU_VIRTUAL_ADDRESS GetVertexBufferVirtualAddress() const
+    {
+        return vertexBuffer->GetGPUVirtualAddress();
+    }
 };

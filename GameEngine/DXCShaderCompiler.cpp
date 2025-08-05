@@ -25,20 +25,28 @@ Microsoft::WRL::ComPtr<IDxcBlob> DXCShaderCompiler::CompileShader(
     sourceBuffer.Size = sourceBlob->GetBufferSize();
     sourceBuffer.Encoding = DXC_CP_ACP;
 
-    const wchar_t* args[] = {
-        filename.c_str(), // For error reporting
-        L"-E", entryPoint.c_str(),
-        L"-T", targetProfile.c_str(),
-        L"-Zpr",             // Row-major matrices
-        L"-Zi",              // Debug info
-        L"-Qembed_debug",    // Embed debug info
-        L"-Od"               // No optimizations for debugging
-    };
-
+    std::vector<LPCWSTR> args;
+    args.push_back(filename.c_str());
+    if (!entryPoint.empty()) 
+    {
+        args.push_back(L"-E");
+        args.push_back(entryPoint.c_str());
+    }
+    args.push_back(L"-T");
+    args.push_back(targetProfile.c_str());
+    args.push_back(L"-Zpr"); // Row-major matrices
+    args.push_back(L"-Zi"); // Debug info
+    args.push_back(L"-Qembed_debug"); // Embed debug info in blob
+#ifdef _DEBUG
+    args.push_back(L"-Od"); // Disable optimizations
+#else
+    args.push_back(L"-O3"); // Enable optimizations
+#endif
+   
     Microsoft::WRL::ComPtr<IDxcResult> result;
     compiler->Compile(
         &sourceBuffer,
-        args, _countof(args),
+        args.data(), args.size(),
         includeHandler.Get(),
         IID_PPV_ARGS(&result)
     );

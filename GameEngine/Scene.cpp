@@ -51,6 +51,11 @@ namespace ECS
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
+	void Scene::BuildTLAS()
+	{
+		GetRenderingManager()->BuildTLAS(this);
+	}
+
 	void Scene::AccumulateLights()
 	{
 		m_lightManager->Initialize(this);
@@ -60,11 +65,22 @@ namespace ECS
 	{
 		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
+		// Update
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			GetAnimationManager()->Update(dt, this, entity, renderComponent);
-			GetRenderingManager()->Render(this, entity, camera, dynamicCB, transformComponent, renderComponent);
+			GetTransformManager()->Update(this, entity, transformComponent);
+	
 		}
+	
+		// Present
+		for (auto [entity, transformComponent, renderComponent] : group.each())
+		{
+			GetRenderingManager()->RenderGbuffer(this, entity, camera, dynamicCB, transformComponent, renderComponent);
+		}
+
+		// Dispatch rays
+		GetRenderingManager()->DispatchRays();
 	}	
 
 	const std::string Scene::GetName() const
@@ -104,6 +120,10 @@ namespace ECS
 	LightManager* Scene::GetLightManager() const
 	{
 		return m_lightManager.get();
+	}
+	TransformManager* Scene::GetTransformManager() const
+	{
+		return m_transformManager.get();
 	}
 	SaveLoadSystem& Scene::GetSaveLoadSystems()
 	{

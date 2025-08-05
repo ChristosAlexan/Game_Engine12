@@ -51,10 +51,7 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 	);
 	dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_CubemapDebug.Get());
 	//dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_Cubemap.Get());
-	// Transition to SRV
 
-
-	m_cubemapTexture.TransitionToSRV(dx12.GetCmdList());
 	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, m_cubemapTexture.GetSrvGpuHandle(0));
 	//dx12.GetCmdList()->SetGraphicsRootDescriptorTable(8, hdr_map1.GetHDRtexture().GetGPUHandle());
 
@@ -80,6 +77,9 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 	}
 
 	m_cubeShape.Draw(dx12.GetCmdList());
+
+	// Transition to SRV
+	m_cubemapTexture.TransitionToSRV(dx12.GetCmdList());
 }
 
 void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle)

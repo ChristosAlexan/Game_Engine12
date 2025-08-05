@@ -11,7 +11,7 @@ Engine::Engine()
 {
 }
 
-bool Engine::Initialize(std::string window_title, std::string window_class, int width, int height)
+bool Engine::Initialize(int width, int height)
 {
 	this->width = width;
 	this->height = height;
@@ -61,11 +61,13 @@ void Engine::Update(int width, int height)
 	// Render cube maps, irradiance, prefilter and brdf maps
 	m_sceneManager->GetRenderingManager()->RenderPbrPass(camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
 
-	//m_sceneManager->GetRenderingManager()->GetDX12().TransitionBackBufferToPresent();
-	// Reset view port to camera
-	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 1000.0f);
+	// Reset viewport to camera
+	camera.PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
 	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
 	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
+	// Render light pass
+	m_sceneManager->GetRenderingManager()->LightPass(m_sceneManager->GetCurrentScene());
 
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
@@ -171,13 +173,10 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 
-	m_sceneManager->GetRenderingManager()->LightPass(m_sceneManager->GetCurrentScene());
-	//m_sceneManager->GetRenderingManager()->RenderBRDF(m_sceneManager->GetRenderingManager()->m_brdfMap);
+	//m_sceneManager->GetCurrentScene()->GetRenderingManager()->m_cubeMap1.RenderDebug(m_sceneManager->GetCurrentScene()->GetRenderingManager()->GetDX12(), camera, 9);
 
-	// Render cube map debug
-	//m_sceneManager->GetRenderingManager()->m_cubeMap1.RenderDebug(m_sceneManager->GetRenderingManager()->GetDX12(), camera, 4);
+	
 	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
-
 
 	if (bStopEngine)
 	{
@@ -199,16 +198,17 @@ void Engine::InitializeDirectX12()
 void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
 	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), 
-		m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
+										m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
 	m_sceneManager->LoadScene("Scene1", m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
+	m_sceneManager->GetCurrentScene()->BuildTLAS();
 	m_sceneManager->SetupLights();
-	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);
+	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);	
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	camera.PerspectiveFov(90.0f, aspectRatio, 0.1f, 1000.0f);
+	camera.PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
 	camera.SetPosition(0, 0, 0);
 }

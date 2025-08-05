@@ -12,7 +12,7 @@ bool GameWindow::Initialize(int window_width, int window_height)
         return SDL_APP_FAILURE;
     }
     m_window = SDL_CreateWindow(
-        "My DX12 Engine",
+        "SDL window",
         window_width, window_height,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY
     );

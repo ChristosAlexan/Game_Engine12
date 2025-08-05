@@ -115,6 +115,9 @@
     <Filter Include="Saves">
       <UniqueIdentifier>{af1346f2-f9ed-4534-b63f-703ab27b5bbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders12\Raytracing shaders">
+      <UniqueIdentifier>{71932e34-91b9-4661-b3fa-fc4f24a3b791}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -257,6 +260,15 @@
     </ClCompile>
     <ClCompile Include="CubeMap.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BLASBuilder.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TLASBuilder.cpp">
+      <Filter>GFX\DX12\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformManager.cpp">
+      <Filter>ECS\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -455,6 +467,18 @@
     <ClInclude Include="CubeMap.h">
       <Filter>GFX\DX12\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RayTraceData.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="BLASBuilder.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TLASBuilder.h">
+      <Filter>GFX\DX12\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader12.hlsl">
@@ -493,6 +517,12 @@
     <FxCompile Include="BRDF_PS.hlsl">
       <Filter>Shaders12\Pixel Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="RayTracingShader.hlsl">
+      <Filter>Shaders12\Raytracing shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="RaytracingPS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -504,6 +534,9 @@
     </None>
     <None Include="Math_Helpers.hlsli">
       <Filter>Shaders12</Filter>
+    </None>
+    <None Include="RayTraceCommon.hlsli">
+      <Filter>Shaders12\Raytracing shaders</Filter>
     </None>
   </ItemGroup>
 </Project>
