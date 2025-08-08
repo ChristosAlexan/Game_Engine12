@@ -1,5 +1,6 @@
 #include "BLASBuilder.h"
 #include "COMException.h"
+#include "Vertex.h"
 
 BLASBuilder::BLASBuilder()
 {
@@ -16,6 +17,7 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	geometry.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
 	geometry.Triangles.VertexBuffer.StartAddress = vertexBuffer;
 	geometry.Triangles.VertexBuffer.StrideInBytes = vertexStride;
+	geometry.Triangles.Transform3x4 = 0;
 	geometry.Triangles.VertexCount = vertexCount;
 	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 	geometry.Triangles.IndexBuffer = indexBuffer;
@@ -54,6 +56,8 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	buildDesc.Inputs = inputs;
 	buildDesc.DestAccelerationStructureData = result->GetGPUVirtualAddress();
 	buildDesc.ScratchAccelerationStructureData = scratch->GetGPUVirtualAddress();
+
+	cmdList->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
 
 	return {result, scratch};
 }

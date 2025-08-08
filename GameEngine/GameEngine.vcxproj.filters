@@ -538,5 +538,8 @@
     <None Include="RayTraceCommon.hlsli">
       <Filter>Shaders12\Raytracing shaders</Filter>
     </None>
+    <None Include="LightsData.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -19,6 +19,7 @@ namespace ECS
 	{
 	public:
 		RenderingManager();
+		~RenderingManager();
 		bool Initialize(GameWindow& game_window, int width, int height);
 		void InitializeRenderTargets(int& width, int& height);
 		void BuildTLAS(Scene* scene);
@@ -32,7 +33,7 @@ namespace ECS
 		void RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB,
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
-		void DispatchRays();
+		void DispatchRays(Scene* scene);
 
 		void RenderRayTracingToRenderTarget();
 	private:
@@ -43,7 +44,9 @@ namespace ECS
 		DX12 m_dx12;
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
-	public:
+		std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
+		std::unique_ptr<Texture12> m_shadowsUAV; // Ray traced shadows output
+ 	public:
 
 		HDR_IMAGE hdr_map1;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;

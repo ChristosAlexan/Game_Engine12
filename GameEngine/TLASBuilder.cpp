@@ -3,6 +3,7 @@
 #include "RenderingECS.h"
 #include "RenderingManager.h"
 #include "Scene.h"
+#include "MathHelpers.h"
 
 TLASBuilder::TLASBuilder()
 {
@@ -10,11 +11,16 @@ TLASBuilder::TLASBuilder()
 
 void TLASBuilder::Build(ECS::Scene* scene)
 {
+	m_instanceDescs.clear();
+	m_tlasBuffer.Reset();
+	m_instanceBuffer.Reset();
+	m_scratchBuffer.Reset();
+
 	auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 	for (auto [entity, transformComponent, renderComponent] : group.each())
 	{
 		const auto& blas = renderComponent.mesh->blas;
-
+	
 		if (!blas)
 			continue;
 
@@ -22,17 +28,18 @@ void TLASBuilder::Build(ECS::Scene* scene)
 		instance.AccelerationStructure = blas->result->GetGPUVirtualAddress();
 		instance.InstanceID = static_cast<UINT>(entity);
 		instance.InstanceMask = 0xFF;
-		instance.InstanceContributionToHitGroupIndex = 0;
+		instance.InstanceContributionToHitGroupIndex = m_instanceDescs.size();
 		instance.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+
+		DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixTranspose(transformComponent.worldMatrix);
 
 		for (int i = 0; i < 3; ++i)
 		{
-			instance.Transform[i][0] = transformComponent.worldMatrix.r[i].m128_f32[0];
-			instance.Transform[i][1] = transformComponent.worldMatrix.r[i].m128_f32[1];
-			instance.Transform[i][2] = transformComponent.worldMatrix.r[i].m128_f32[2];
-			instance.Transform[i][3] = transformComponent.worldMatrix.r[i].m128_f32[3];
+			instance.Transform[i][0] = worldMatrix.r[i].m128_f32[0];
+			instance.Transform[i][1] = worldMatrix.r[i].m128_f32[1];
+			instance.Transform[i][2] = worldMatrix.r[i].m128_f32[2];
+			instance.Transform[i][3] = worldMatrix.r[i].m128_f32[3];
 		}
-
 		m_instanceDescs.push_back(instance);
 	}
 
@@ -48,7 +55,7 @@ void TLASBuilder::BuildRAS(DX12& dx12)
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs = {};
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
+	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 	inputs.NumDescs = (UINT)m_instanceDescs.size();
 
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
@@ -57,6 +64,7 @@ void TLASBuilder::BuildRAS(DX12& dx12)
 	// Create result buffer for the TLAS
 	m_tlasBuffer = dx12.CreateRayTracingBuffer(prebuildInfo.ResultDataMaxSizeInBytes, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 	m_scratchBuffer = dx12.CreateRayTracingBuffer(prebuildInfo.ScratchDataSizeInBytes, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	
 	// Build the TLAS
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC tlasBuildDesc = {};
 	tlasBuildDesc.Inputs = inputs;

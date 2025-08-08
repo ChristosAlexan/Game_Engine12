@@ -1,3 +1,4 @@
+
 #include"Engine.h"
 #include<Windows.h>
 #include "ErrorLogger.h"
@@ -17,6 +18,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
 #ifdef _DEBUG
 	EnableConsole();
+	LoadLibraryA("C:\\Program Files\\Microsoft PIX\\2507.11\\WinPixGpuCapturer.dll");
 #endif
 
 	HRESULT hr = CoInitialize(NULL);

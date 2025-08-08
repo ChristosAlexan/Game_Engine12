@@ -203,7 +203,6 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
-	m_sceneManager->GetCurrentScene()->BuildTLAS();
 	m_sceneManager->SetupLights();
 	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);	
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();

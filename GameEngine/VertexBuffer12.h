@@ -23,7 +23,7 @@ public:
 		HRESULT hr;
         UINT vbSize = sizeof(T) * vertexCount;
 
-        // 1. Create default heap (GPU memory)
+        // Create default heap (GPU memory)
         CD3DX12_HEAP_PROPERTIES defaultHeapProps(D3D12_HEAP_TYPE_DEFAULT);
         CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
 
@@ -36,7 +36,7 @@ public:
             IID_PPV_ARGS(&vertexBuffer)
         );
 
-        // 2. Create upload heap
+        // Create upload heap
         CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
         device->CreateCommittedResource(
             &uploadHeapProps,
@@ -47,7 +47,7 @@ public:
             IID_PPV_ARGS(&vertexUploadBuffer)
         );
 
-        // 3. Copy data to upload heap
+        // Copy data to upload heap
         D3D12_SUBRESOURCE_DATA vertexData = {};
         vertexData.pData = reinterpret_cast<const BYTE*>(data);
         vertexData.RowPitch = vbSize;
@@ -55,7 +55,7 @@ public:
 
         UpdateSubresources(commandList, vertexBuffer.Get(), vertexUploadBuffer.Get(), 0, 0, 1, &vertexData);
 
-        // 4. Transition to vertex buffer state
+        // Transition to vertex buffer state
         CD3DX12_RESOURCE_BARRIER vbBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
             vertexBuffer.Get(),
             D3D12_RESOURCE_STATE_COPY_DEST,
@@ -63,7 +63,7 @@ public:
         );
         commandList->ResourceBarrier(1, &vbBarrier);
 
-        // 5. Set view
+        // Set view
         vbView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
         vbView.StrideInBytes = sizeof(T);
         vbView.SizeInBytes = vbSize;

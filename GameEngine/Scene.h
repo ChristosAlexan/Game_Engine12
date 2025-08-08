@@ -27,7 +27,6 @@ namespace ECS
 		entt::entity CreateEntity();
 		void LoadMaterials();
 		void LoadAssets();
-		void BuildTLAS();
 		void AccumulateLights();
 		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
 

@@ -1,4 +1,5 @@
 #include "General_PS.hlsli"
+#include "LightsData.hlsli"
 #include "Math_Helpers.hlsli"
 
 struct PSInput
@@ -106,8 +107,8 @@ float4 Main(PSInput input) : SV_TARGET
     color = pow(color, float3(1.0f / gamma, 1.0f / gamma, 1.0f / gamma));
     
     
-    float3 raytracing = raytracingTexture.Sample(gSampler, input.uv);
-    return float4(color, 1.0);
+    float raytracedShadows = raytracingTexture.Sample(gSampler, input.uv).r;
+    return float4(color * raytracedShadows, 1.0);
 }
 
 float3 fresnelSchlick(float cosTheta, float3 F0)

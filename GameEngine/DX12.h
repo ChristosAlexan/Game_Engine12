@@ -21,7 +21,6 @@ public:
 
 	uint32_t GetScreenWidth();
 	uint32_t GetScreenHeight();
-	void CreateUploadBuffer(UINT64 size, const void* initData, Microsoft::WRL::ComPtr<ID3D12Resource>& defaultBuffer, Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRaytracingInstanceUploadBuffer(UINT64 size, const void* initData);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRayTracingBuffer(UINT64 size, D3D12_RESOURCE_STATES initialState);
 	void WaitForGPU(ID3D12CommandQueue* commandQueue, ID3D12Fence* fence, HANDLE fenceEvent, UINT64& fenceValue);
@@ -31,13 +30,14 @@ public:
 	void CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height);
 	void CreateFenceAndSyncObjects();
 	void CreateSamplerStates();
-	void CreateRootSignature(CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC& rootSigDesc);
+	void CreateRootSignature(CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC& rootSigDesc, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
 	void CreateDescriptorHeaps();
 	void InitializeShaders();
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, 
 		const UINT num_renderTargets, const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode = D3D12_CULL_MODE_BACK);
+	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
 	void CreateRTPSO(IDxcBlob* rayTracingBlob);
-	void CreateSBT();
+	void CreateSBT(UINT numHitGroups);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
@@ -58,7 +58,9 @@ public:
 	ID3D12DescriptorHeap* GetRtvHeap() const;
 	ID3D12DescriptorHeap* GetSharedSrvHeap() const;
 	DescriptorAllocator* GetDescriptorAllocator() const;
-	ID3D12RootSignature* GetRootSignature() const;
+	ID3D12RootSignature* GetRasterRootSignature() const;
+	ID3D12RootSignature* GetGlobalRaytracingRootSignature() const;
+	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
 	void DispatchRaytracing();
 
 public:
@@ -80,7 +82,6 @@ public:
 	UINT64 fenceValue = 0;
 	HANDLE fenceEvent = nullptr;
 
-	std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
 
 private:
 	uint32_t m_screenWidth, m_screenHeight;
@@ -95,15 +96,15 @@ private:
 	std::unique_ptr<DescriptorAllocator> m_descAllocator;
 	
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory;
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rasterRootSignature, m_globalRaytracingRootSignature, m_localRaytracingRootSignature;
 
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedSrvHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
 	CD3DX12_RESOURCE_BARRIER m_barrier;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_rayGenBuffer, m_missBuffer, m_hitGroupBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_rayGenUploadBuffer, m_missUploadBuffer, m_hitGroupUploadBuffer;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_sbtBuffer, m_sbtUploadBuffer;
 	// SAMPLE DESCS
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
 
@@ -113,5 +114,10 @@ private:
 
 
 	AppTimer timer;
+
+	const wchar_t* c_hitGroupName = L"MyHitGroup";
+	const wchar_t* c_raygenShaderName = L"MyRaygenShader";
+	const wchar_t* c_closestHitShaderName = L"MyClosestHitShader";
+	const wchar_t* c_missShaderName = L"MyMissShader";
 };
 

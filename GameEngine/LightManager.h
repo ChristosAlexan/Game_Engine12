@@ -17,6 +17,7 @@ namespace ECS
 		std::vector<LightComponent*>& GetLights();
 		std::vector<GPULight>& GetGPULights();
 		std::vector<TransformComponent*>& GetTransforms();
+		ID3D12Resource* GetResource() const;
 		void UpdateVisibleLights(ID3D12GraphicsCommandList* cmdList, Camera& camera);
 
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;

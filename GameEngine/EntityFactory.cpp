@@ -52,6 +52,9 @@ namespace ECS
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
 
+		if(renderComponent.mesh->blas)
+			m_registry->emplace_or_replace<BLAS*>(id, renderComponent.mesh->blas.get());
+
 		if (entityDesc.hasAnimation)
 		{
 			entityDesc.animComponent = AnimatorComponent{};

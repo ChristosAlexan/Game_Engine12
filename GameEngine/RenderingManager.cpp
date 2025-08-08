@@ -11,6 +11,12 @@ namespace ECS
 	{
 	}
 
+	RenderingManager::~RenderingManager()
+	{
+		m_textureUAV.reset();
+		m_shadowsUAV.reset();
+	}
+
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
 	{
 	
@@ -36,8 +42,12 @@ namespace ECS
 		std::vector<DXGI_FORMAT> formats = {DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT};
 		m_brdfMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), 512, 512, formats, 1);
 
-		GetDX12().m_textureUAV = std::make_unique<Texture12>();
-		GetDX12().m_textureUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
+
+		m_textureUAV = std::make_unique<Texture12>();
+		m_textureUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
+		m_shadowsUAV = std::make_unique<Texture12>();
+		m_shadowsUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
+
 		m_raytracingMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height, formats, 1);
 	}
 
@@ -222,25 +232,36 @@ namespace ECS
 		m_brdfMap.TransitionToSRV(GetDX12().GetCmdList());
 	}
 
-	void RenderingManager::DispatchRays()
+	void RenderingManager::DispatchRays(Scene* scene)
 	{
+		BuildTLAS(scene);
+
+		auto view = scene->GetRegistry().view<BLAS*>();
+		UINT numBLAS = view.size();
+		GetDX12().CreateSBT(numBLAS);
+
+		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
 		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetDX12().m_textureUAV->m_resource.Get(),
+			m_shadowsUAV->m_resource.Get(),
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 
-		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetRootSignature());
+		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
 		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
-		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(15, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(16, GetDX12().m_textureUAV->GetGPUHandleUAV());
+
+		m_dx12.GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture().GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsUAV->GetGPUHandleUAV());
+
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
 
 		GetDX12().DispatchRaytracing();
 
 		// Transition to shader resource
 		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetDX12().m_textureUAV->m_resource.Get(),
+			m_shadowsUAV->m_resource.Get(),
 			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
@@ -250,7 +271,7 @@ namespace ECS
 
 	void RenderingManager::RenderLightPass(Scene* scene)
 	{
-		m_gBuffer.GetGbufferRenderTargetTexture().TransitionToSRV(GetDX12().GetCmdList());
+		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		CB_PS_LIGHTS lights_data = {};
 
 		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
@@ -361,13 +382,13 @@ namespace ECS
 			0,
 			nullptr
 		);
-		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(17, GetDX12().m_textureUAV->GetGPUHandle());
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(17, m_shadowsUAV->GetGPUHandle());
 		
 		m_dx12.GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_dx12.GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		m_dx12.GetCmdList()->DrawInstanced(3, 1, 0, 0);
 
 
-		m_raytracingMap.TransitionToSRV(GetDX12().GetCmdList());
+		m_raytracingMap.TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 }

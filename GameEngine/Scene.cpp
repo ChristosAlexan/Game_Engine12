@@ -51,11 +51,6 @@ namespace ECS
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
 
-	void Scene::BuildTLAS()
-	{
-		GetRenderingManager()->BuildTLAS(this);
-	}
-
 	void Scene::AccumulateLights()
 	{
 		m_lightManager->Initialize(this);
@@ -80,7 +75,7 @@ namespace ECS
 		}
 
 		// Dispatch rays
-		GetRenderingManager()->DispatchRays();
+		GetRenderingManager()->DispatchRays(this);
 	}	
 
 	const std::string Scene::GetName() const

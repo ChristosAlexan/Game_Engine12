@@ -207,7 +207,7 @@ void RenderTargetTexture::Reset(ID3D12GraphicsCommandList* cmdList)
 	{
 		auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
 			GetRenderTextureSource(i),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			m_curreState,
 			D3D12_RESOURCE_STATE_RENDER_TARGET
 		);
 		cmdList->ResourceBarrier(1, &barrierToRTV);
@@ -228,6 +228,21 @@ void RenderTargetTexture::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 	}
 	
 }
+
+void RenderTargetTexture::TransitionState(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES currentState, D3D12_RESOURCE_STATES nextState)
+{
+	m_curreState = nextState;
+	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)
+	{
+		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
+			GetRenderTextureSource(i),
+			currentState,
+			nextState
+		);
+		cmdList->ResourceBarrier(1, &barrierToSRV);
+	}
+}
+
 void RenderTargetTexture::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
 {
 	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)

@@ -530,6 +530,7 @@
   <ItemGroup>
     <None Include="General_PS.hlsli" />
     <None Include="General_VS.hlsli" />
+    <None Include="LightsData.hlsli" />
     <None Include="Math_Helpers.hlsli" />
     <None Include="packages.config" />
     <None Include="RayTraceCommon.hlsli" />

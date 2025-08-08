@@ -50,6 +50,11 @@ namespace ECS
 		return m_lightTransforms;
 	}
 
+	ID3D12Resource* LightManager::GetResource() const
+	{
+		return m_lightBuffer.GetResource();
+	}
+
 	void LightManager::UpdateVisibleLights(ID3D12GraphicsCommandList* cmdList, Camera& camera)
 	{
 		auto& cameraView = camera.GetViewMatrix();

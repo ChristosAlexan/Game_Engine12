@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "imgui_internal.h"
 #include "RenderingECS.h"
-
+#include <iostream>
 
 struct Ray {
 	DirectX::XMVECTOR origin;
@@ -167,3 +167,22 @@ inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")
 	OutputDebugStringA(oss.str().c_str());
 }
 
+inline void DebugMatrix(const DirectX::XMMATRIX& mat, const char* name = "Matrix")
+{
+	DirectX::XMFLOAT4X4 m;
+	DirectX::XMStoreFloat4x4(&m, mat);
+
+	std::cout << name << ":\n";
+	std::cout << std::fixed << std::setprecision(4); // nice formatting
+
+	for (int row = 0; row < 4; ++row)
+	{
+		std::cout << "[ ";
+		for (int col = 0; col < 4; ++col)
+		{
+			std::cout << std::setw(8) << m.m[row][col] << " ";
+		}
+		std::cout << "]\n";
+	}
+	std::cout << std::endl;
+}

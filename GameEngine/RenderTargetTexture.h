@@ -17,6 +17,7 @@ public:
 	ID3D12Resource* GetRenderTextureSource(uint32_t index);
 	void Reset(ID3D12GraphicsCommandList* cmdList);
 	void TransitionToRTV(ID3D12GraphicsCommandList* cmdList);
+	void TransitionState(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES currentState, D3D12_RESOURCE_STATES nextState);
 	void TransitionToSRV(ID3D12GraphicsCommandList* cmdList);
 public:
 	uint32_t m_renderTargets_size = 0; // Total number of render targets to create
@@ -32,5 +33,7 @@ public:
 	UINT m_width = 0;
 	UINT m_height = 0;
 	UINT16 m_mipLevels = 1;
+
+	D3D12_RESOURCE_STATES m_curreState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 };
 
