@@ -22,6 +22,7 @@ namespace ECS
     {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
+        MESH_TYPE mesh_type;
     };
 
     struct GpuMesh 
@@ -31,7 +32,8 @@ namespace ECS
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
         MeshData cpuMesh;
-        std::shared_ptr<BLAS> blas;
+        std::shared_ptr<BLAS> staticBlas;
+        std::shared_ptr<BLAS> skinnedBlas;
 
         void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
         {

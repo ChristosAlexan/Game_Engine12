@@ -18,7 +18,7 @@ namespace ECS
 		auto id = scene->CreateEntity();
 	
 
-		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(scene->GetRenderingManager()->GetDX12(), entityDesc, m_registry, id, m_device, m_cmdList);
+		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(scene, entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
 
 		RenderComponent renderComponent = {};
@@ -52,8 +52,10 @@ namespace ECS
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
 
-		if(renderComponent.mesh->blas)
-			m_registry->emplace_or_replace<BLAS*>(id, renderComponent.mesh->blas.get());
+		if(renderComponent.mesh->staticBlas)
+			scene->blas_total++;
+		if (renderComponent.mesh->skinnedBlas)
+			scene->blas_total++;
 
 		if (entityDesc.hasAnimation)
 		{

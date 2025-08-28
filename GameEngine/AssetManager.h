@@ -11,14 +11,13 @@
 class DX12;
 namespace ECS
 {
+    class EntityECS;
+    class Scene;
     class AssetManager
     {
     public:
-        class EntityECS;
-        class Scene;
-
         AssetManager();
-        std::shared_ptr<GpuMesh> GetOrLoadMesh(DX12& dx12, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+        std::shared_ptr<GpuMesh> GetOrLoadMesh(Scene* scene, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
         void MapModel(Model& model, EntityDesc& entityDesc);
         std::shared_ptr<Model> GetModel(const std::string& modelName);
     public:

@@ -3,6 +3,7 @@
 #include "ErrorLogger.h"
 #include "BLASBuilder.h"
 #include "DX12.h"
+#include "Scene.h"
 
 namespace ECS
 {
@@ -10,7 +11,7 @@ namespace ECS
 	{
 	}
 
-	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(DX12& dx12, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(Scene* scene, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
 		if (m_meshes.contains(entityDesc.name))
 			return m_meshes.at(entityDesc.name);
@@ -46,9 +47,20 @@ namespace ECS
 
 		if (entityDesc.meshType != ECS::MESH_TYPE::LIGHT)
 		{
-			mesh->blas = std::make_shared<BLAS>(blas_builder.Build(dx12.GetDevice(), dx12.GetCmdList(),
-			mesh->vertexBuffer.GetVertexBufferVirtualAddress(), mesh->vertexCount, mesh->vertexBuffer.vbView.StrideInBytes,
-			mesh->indexBuffer.GetIndexBufferVirtualAddress(), mesh->indexCount, mesh->indexBuffer.ibView.Format));
+			if (entityDesc.meshType == ECS::MESH_TYPE::STATIC_MESH)
+			{
+				mesh->staticBlas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
+					mesh->vertexBuffer.GetVertexBufferVirtualAddress(), mesh->vertexCount, mesh->vertexBuffer.vbView.StrideInBytes,
+					mesh->indexBuffer.GetIndexBufferVirtualAddress(), mesh->indexCount, mesh->indexBuffer.ibView.Format,
+					D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
+			}
+			else if (entityDesc.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
+			{
+				mesh->skinnedBlas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
+					mesh->vertexBuffer.GetVertexBufferVirtualAddress(), mesh->vertexCount, mesh->vertexBuffer.vbView.StrideInBytes,
+					mesh->indexBuffer.GetIndexBufferVirtualAddress(), mesh->indexCount, mesh->indexBuffer.ibView.Format,
+					D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
+			}
 		}
 
 		m_meshes.emplace(entityDesc.name, mesh);

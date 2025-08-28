@@ -57,6 +57,8 @@ namespace ECS
 		UINT m_NextEntityID = 0;
 		entt::registry m_registry;
 		SaveLoadSystem m_saveLoadSystem;
+	public:
+		uint32_t blas_total = 0;
 	};
 }
 

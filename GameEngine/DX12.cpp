@@ -508,7 +508,7 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"VertexShader12.hlsl", L"Main", L"vs_6_7");
+        auto vsBlob = compiler.CompileShader(L"GbufferVS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"PixelShader12.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
@@ -668,10 +668,9 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
 
 void DX12::CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline)
 {
-    // Local root signature to be used in a ray gen shader.
+    // Local root signature to be used in a ray gen shader
     {
         auto* localRootSubobject = raytracingPipeline->CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-        //auto localRootSignature = raytracingPipeline->CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
         assert(m_localRaytracingRootSignature != nullptr && "Local root signature is null!");
         localRootSubobject->SetRootSignature(m_localRaytracingRootSignature.Get());
         // Shader association

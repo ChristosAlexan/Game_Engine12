@@ -484,7 +484,7 @@
     <FxCompile Include="PixelShader12.hlsl">
       <Filter>Shaders12\Pixel Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="VertexShader12.hlsl">
+    <FxCompile Include="GbufferVS.hlsl">
       <Filter>Shaders12\Vertex Shaders</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader_2D.hlsl">

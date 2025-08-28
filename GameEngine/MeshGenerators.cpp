@@ -52,6 +52,7 @@ ECS::MeshData GenerateCubeMesh(ECS::EntityDesc& entityDesc)
 		20,22,21, 20,23,22  // Back face
 	};
 
+	mesh.mesh_type = entityDesc.meshType;
     return mesh;
 }
 
@@ -71,11 +72,13 @@ ECS::MeshData GenerateQuadMesh(ECS::EntityDesc& entityDesc)
 	mesh.indices.push_back(2);
 	mesh.indices.push_back(3);
 
+	mesh.mesh_type = entityDesc.meshType;
     return mesh;
 }
 
 ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc)
 {
+	model.GetMeshData().mesh_type = entityDesc.meshType;
 	model.name = entityDesc.name;
 	model.LoadModel(entityDesc.filePath);
 
@@ -84,6 +87,7 @@ ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc)
 
 ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc)
 {
+	model.GetMeshData().mesh_type = entityDesc.meshType;
 	model.name = entityDesc.name;
 	model.SetAnimFiles(entityDesc.anim_filePaths);
 	model.LoadModel(entityDesc.filePath);

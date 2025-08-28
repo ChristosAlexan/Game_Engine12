@@ -7,12 +7,21 @@ namespace ECS
 	{
 		Microsoft::WRL::ComPtr<ID3D12Resource> result;  // final BLAS buffer
 		Microsoft::WRL::ComPtr<ID3D12Resource> scratch; // temp buffer
+		D3D12_RAYTRACING_GEOMETRY_DESC geometry = {};
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs{};
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild{};
+		bool allowUpdate = false;
 	};
 
 	struct TLAS
 	{
-		Microsoft::WRL::ComPtr<ID3D12Resource> result;
-		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
+		Microsoft::WRL::ComPtr<ID3D12Resource> tlasBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs{};
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild{};
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC tlasBuildDesc{};
+		bool bInit = false;
 	};
 }
 

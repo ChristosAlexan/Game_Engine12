@@ -8,9 +8,10 @@ BLASBuilder::BLASBuilder()
 
 ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, 
 	D3D12_GPU_VIRTUAL_ADDRESS vertexBuffer, const UINT vertexCount, UINT vertexStride, 
-	D3D12_GPU_VIRTUAL_ADDRESS indexBuffer, const UINT indexCount, DXGI_FORMAT indexFormat)
+	D3D12_GPU_VIRTUAL_ADDRESS indexBuffer, const UINT indexCount, DXGI_FORMAT indexFormat, D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS inputFlags)
 {
 	HRESULT hr;
+	ECS::BLAS blas;
 
 	// Geometry description
 	D3D12_RAYTRACING_GEOMETRY_DESC geometry = {};
@@ -24,18 +25,18 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	geometry.Triangles.IndexCount = indexCount;
 	geometry.Triangles.IndexFormat = indexFormat;
 	geometry.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-
+	
 	// Prebuild info
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs = {};
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
 	inputs.NumDescs = 1;
 	inputs.pGeometryDescs = &geometry;
-	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+	inputs.Flags = inputFlags;
 
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild = {};
 	device->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, &prebuild);
-
+	
 	// Create scratch buffer
 	D3D12_RESOURCE_DESC scratchDesc = CD3DX12_RESOURCE_DESC::Buffer(prebuild.ScratchDataSizeInBytes, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratch;
@@ -59,5 +60,34 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 
 	cmdList->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
 
-	return {result, scratch};
+	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(result.Get());
+	cmdList->ResourceBarrier(1, &barrier);
+	blas.result = result;
+	blas.scratch = scratch;
+	blas.prebuild = prebuild;
+	blas.inputs = inputs;
+	blas.geometry = geometry;
+
+	return blas;
+}
+
+void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::BLAS* blas)
+{
+	if (!blas)
+		return;
+	auto inputs = blas->inputs;
+	inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+	
+	auto geometry = blas->geometry;
+	
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc{};
+	desc.Inputs = inputs;
+	desc.Inputs.pGeometryDescs = &geometry;
+	desc.SourceAccelerationStructureData = blas->result->GetGPUVirtualAddress();
+	desc.DestAccelerationStructureData = blas->result->GetGPUVirtualAddress();
+	desc.ScratchAccelerationStructureData = blas->scratch->GetGPUVirtualAddress();
+	cmdList->BuildRaytracingAccelerationStructure(&desc, 0, nullptr);
+	
+	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(blas->result.Get());
+	cmdList->ResourceBarrier(1, &barrier);
 }

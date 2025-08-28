@@ -501,7 +501,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">6.7</ShaderModel>
     </FxCompile>
-    <FxCompile Include="VertexShader12.hlsl">
+    <FxCompile Include="GbufferVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='ReleaseDX12|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

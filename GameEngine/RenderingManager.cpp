@@ -4,6 +4,8 @@
 #include "ErrorLogger.h"
 #include "GameWindow.h"
 #include <cassert>
+#include "BLASBuilder.h"
+#include "AssetManager.h"
 
 namespace ECS
 {
@@ -55,6 +57,18 @@ namespace ECS
 	{
 		// Build TLAS for raytracing
 		m_tlasBuilder.Build(scene);
+	}
+
+	void RenderingManager::ReBuildBLAS(Scene* scene)
+	{
+		BLASBuilder blas_builder;
+		for(auto& mesh : scene->GetAssetManager()->m_meshes)
+		{
+			if (mesh.second->cpuMesh.mesh_type == ECS::SKELETAL_MESH)
+			{
+				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), mesh.second->skinnedBlas.get());
+			}
+		}
 	}
 
 	DX12& RenderingManager::GetDX12()
@@ -234,11 +248,10 @@ namespace ECS
 
 	void RenderingManager::DispatchRays(Scene* scene)
 	{
+		ReBuildBLAS(scene);
 		BuildTLAS(scene);
 
-		auto view = scene->GetRegistry().view<BLAS*>();
-		UINT numBLAS = view.size();
-		GetDX12().CreateSBT(numBLAS);
+		GetDX12().CreateSBT(scene->blas_total);
 
 		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access

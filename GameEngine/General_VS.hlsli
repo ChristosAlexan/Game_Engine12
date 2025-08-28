@@ -9,5 +9,5 @@ cbuffer CB_VS_Skinning : register(b1)
 {
     matrix skinningMatrices[100];
     bool hasAnim;
-    float3 padding2; //pad to next 16-byte boundary
+    float3 padding2;
 };
