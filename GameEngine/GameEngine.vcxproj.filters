@@ -481,65 +481,65 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader12.hlsl">
+    <None Include="packages.config" />
+    <None Include="Shaders\General_PS.hlsli">
       <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GbufferVS.hlsl">
+    </None>
+    <None Include="Shaders\General_VS.hlsli">
       <Filter>Shaders12\Vertex Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShader_2D.hlsl">
-      <Filter>Shaders12\Vertex Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShader_lightPass.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GBufferPS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Cubemap_PS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Cubemap_VS.hlsl">
-      <Filter>Shaders12\Vertex Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="CubemapDebug_PS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="CubemapDebug_VS.hlsl">
-      <Filter>Shaders12\Vertex Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="IrradianceConvolutionPS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PrefilterPS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="BRDF_PS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="RayTracingShader.hlsl">
-      <Filter>Shaders12\Raytracing shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="RaytracingPS.hlsl">
-      <Filter>Shaders12\Pixel Shaders</Filter>
-    </FxCompile>
+    </None>
+    <None Include="Shaders\RayTraceCommon.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
+    <None Include="Shaders\LightsData.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
+    <None Include="Shaders\Math_Helpers.hlsli">
+      <Filter>Shaders12</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="General_VS.hlsli">
-      <Filter>Shaders12</Filter>
-    </None>
-    <None Include="General_PS.hlsli">
-      <Filter>Shaders12</Filter>
-    </None>
-    <None Include="Math_Helpers.hlsli">
-      <Filter>Shaders12</Filter>
-    </None>
-    <None Include="RayTraceCommon.hlsli">
+    <FxCompile Include="Shaders\Cubemap_PS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubemapDebug_PS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GBufferPS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\IrradianceConvolutionPS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PixelShader_lightPass.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PixelShader12.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PrefilterPS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\RaytracingPS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BRDF_PS.hlsl">
+      <Filter>Shaders12\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VertexShader_2D.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Cubemap_VS.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubemapDebug_VS.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GbufferVS.hlsl">
+      <Filter>Shaders12\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\RayTracingShader.hlsl">
       <Filter>Shaders12\Raytracing shaders</Filter>
-    </None>
-    <None Include="LightsData.hlsli">
-      <Filter>Shaders12</Filter>
-    </None>
+    </FxCompile>
   </ItemGroup>
 </Project>

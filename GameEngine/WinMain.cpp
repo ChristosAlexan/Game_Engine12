@@ -18,7 +18,9 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
 #ifdef _DEBUG
 	EnableConsole();
+#ifdef _PIX_
 	LoadLibraryA("C:\\Program Files\\Microsoft PIX\\2507.11\\WinPixGpuCapturer.dll");
+#endif
 #endif
 
 	HRESULT hr = CoInitialize(NULL);

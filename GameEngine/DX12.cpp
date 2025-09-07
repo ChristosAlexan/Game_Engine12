@@ -508,8 +508,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"GbufferVS.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"PixelShader12.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/GbufferVS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/PixelShader12.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -530,15 +530,15 @@ void DX12::InitializeShaders()
         formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ROUGH_METAL] = FORMAT_ROUGH_METAL;
         formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::WORLDPOS_DEPTH] = FORMAT_WORLDPOS_DEPTH;
 
-        psBlob = compiler.CompileShader(L"GBufferPS.hlsl", L"Main", L"ps_6_7");
+        psBlob = compiler.CompileShader(L"Shaders/GBufferPS.hlsl", L"Main", L"ps_6_7");
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats);
     }
 
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"VertexShader_2D.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"PixelShader_lightPass.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/PixelShader_lightPass.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -551,8 +551,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"Cubemap_PS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/Cubemap_PS.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -564,8 +564,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"IrradianceConvolutionPS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/IrradianceConvolutionPS.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -577,8 +577,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"Cubemap_VS.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"PrefilterPS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/PrefilterPS.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -590,8 +590,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"CubemapDebug_VS.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"CubemapDebug_PS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/CubemapDebug_VS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/CubemapDebug_PS.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -604,8 +604,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
 
-        auto vsBlob = compiler.CompileShader(L"VertexShader_2D.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"BRDF_PS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/BRDF_PS.hlsl", L"Main", L"ps_6_7");
 
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -618,8 +618,8 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
    
-        auto vsBlob = compiler.CompileShader(L"VertexShader_2D.hlsl", L"Main", L"vs_6_7");
-        auto psBlob = compiler.CompileShader(L"RaytracingPS.hlsl", L"Main", L"ps_6_7");
+        auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/RaytracingPS.hlsl", L"Main", L"ps_6_7");
    
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -633,7 +633,7 @@ void DX12::InitializeShaders()
     {
         DXCShaderCompiler compiler;
    
-        auto rayTraceBlob = compiler.CompileShader(L"RayTracingShader.hlsl", std::wstring{}, L"lib_6_7");
+        auto rayTraceBlob = compiler.CompileShader(L"Shaders/RayTracingShader.hlsl", std::wstring{}, L"lib_6_7");
         CreateRTPSO(rayTraceBlob.Get());
     }
 }
