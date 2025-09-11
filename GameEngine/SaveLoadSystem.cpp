@@ -2,6 +2,8 @@
 #include "EntityFactory.h"
 #include "Scene.h"
 #include "EntityECS.h"
+#include <filesystem>
+#include "ErrorLogger.h"
 
 namespace ECS
 {
@@ -103,6 +105,13 @@ namespace ECS
 			if(entityDesc.meshType != ECS::MESH_TYPE::LIGHT)
 			{
 				entityDesc.filePath = entityJson["filePath"];
+
+				if (!std::filesystem::exists(entityDesc.filePath))
+				{
+					ErrorLogger::Log("Failed to find path: " + entityDesc.filePath);
+					continue;
+				}
+
 				entityDesc.hasAnimation = entityJson["hasAnimation"];
 				entityDesc.hasTextures = entityJson["hasTextures"];
 			

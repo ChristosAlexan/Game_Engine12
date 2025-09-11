@@ -747,7 +747,7 @@ void DX12::CreateSBT(UINT numHitGroups)
     );
     COM_ERROR_IF_FAILED(hr, "failed to create SBT default heap commited resource!");
 
-    // --- Create the UPLOAD buffer ---
+    // Create the UPLOAD buffer
     CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
     hr = device->CreateCommittedResource(
         &uploadHeapProps,
@@ -765,15 +765,15 @@ void DX12::CreateSBT(UINT numHitGroups)
     Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> stateObjectProps;
     rtpso.As(&stateObjectProps);
 
-    // --- RayGen
+    // RayGen
     void* raygenID = stateObjectProps->GetShaderIdentifier(c_raygenShaderName);
     memcpy(pData, raygenID, shaderIdSize);
 
-    // --- Miss
+    // Miss
     void* missID = stateObjectProps->GetShaderIdentifier(c_missShaderName);
     memcpy(pData + alignedRecordSize, missID, shaderIdSize);
 
-    // --- HitGroup(s)
+    // HitGroups
     for (UINT i = 0; i < numHitGroups; ++i)
     {
         void* hitID = stateObjectProps->GetShaderIdentifier(c_hitGroupName);
@@ -782,7 +782,7 @@ void DX12::CreateSBT(UINT numHitGroups)
     }
     m_sbtUploadBuffer->Unmap(0, nullptr);
 
-    // --- Copy SBT upload buffer to GPU buffer
+    // Copy SBT upload buffer to GPU buffer
     commandList->CopyBufferRegion(m_sbtBuffer.Get(), 0, m_sbtUploadBuffer.Get(), 0, sbtSize);
 
     dispatchDesc = D3D12_DISPATCH_RAYS_DESC();
