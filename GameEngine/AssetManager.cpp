@@ -16,33 +16,33 @@ namespace ECS
 		if (m_meshes.contains(entityDesc.name))
 			return m_meshes.at(entityDesc.name);
 
-		MeshData data;
+		MeshData cpuMesh;
 		Model model;
 		BLASBuilder blas_builder;
 
 		switch (entityDesc.meshType)
 		{
 			case QUAD:
-				data = GenerateQuadMesh(entityDesc);
+				cpuMesh = GenerateQuadMesh(entityDesc);
 				break;
 			case CUBE:
-				data = GenerateCubeMesh(entityDesc);
+				cpuMesh = GenerateCubeMesh(entityDesc);
 				break;
 			case STATIC_MESH:
-				data = GenerateStaticMesh(model, entityDesc);
+				cpuMesh = GenerateStaticMesh(model, entityDesc);
 				MapModel(model, entityDesc);
 				break;
 			case SKELETAL_MESH:
-				data = GenerateSkeletalMesh(model, entityDesc);
+				cpuMesh = GenerateSkeletalMesh(model, entityDesc, scene);
 				MapModel(model, entityDesc);
 				break;
 			case LIGHT:
-				data = GenerateCubeMesh(entityDesc);
+				cpuMesh = GenerateCubeMesh(entityDesc);
 				break;
 		}
 
-		auto mesh = std::make_shared<GpuMesh>();
-		mesh->cpuMesh = std::move(data);
+		auto mesh = std::make_shared<GpuMesh>(model.GetGpuMesh());
+		mesh->cpuMesh = std::make_shared<MeshData>(cpuMesh);
 		mesh->Upload(device, cmdList);
 
 		if (entityDesc.meshType != ECS::MESH_TYPE::LIGHT)

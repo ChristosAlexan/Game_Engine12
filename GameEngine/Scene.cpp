@@ -67,7 +67,7 @@ namespace ECS
 			GetTransformManager()->Update(this, entity, transformComponent);
 	
 		}
-	
+		GetRenderingManager()->CalculateCompute(this);
 		// Present
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{

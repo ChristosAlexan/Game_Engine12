@@ -35,6 +35,7 @@ TextureCube prefilterTexture : register(t0, space4);
 TextureCube irradianceTexture : register(t1, space4);
 Texture2D brdfTexture : register(t2, space4);
 Texture2D raytracingTexture : register(t3, space4);
+Texture2D computeTexture : register(t4, space4);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -108,6 +109,8 @@ float4 Main(PSInput input) : SV_TARGET
     
     
     float raytracedShadows = raytracingTexture.Sample(gSampler, input.uv).r;
+    float3 compute = computeTexture.Sample(gSampler, input.uv).rgb;
+    //return float4(compute, 1.0f);
     return float4(color * raytracedShadows, 1.0);
 }
 

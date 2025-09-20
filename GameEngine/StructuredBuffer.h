@@ -64,6 +64,11 @@ public:
 		return m_gpuBuffer->GetGPUVirtualAddress(); 
 	}
 
+	const UINT GetElementCount() const
+	{
+		return m_elementCount;
+	}
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_gpuBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_uploadBuffer;

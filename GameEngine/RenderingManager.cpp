@@ -17,6 +17,7 @@ namespace ECS
 	{
 		m_textureUAV.reset();
 		m_shadowsUAV.reset();
+		m_computeUAV.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
@@ -49,6 +50,8 @@ namespace ECS
 		m_textureUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
 		m_shadowsUAV = std::make_unique<Texture12>();
 		m_shadowsUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
+		m_computeUAV = std::make_unique<Texture12>();
+		m_computeUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
 
 		m_raytracingMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height, formats, 1);
 	}
@@ -64,7 +67,7 @@ namespace ECS
 		BLASBuilder blas_builder;
 		for(auto& mesh : scene->GetAssetManager()->m_meshes)
 		{
-			if (mesh.second->cpuMesh.mesh_type == ECS::SKELETAL_MESH)
+			if (mesh.second->cpuMesh->mesh_type == ECS::SKELETAL_MESH)
 			{
 				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), mesh.second->skinnedBlas.get());
 			}
@@ -334,10 +337,11 @@ namespace ECS
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap.GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap.GetSrvGpuHandle(0));
+		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(19, m_computeUAV->GetGPUHandle());
 
 		// Get all the light components in the scene
-		auto view = scene->GetRegistry().view<LightComponent>();
-		std::size_t totalLights = view.size();
+		auto lightsView = scene->GetRegistry().view<LightComponent>();
+		std::size_t totalLights = lightsView.size();
 		lights_data.totalLights = totalLights;
 		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
 
@@ -403,5 +407,50 @@ namespace ECS
 
 
 		m_raytracingMap.TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+
+	void RenderingManager::CalculateCompute(Scene* scene)
+	{
+		auto renderCompView = scene->GetRegistry().view<RenderComponent>();
+		std::size_t total = renderCompView.size();
+	
+
+		for (auto renderComponent : renderCompView)
+		{
+			auto& gpuMesh = renderCompView.get<RenderComponent>(renderComponent).mesh;
+			auto& cpuMesh = renderCompView.get<RenderComponent>(renderComponent).mesh->cpuMesh;
+
+			if (cpuMesh->mesh_type == SKELETAL_MESH)
+			{
+				ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
+				m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
+				GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetComputeRootSignature());
+				// Transition back to unorder access
+				CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+					m_computeUAV->m_resource.Get(),
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+					D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+				GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+
+				m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_compute.Get());
+				GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
+				GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
+					1, // Root parameter skinning structured buffer index is 1
+					gpuMesh->gpuHandle
+				);
+
+				unsigned int dispatchX = m_dx12.GetScreenWidth() / 8;
+				unsigned int dispatchY = m_dx12.GetScreenHeight() / 8;
+
+				GetDX12().GetCmdList()->Dispatch(dispatchX, dispatchY, 1);
+
+				// Transition to shader resource
+				barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+					m_computeUAV->m_resource.Get(),
+					D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+			}
+		}
 	}
 }

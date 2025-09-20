@@ -6,6 +6,7 @@
 #include "ErrorLogger.h"
 #include "GFX_MACROS.h"
 
+#ifdef _DEBUG
 // Pretty-print a state object tree.
 inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
 {
@@ -117,6 +118,7 @@ inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
     wstr << L"\n";
     OutputDebugStringW(wstr.str().c_str());
 }
+#endif // DEBUG
 
 DX12::DX12()
 {
@@ -293,10 +295,13 @@ ID3D12RootSignature* DX12::GetLocalRaytracingRootSignature() const
     return m_localRaytracingRootSignature.Get();
 }
 
+ID3D12RootSignature* DX12::GetComputeRootSignature() const
+{
+    return m_computeRootSignature.Get();
+}
+
 void DX12::DispatchRaytracing()
 {
-    commandList->SetPipelineState1(rtpso.Get());
-
     commandList->DispatchRays(&dispatchDesc);
 }
 
@@ -503,11 +508,10 @@ void DX12::CreateDescriptorHeaps()
 
 void DX12::InitializeShaders()
 {
+    DXCShaderCompiler compiler;
     DXGI_FORMAT default_format8_UNORM = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT default_format16_FLOAT = DXGI_FORMAT_R16G16B16A16_FLOAT;
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/GbufferVS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/PixelShader12.hlsl", L"Main", L"ps_6_7");
 
@@ -535,8 +539,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/PixelShader_lightPass.hlsl", L"Main", L"ps_6_7");
 
@@ -549,8 +551,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/Cubemap_PS.hlsl", L"Main", L"ps_6_7");
 
@@ -562,8 +562,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/IrradianceConvolutionPS.hlsl", L"Main", L"ps_6_7");
 
@@ -575,8 +573,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/Cubemap_VS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/PrefilterPS.hlsl", L"Main", L"ps_6_7");
 
@@ -588,8 +584,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/CubemapDebug_VS.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/CubemapDebug_PS.hlsl", L"Main", L"ps_6_7");
 
@@ -602,8 +596,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/BRDF_PS.hlsl", L"Main", L"ps_6_7");
 
@@ -616,8 +608,6 @@ void DX12::InitializeShaders()
     }
 
     {
-        DXCShaderCompiler compiler;
-   
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/RaytracingPS.hlsl", L"Main", L"ps_6_7");
    
@@ -631,10 +621,14 @@ void DX12::InitializeShaders()
 
     // Ray tracing shader
     {
-        DXCShaderCompiler compiler;
-   
         auto rayTraceBlob = compiler.CompileShader(L"Shaders/RayTracingShader.hlsl", std::wstring{}, L"lib_6_7");
         CreateRTPSO(rayTraceBlob.Get());
+    }
+
+    // Compute shader
+    {
+        auto computeBlob = compiler.CompileShader(L"Shaders/ComputeShader.hlsl", L"Main", L"cs_6_7");
+        CreateComputePSO(computeBlob.Get(), pipelineState_compute);
     }
 }
 
@@ -664,6 +658,22 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
 
     hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO_pipeline));
     COM_ERROR_IF_FAILED(hr, "Failed to create pipeline state");
+}
+
+void DX12::CreateComputePSO(IDxcBlob* computeBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline)
+{
+    HRESULT hr;
+
+    D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.pRootSignature = m_computeRootSignature.Get();
+    psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+    psoDesc.NodeMask = 0;
+    psoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
+    psoDesc.CachedPSO.pCachedBlob = nullptr;
+    psoDesc.CS.BytecodeLength = computeBlob->GetBufferSize();
+    psoDesc.CS.pShaderBytecode = computeBlob->GetBufferPointer();
+
+    hr = device->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&PSO_pipeline));
 }
 
 void DX12::CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline)
@@ -851,8 +861,9 @@ void DX12::InitializeBuffers()
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 1); // space1
     CD3DX12_DESCRIPTOR_RANGE1 hdrTextRange;
     hdrTextRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 3); // space3
-    CD3DX12_DESCRIPTOR_RANGE1 srvStructuredBuffer;
-    srvStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
+    CD3DX12_DESCRIPTOR_RANGE1 srvLightsStructuredBuffer;
+    srvLightsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
+
 
     CD3DX12_DESCRIPTOR_RANGE1 prefilterRange;
     prefilterRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 4); // t0 space4 prefilterMap
@@ -866,8 +877,10 @@ void DX12::InitializeBuffers()
     raytracingSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 6); // space6 raytracing srv
     CD3DX12_DESCRIPTOR_RANGE1 raytracingLightPassSrvRange;
     raytracingLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 4); // t3 space4 raytracing lightpass input
+    CD3DX12_DESCRIPTOR_RANGE1 computeLightPassSrvRange;
+    computeLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 4); // t5 space4 compute lightpass input
 
-    CD3DX12_ROOT_PARAMETER1 rootParams[19];
+    CD3DX12_ROOT_PARAMETER1 rootParams[20];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE , D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -875,7 +888,7 @@ void DX12::InitializeBuffers()
     rootParams[4].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     rootParams[5].InitAsConstantBufferView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b1: PS Material
     rootParams[6].InitAsConstantBufferView(2, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b2: PS Camera
-    rootParams[7].InitAsDescriptorTable(1, &srvStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
+    rootParams[7].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer
     rootParams[8].InitAsDescriptorTable(1, &hdrTextRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space3: PS cubemap textures
     rootParams[9].InitAsDescriptorTable(1, &cubeMapRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space0: PS Gbuffer cubeMap texture
     rootParams[10].InitAsConstantBufferView(3, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b3: PS PBR buffer
@@ -889,19 +902,21 @@ void DX12::InitializeBuffers()
     rootParams[15].InitAsShaderResourceView(0, 5, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     rootParams[16].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
     rootParams[17].InitAsDescriptorTable(1, &raytracingSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space6: PS raytracing map
-    rootParams[18].InitAsDescriptorTable(1, &raytracingLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space6: PS raytracing map
+    rootParams[18].InitAsDescriptorTable(1, &raytracingLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t3 space4: PS raytracing map
+    rootParams[19].InitAsDescriptorTable(1, &computeLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t4 space4: PS compute map
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
     CreateRootSignature(rootSigDesc, m_rasterRootSignature);
 
 
-
+    // Ray tracing root signature
     CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[4];
     globalRaytracingRootParams[0].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     globalRaytracingRootParams[1].InitAsShaderResourceView(0, 6, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     globalRaytracingRootParams[2].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
-    globalRaytracingRootParams[3].InitAsDescriptorTable(1, &srvStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
+    globalRaytracingRootParams[3].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
+
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC globalRaytracingRootSigDesc;
     globalRaytracingRootSigDesc.Init_1_1(_countof(globalRaytracingRootParams), globalRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);
     CreateRootSignature(globalRaytracingRootSigDesc, m_globalRaytracingRootSignature);
@@ -911,6 +926,21 @@ void DX12::InitializeBuffers()
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC localRaytracingRootSigDesc;
     localRaytracingRootSigDesc.Init_1_1(_countof(localRaytracingRootParams), localRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE);
     CreateRootSignature(localRaytracingRootSigDesc, m_localRaytracingRootSignature);*/
+
+
+
+    CD3DX12_DESCRIPTOR_RANGE1 testComputeRange;
+    testComputeRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0, 8); // u0 space8 test compute output
+    CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBuffer;
+    srvSkinningStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 8); // t4 space4 skinning structured buffer compute  
+    // Compute root signature
+    CD3DX12_ROOT_PARAMETER1 computeRootParams[2];
+    computeRootParams[0].InitAsDescriptorTable(1, &testComputeRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space8: UAV compute UAV output
+    computeRootParams[1].InitAsDescriptorTable(1, &srvSkinningStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t1 space8: skinning structured buffer
+
+    CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC computeRootSigDesc;
+    computeRootSigDesc.Init_1_1(_countof(computeRootParams), computeRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);
+    CreateRootSignature(computeRootSigDesc, m_computeRootSignature);
 }
 
 // Transition back buffer to render target

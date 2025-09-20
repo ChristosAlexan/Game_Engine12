@@ -1,3 +1,5 @@
+#include "Scene.h"
+#include "RenderingManager.h"
 #include "MeshGenerators.h"
 #include "AssetManager.h"
 
@@ -85,13 +87,14 @@ ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc)
 	return model.GetMeshData();
 }
 
-ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc)
+ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc, ECS::Scene* scene)
 {
 	model.GetMeshData().mesh_type = entityDesc.meshType;
 	model.name = entityDesc.name;
 	model.SetAnimFiles(entityDesc.anim_filePaths);
 	model.LoadModel(entityDesc.filePath);
-
+	model.CreateGPUSkinningData(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(), scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
+	
 	return model.GetMeshData();
 }
 

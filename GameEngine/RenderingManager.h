@@ -35,8 +35,8 @@ namespace ECS
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
-
 		void RenderRayTracingToRenderTarget();
+		void CalculateCompute(Scene* scene);
 	private:
 		void RenderLightPass(Scene* scene);
 
@@ -47,6 +47,7 @@ namespace ECS
 		GBuffer m_gBuffer;
 		std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
 		std::unique_ptr<Texture12> m_shadowsUAV; // Ray traced shadows output
+		std::unique_ptr<Texture12> m_computeUAV; // compute output
  	public:
 
 		HDR_IMAGE hdr_map1;

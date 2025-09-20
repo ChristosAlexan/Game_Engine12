@@ -84,6 +84,37 @@ DirectX::XMMATRIX Node::getLocalMatrix()
 
 Model::Model()
 {
+    //m_cpuMesh = std::make_shared<ECS::MeshData>();
+    //m_gpuMesh = std::make_shared<ECS::GpuMesh>();
+}
+
+void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAlloc)
+{
+      m_cpuMesh.skinningVertexBuffer.Initialize(device, m_cpuMesh.vertices.size());
+
+      DescriptorAllocator::DescriptorHandle allocator = descriptorAlloc->Allocate();
+
+      m_cpuMesh.cpuHandle = allocator.cpuHandle;
+      m_gpuMesh.gpuHandle = allocator.gpuHandle;
+
+      m_cpuMesh.skinningVertexBuffer.CreateSRV(device, m_cpuMesh.cpuHandle);
+
+
+     std::vector<ECS::GPUSkinningBufferVertexData> gpuSkinninningData;
+     gpuSkinninningData.resize(m_cpuMesh.vertices.size());
+
+      for (int i = 0; i < gpuSkinninningData.size(); ++i)
+      {
+         
+
+          gpuSkinninningData[i].position = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].pos.x, m_cpuMesh.vertices[i].pos.y, m_cpuMesh.vertices[i].pos.z, 0.0f);
+          gpuSkinninningData[i].boneWeights = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].boneWeights[0], m_cpuMesh.vertices[i].boneWeights[1], m_cpuMesh.vertices[i].boneWeights[2], m_cpuMesh.vertices[i].boneWeights[3]);
+          for (int index = 0; index < 4; ++index)
+              gpuSkinninningData[i].boneIndices[index] = m_cpuMesh.vertices[i].boneIndices[index];
+
+      }
+
+      m_cpuMesh.skinningVertexBuffer.UploadData(cmdList, gpuSkinninningData);
 }
 
 bool Model::LoadModel(const std::string& filepath)
@@ -154,6 +185,11 @@ void Model::SetAnimFiles(const std::vector<std::string>& animFiles)
 ECS::MeshData& Model::GetMeshData()
 {
     return m_cpuMesh;
+}
+
+ECS::GpuMesh& Model::GetGpuMesh()
+{
+    return m_gpuMesh;
 }
 
 
@@ -251,13 +287,10 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                 // Append data to model's vertex buffer
                 for (size_t vertexOffset = 0; vertexOffset < vertexCount; ++vertexOffset) {
                     Vertex vert{};
+
                     vert.pos = positionBuffer ? DirectX::XMFLOAT3(positionBuffer[0 + (vertexOffset * 3)], positionBuffer[1 + (vertexOffset * 3)], positionBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0, 0, 0);
                     vert.normal = normalsBuffer ? DirectX::XMFLOAT3(normalsBuffer[0 + (vertexOffset * 3)], normalsBuffer[1 + (vertexOffset * 3)], normalsBuffer[2 + (vertexOffset * 3)]) : DirectX::XMFLOAT3(0,0,0);
                     vert.texCoord = texCoordsBuffer ? DirectX::XMFLOAT2(texCoordsBuffer[0 + (vertexOffset * 2)], texCoordsBuffer[1 + (vertexOffset * 2)]) : DirectX::XMFLOAT2(0, 0);
-
-
-                    
-
 
                     if (weightsBuffer)
                     {
@@ -273,7 +306,8 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                         vert.boneWeights[2] = 0.0f;
                         vert.boneWeights[3] = 0.0f;
                     }
-                  
+                    
+
                     if(jointsBuffer)
                     {
                         vert.boneIndices[0] = jointsBuffer[0 + (vertexOffset * 4)];
@@ -305,7 +339,7 @@ void Model::LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& inp
                    
                        binormal = DirectX::XMVector3Cross(normal, tangent) * vert.tangent.w;
                    }
-                 
+
                    m_cpuMesh.vertices.push_back(vert);
                 }
             }

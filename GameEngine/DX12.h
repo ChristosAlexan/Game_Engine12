@@ -35,6 +35,7 @@ public:
 	void InitializeShaders();
 	void CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, 
 		const UINT num_renderTargets, const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode = D3D12_CULL_MODE_BACK);
+	void CreateComputePSO(IDxcBlob* computeBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline);
 	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
 	void CreateRTPSO(IDxcBlob* rayTracingBlob);
 	void CreateSBT(UINT numHitGroups);
@@ -61,6 +62,7 @@ public:
 	ID3D12RootSignature* GetRasterRootSignature() const;
 	ID3D12RootSignature* GetGlobalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
+	ID3D12RootSignature* GetComputeRootSignature() const;
 	void DispatchRaytracing();
 
 public:
@@ -72,7 +74,7 @@ public:
 	UINT frameIndex = 0;
 	UINT rtvDescriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer, 
-		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget;
+		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget, pipelineState_compute;
 	Microsoft::WRL::ComPtr<ID3D12StateObject> rtpso; // Ray tracing state object
 
 
@@ -96,7 +98,7 @@ private:
 	std::unique_ptr<DescriptorAllocator> m_descAllocator;
 	
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory;
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rasterRootSignature, m_globalRaytracingRootSignature, m_localRaytracingRootSignature;
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rasterRootSignature, m_globalRaytracingRootSignature, m_localRaytracingRootSignature, m_computeRootSignature;
 
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedSrvHeap;

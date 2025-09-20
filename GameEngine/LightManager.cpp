@@ -86,7 +86,7 @@ namespace ECS
 		);
 		cmdList->ResourceBarrier(1, &barrier);
 		cmdList->SetGraphicsRootDescriptorTable(
-			7, // Root parameter structured buffer index is 7
+			7, // Root parameter light's structured buffer index is 7
 			m_gpuHandle
 		);
 	}

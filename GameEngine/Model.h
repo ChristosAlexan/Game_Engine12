@@ -16,6 +16,7 @@ class Model
 {
 public:
 	Model();
+	void CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAlloc); // Needed for Compute shader skinning
 
 	//NOTE: Use blender 2.83 when exporting .gltf or .glb models for correct skinning, later versions are not supported for now
 	bool LoadModel(const std::string& filepath);
@@ -37,12 +38,13 @@ public:
 	void BuildFlatHierarchy(AnimatorComponent& animData);
 	void FlattenHierarchyRecursive(Node* node, int parentIndex, AnimatorComponent& animData);
 	ECS::MeshData& GetMeshData();
+	ECS::GpuMesh& GetGpuMesh();
 
 	void LoadNode(const tinygltf::Node& inputNode, const tinygltf::Model& input, Node* parent, uint32_t nodeIndex);
 
 public:
 	std::string name;
-	
+
 private:
 	std::vector<tinygltf::Model> models;
 	tinygltf::TinyGLTF loader;
@@ -51,6 +53,7 @@ private:
 
 
 	ECS::MeshData m_cpuMesh;
+	ECS::GpuMesh m_gpuMesh;
 
 	std::vector<DirectX::XMMATRIX> inverseBindMatrices;
 	std::unordered_map<int, int> nodeToJointMap;
@@ -61,4 +64,5 @@ private:
 	std::vector<std::string> m_animFiles;
 	std::vector<Node*> nodes;
 	uint32_t totalNodeCount = 0;
+
 };

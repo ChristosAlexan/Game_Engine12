@@ -4,7 +4,12 @@
 #include <entt/entt.hpp>
 #include "EntityECS.h"
 
+namespace ECS
+{
+	class Scene;
+}
+
 ECS::MeshData GenerateCubeMesh(ECS::EntityDesc& entityDesc);
 ECS::MeshData GenerateQuadMesh(ECS::EntityDesc& entityDesc);
 ECS::MeshData GenerateStaticMesh(Model& model, ECS::EntityDesc& entityDesc);
-ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc);
+ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc, ECS::Scene* scene);

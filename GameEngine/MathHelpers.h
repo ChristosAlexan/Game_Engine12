@@ -101,7 +101,7 @@ inline void GenerateAABB(ECS::AABB& aabb, ECS::RenderComponent* renderComp)
 	DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
 	DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
 
-	for (const auto& vertex : renderComp->mesh->cpuMesh.vertices)
+	for (const auto& vertex : renderComp->mesh->cpuMesh->vertices)
 	{
 		DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
 		min = DirectX::XMVectorMin(min, pos);
