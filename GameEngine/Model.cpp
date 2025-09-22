@@ -84,20 +84,20 @@ DirectX::XMMATRIX Node::getLocalMatrix()
 
 Model::Model()
 {
-    //m_cpuMesh = std::make_shared<ECS::MeshData>();
-    //m_gpuMesh = std::make_shared<ECS::GpuMesh>();
 }
 
 void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAlloc)
 {
       m_cpuMesh.skinningVertexBuffer.Initialize(device, m_cpuMesh.vertices.size());
+      m_gpuMesh.skinningVertexBufferOutput.Initialize(device, m_cpuMesh.vertices.size(), true);
+
 
       DescriptorAllocator::DescriptorHandle allocator = descriptorAlloc->Allocate();
 
-      m_cpuMesh.cpuHandle = allocator.cpuHandle;
-      m_gpuMesh.gpuHandle = allocator.gpuHandle;
+      m_cpuMesh.skinningCpuHandleIn = allocator.cpuHandle;
+      m_gpuMesh.skinningGpuHandleIn = allocator.gpuHandle;
 
-      m_cpuMesh.skinningVertexBuffer.CreateSRV(device, m_cpuMesh.cpuHandle);
+      m_cpuMesh.skinningVertexBuffer.CreateSRV(device, m_cpuMesh.skinningCpuHandleIn);
 
 
      std::vector<ECS::GPUSkinningBufferVertexData> gpuSkinninningData;
@@ -105,16 +105,19 @@ void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandLis
 
       for (int i = 0; i < gpuSkinninningData.size(); ++i)
       {
-         
-
           gpuSkinninningData[i].position = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].pos.x, m_cpuMesh.vertices[i].pos.y, m_cpuMesh.vertices[i].pos.z, 0.0f);
           gpuSkinninningData[i].boneWeights = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].boneWeights[0], m_cpuMesh.vertices[i].boneWeights[1], m_cpuMesh.vertices[i].boneWeights[2], m_cpuMesh.vertices[i].boneWeights[3]);
           for (int index = 0; index < 4; ++index)
               gpuSkinninningData[i].boneIndices[index] = m_cpuMesh.vertices[i].boneIndices[index];
-
       }
 
       m_cpuMesh.skinningVertexBuffer.UploadData(cmdList, gpuSkinninningData);
+
+      allocator = descriptorAlloc->Allocate();
+      m_cpuMesh.skinningCpuHandleOut = allocator.cpuHandle;
+      m_gpuMesh.skinningGpuHandleOut = allocator.gpuHandle;
+
+      m_gpuMesh.skinningVertexBufferOutput.CreateUAV(device, m_cpuMesh.skinningCpuHandleOut);
 }
 
 bool Model::LoadModel(const std::string& filepath)

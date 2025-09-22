@@ -69,7 +69,7 @@ namespace ECS
 		{
 			if (mesh.second->cpuMesh->mesh_type == ECS::SKELETAL_MESH)
 			{
-				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), mesh.second->skinnedBlas.get());
+				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), mesh.second.get());
 			}
 		}
 	}
@@ -105,7 +105,7 @@ namespace ECS
 		RenderLightPass(scene);
 	}
 
-	void RenderingManager::RenderPbrPass(Camera& camera, DynamicUploadBuffer* dynamicCB)
+	void RenderingManager::RenderPbrPass(Camera& camera)
 	{
 		if (bRenderPbrPass)
 		{
@@ -120,7 +120,7 @@ namespace ECS
 		}
 	}
 
-	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB, 
+	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
 		TransformComponent& transformComponent, RenderComponent& renderComponent)
 	{
 		if (!scene)
@@ -183,13 +183,13 @@ namespace ECS
 
 		if (m_dx12.GetCmdList())
 		{
-			if (dynamicCB)
+			if (GetDX12().dynamicCB)
 			{
-				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dynamicCB->Allocate(vsCB));
-				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(1, dynamicCB->Allocate(psCB));
-				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, dynamicCB->Allocate(skinningCB));
-				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, dynamicCB->Allocate(psMaterialCB));
-				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(6, dynamicCB->Allocate(psCameraCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, GetDX12().dynamicCB->Allocate(vsCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(1, GetDX12().dynamicCB->Allocate(psCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, GetDX12().dynamicCB->Allocate(skinningCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psMaterialCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
 			}
 
 			if(renderComponent.hasTextures)
@@ -411,45 +411,83 @@ namespace ECS
 
 	void RenderingManager::CalculateCompute(Scene* scene)
 	{
-		auto renderCompView = scene->GetRegistry().view<RenderComponent>();
-		std::size_t total = renderCompView.size();
-	
+		CB_CS_AnimationShader skinningCB = {};
 
-		for (auto renderComponent : renderCompView)
+		auto group = scene->GetRegistry().group<>(entt::get<RenderComponent, AnimatorComponent>);
+
+		for (auto entity : group)
 		{
-			auto& gpuMesh = renderCompView.get<RenderComponent>(renderComponent).mesh;
-			auto& cpuMesh = renderCompView.get<RenderComponent>(renderComponent).mesh->cpuMesh;
-
+			auto& gpuMesh = group.get<RenderComponent>(entity).mesh;
+			auto& cpuMesh = group.get<RenderComponent>(entity).mesh->cpuMesh;
+			
 			if (cpuMesh->mesh_type == SKELETAL_MESH)
 			{
+				auto& animatorComponent = group.get<AnimatorComponent>(entity);
+
 				ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
 				m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
 				GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetComputeRootSignature());
-				// Transition back to unorder access
-				CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-					m_computeUAV->m_resource.Get(),
-					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-					D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-				GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 
-				m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_compute.Get());
-				GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
-				GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
-					1, // Root parameter skinning structured buffer index is 1
-					gpuMesh->gpuHandle
-				);
+				
+				if (!animatorComponent.finalTransforms.empty())
+				{
+					size_t matrixCount = animatorComponent.finalTransforms.size();
+					assert(matrixCount <= sizeof(skinningCB.skinningMatrix));
+					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), matrixCount * sizeof(DirectX::XMMATRIX));
 
-				unsigned int dispatchX = m_dx12.GetScreenWidth() / 8;
-				unsigned int dispatchY = m_dx12.GetScreenHeight() / 8;
+				}
+				
+				if (GetDX12().GetCmdList())
+				{
+					// Transition back to unorder access
+					CD3DX12_RESOURCE_BARRIER barrierTest = CD3DX12_RESOURCE_BARRIER::Transition(
+						m_computeUAV->m_resource.Get(),
+						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+						D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+					GetDX12().GetCmdList()->ResourceBarrier(1, &barrierTest);
 
-				GetDX12().GetCmdList()->Dispatch(dispatchX, dispatchY, 1);
+					CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+						gpuMesh->skinningVertexBufferOutput.GetResource(),
+						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+						D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+						);
+					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 
-				// Transition to shader resource
-				barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-					m_computeUAV->m_resource.Get(),
-					D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+					m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_compute.Get());
+					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
+					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
+						1, // Root parameter skinning structured buffer input
+						gpuMesh->skinningGpuHandleIn
+					);
+					
+					std::size_t vertexCount = cpuMesh->vertices.size();
+					skinningCB.vertexCount = vertexCount;
+
+					m_dx12.GetCmdList()->SetComputeRootConstantBufferView(2, GetDX12().dynamicCB->Allocate(skinningCB));
+
+					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
+						3, // Root parameter skinning structured buffer output
+						gpuMesh->skinningGpuHandleOut
+					);
+
+					unsigned int threadsPerGroup = 256;
+					unsigned int groups = (vertexCount + threadsPerGroup - 1) / threadsPerGroup;
+
+					GetDX12().GetCmdList()->Dispatch(groups, 1, 1);
+				
+					// Transition to shader resource
+					barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+						gpuMesh->skinningVertexBufferOutput.GetResource(),
+						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+
+					barrierTest = CD3DX12_RESOURCE_BARRIER::Transition(
+						m_computeUAV->m_resource.Get(),
+						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+					GetDX12().GetCmdList()->ResourceBarrier(1, &barrierTest);
+				}
 			}
 		}
 	}

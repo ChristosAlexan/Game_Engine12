@@ -57,9 +57,9 @@ void Engine::Update(int width, int height)
 	float clearColor[] = { 0,0,0,1 };
 	m_sceneManager->GetRenderingManager()->SetRenderTarget(m_sceneManager->GetRenderingManager()->GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(dt, camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
+	m_sceneManager->Update(dt, camera);
 	// Render cube maps, irradiance, prefilter and brdf maps
-	m_sceneManager->GetRenderingManager()->RenderPbrPass(camera, m_sceneManager->GetRenderingManager()->GetDX12().dynamicCB.get());
+	m_sceneManager->GetRenderingManager()->RenderPbrPass(camera);
 
 	// Reset viewport to camera
 	camera.PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);

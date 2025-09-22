@@ -57,8 +57,8 @@ namespace ECS
 		return m_renderingManager.get();
 	}
 
-	void SceneManager::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
+	void SceneManager::Update(float dt, Camera& camera)
 	{
-		m_currentScene->Update(dt, camera, dynamicCB);
+		m_currentScene->Update(dt, camera);
 	}
 }

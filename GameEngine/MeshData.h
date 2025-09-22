@@ -17,6 +17,12 @@ namespace ECS
         uint32_t boneIndices[4] = { 0,0,0,0 };
     };
 
+    struct GPUSkinningBufferVertexDataOutput
+    {
+        DirectX::XMFLOAT3 position;
+        float padding;
+    };
+
     enum MESH_TYPE
     {
         QUAD = 0,
@@ -28,7 +34,8 @@ namespace ECS
 
     struct MeshData 
     {
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
+        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuHandleIn{};
+        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuHandleOut{};
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         MESH_TYPE mesh_type;
@@ -37,7 +44,8 @@ namespace ECS
 
     struct GpuMesh 
     {
-        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
+        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuHandleIn{};
+        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuHandleOut{};
         VertexBuffer12<Vertex> vertexBuffer;
         IndexBuffer12 indexBuffer;
         uint32_t vertexCount = 0;
@@ -45,6 +53,7 @@ namespace ECS
         std::shared_ptr<MeshData> cpuMesh;
         std::shared_ptr<BLAS> staticBlas;
         std::shared_ptr<BLAS> skinnedBlas;
+        StructuredBuffer<GPUSkinningBufferVertexDataOutput> skinningVertexBufferOutput;
 
         void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
         {

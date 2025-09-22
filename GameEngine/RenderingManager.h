@@ -30,8 +30,8 @@ namespace ECS
 		void ResetRenderTargets();
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void LightPass(Scene* scene);
-		void RenderPbrPass(Camera& camera, DynamicUploadBuffer* dynamicCB);
-		void RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera, DynamicUploadBuffer* dynamicCB,
+		void RenderPbrPass(Camera& camera);
+		void RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);

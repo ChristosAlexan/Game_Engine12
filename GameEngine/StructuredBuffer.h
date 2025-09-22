@@ -6,7 +6,7 @@ template<typename T>
 class StructuredBuffer
 {
 public:
-	void Initialize(ID3D12Device* device, UINT elementCount)
+	void Initialize(ID3D12Device* device, UINT elementCount, bool isUAV = false)
 	{
 		HRESULT hr;
 		m_elementCount = elementCount;
@@ -15,22 +15,36 @@ public:
 
 		// Create GPU buffer (default heap)
 		CD3DX12_HEAP_PROPERTIES defaultHeapProps(D3D12_HEAP_TYPE_DEFAULT);
-		CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_NONE);
+		CD3DX12_RESOURCE_DESC bufferDesc;
 
-		hr = device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
-			&bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_gpuBuffer));
-		COM_ERROR_IF_FAILED(hr, "Failed to create gpu buffer commited resource!");
+		if (isUAV)
+		{
+			bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
-		// Create upload buffer
-		CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
-		hr = device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
-			&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_uploadBuffer));
-		COM_ERROR_IF_FAILED(hr, "Failed to create upload buffer commited resource!");
+			hr = device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
+				&bufferDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(&m_gpuBuffer));
+			COM_ERROR_IF_FAILED(hr, "Failed to create gpu buffer commited resource!");
+		}
+		else
+		{
+			bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_NONE);
 
-		// Map upload buffer
-		CD3DX12_RANGE readRange(0, 0);
-		hr = m_uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUpload));
-		COM_ERROR_IF_FAILED(hr, "Failed to map upload buffer!");
+			hr = device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
+				&bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_gpuBuffer));
+			COM_ERROR_IF_FAILED(hr, "Failed to create gpu buffer commited resource!");
+
+			// Create upload buffer
+			CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
+			hr = device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
+				&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_uploadBuffer));
+			COM_ERROR_IF_FAILED(hr, "Failed to create upload buffer commited resource!");
+
+			// Map upload buffer
+			CD3DX12_RANGE readRange(0, 0);
+			hr = m_uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUpload));
+			COM_ERROR_IF_FAILED(hr, "Failed to map upload buffer!");
+		}
+		
 	}
 
 	void UploadData(ID3D12GraphicsCommandList* cmdList, const std::vector<T>& data)
@@ -52,6 +66,19 @@ public:
 		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 		device->CreateShaderResourceView(m_gpuBuffer.Get(), &srvDesc, srvHandle);
+	}
+
+	void CreateUAV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE uavHandle)
+	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		uavDesc.Buffer.FirstElement = 0;
+		uavDesc.Buffer.NumElements = m_elementCount;
+		uavDesc.Buffer.StructureByteStride = m_stride;
+		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+		device->CreateUnorderedAccessView(m_gpuBuffer.Get(), nullptr, &uavDesc, uavHandle);
 	}
 
 	ID3D12Resource* GetResource() const 

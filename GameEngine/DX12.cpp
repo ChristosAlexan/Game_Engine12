@@ -931,12 +931,17 @@ void DX12::InitializeBuffers()
 
     CD3DX12_DESCRIPTOR_RANGE1 testComputeRange;
     testComputeRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0, 8); // u0 space8 test compute output
-    CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBuffer;
-    srvSkinningStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 8); // t4 space4 skinning structured buffer compute  
+    CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBufferIn;
+    srvSkinningStructuredBufferIn.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 8); // t0 space8 skinning structured buffer compute  
+    CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBufferOut;
+    srvSkinningStructuredBufferOut.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1, 8); // u0 space8 test compute output
+
     // Compute root signature
-    CD3DX12_ROOT_PARAMETER1 computeRootParams[2];
+    CD3DX12_ROOT_PARAMETER1 computeRootParams[4];
     computeRootParams[0].InitAsDescriptorTable(1, &testComputeRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space8: UAV compute UAV output
-    computeRootParams[1].InitAsDescriptorTable(1, &srvSkinningStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t1 space8: skinning structured buffer
+    computeRootParams[1].InitAsDescriptorTable(1, &srvSkinningStructuredBufferIn, D3D12_SHADER_VISIBILITY_ALL); // t1 space8: SRV skinning structured buffer in
+    computeRootParams[2].InitAsConstantBufferView(0, 8, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b0 space8 CS : skinning data
+    computeRootParams[3].InitAsDescriptorTable(1, &srvSkinningStructuredBufferOut, D3D12_SHADER_VISIBILITY_ALL); // u1 space8: UAV skinning structured buffer out
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC computeRootSigDesc;
     computeRootSigDesc.Init_1_1(_countof(computeRootParams), computeRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);

@@ -20,7 +20,7 @@ namespace ECS
 		Scene* GetCurrentScene() const;
 		void SetupLights();
 		RenderingManager* GetRenderingManager();
-		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
+		void Update(float dt, Camera& camera);
 		
 	private:
 		ID3D12Device* m_device = nullptr;

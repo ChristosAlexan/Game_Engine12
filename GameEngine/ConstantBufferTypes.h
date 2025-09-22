@@ -52,3 +52,9 @@ struct CB_PS_LIGHTS
 	DirectX::XMFLOAT3 padding3;
 };
 
+/************ COMPUTE SHADERS *******************/
+struct CB_CS_AnimationShader
+{
+	DirectX::XMMATRIX skinningMatrix[100];
+	uint32_t vertexCount;
+};

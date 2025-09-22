@@ -56,7 +56,7 @@ namespace ECS
 		m_lightManager->Initialize(this);
 	}
 
-	void Scene::Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB)
+	void Scene::Update(float dt, Camera& camera)
 	{
 		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
@@ -71,7 +71,7 @@ namespace ECS
 		// Present
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
-			GetRenderingManager()->RenderGbuffer(this, entity, camera, dynamicCB, transformComponent, renderComponent);
+			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent);
 		}
 
 		// Dispatch rays

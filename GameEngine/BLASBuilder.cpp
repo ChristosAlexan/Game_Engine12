@@ -2,6 +2,7 @@
 #include "COMException.h"
 #include "Vertex.h"
 
+
 BLASBuilder::BLASBuilder()
 {
 }
@@ -71,23 +72,27 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	return blas;
 }
 
-void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::BLAS* blas)
+void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::GpuMesh* mesh)
 {
-	if (!blas)
+	if (!mesh->skinnedBlas)
 		return;
-	auto inputs = blas->inputs;
+	auto inputs = mesh->skinnedBlas->inputs;
 	inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 	
-	auto geometry = blas->geometry;
-	
+	auto geometry = mesh->skinnedBlas->geometry;
+	/*geometry.Triangles.VertexBuffer.StartAddress = mesh->skinningVertexBufferOutput.GetGPUAddress();
+	geometry.Triangles.VertexBuffer.StrideInBytes = 16;
+	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;*/
+
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc{};
 	desc.Inputs = inputs;
 	desc.Inputs.pGeometryDescs = &geometry;
-	desc.SourceAccelerationStructureData = blas->result->GetGPUVirtualAddress();
-	desc.DestAccelerationStructureData = blas->result->GetGPUVirtualAddress();
-	desc.ScratchAccelerationStructureData = blas->scratch->GetGPUVirtualAddress();
+	
+	desc.SourceAccelerationStructureData = mesh->skinnedBlas->result->GetGPUVirtualAddress();
+	desc.DestAccelerationStructureData = mesh->skinnedBlas->result->GetGPUVirtualAddress();
+	desc.ScratchAccelerationStructureData = mesh->skinnedBlas->scratch->GetGPUVirtualAddress();
 	cmdList->BuildRaytracingAccelerationStructure(&desc, 0, nullptr);
 	
-	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(blas->result.Get());
+	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(mesh->skinnedBlas->result.Get());
 	cmdList->ResourceBarrier(1, &barrier);
 }

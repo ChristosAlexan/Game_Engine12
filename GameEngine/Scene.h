@@ -28,7 +28,7 @@ namespace ECS
 		void LoadMaterials();
 		void LoadAssets();
 		void AccumulateLights();
-		void Update(float dt, Camera& camera, DynamicUploadBuffer* dynamicCB);
+		void Update(float dt, Camera& camera);
 
 		//AABB GetWorldAABB(TransformComponent* trans, RenderComponent* renderComp);
 		const std::string GetName() const;
