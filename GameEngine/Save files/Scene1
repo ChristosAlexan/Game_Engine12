@@ -289,19 +289,18 @@
             "useNormalMap": true
         },
         {
-            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
-            "AnimSize": 1,
+            "AnimSize": 0,
             "albedoTextureName": "roboAlbedo",
             "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
-            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "filePath": ".//Data/Assets/Test Scene/blender 2.83/CesiumMan1.gltf",
             "hasAnimation": true,
-            "hasTextures": true,
+            "hasTextures": false,
             "materialName": "RoboMaterial",
             "meshType": 3,
-            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTextureName": "roboMetalRougness1",
             "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
-            "name": "Robo",
+            "name": "Robo1",
             "normalTextureName": "roboNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
             "roughness": 0.5,
@@ -313,15 +312,15 @@
                     -3.116821050643921
                 ],
                 "rotation": [
-                    0.0008683922933414578,
+                    0.0008683943888172507,
                     0.9991077184677124,
-                    0.026198651641607285,
-                    -0.0331168957054615
+                    0.026198672130703926,
+                    -0.0331169031560421
                 ],
                 "scale": [
-                    2.520538330078125,
-                    2.5199995040893555,
-                    2.5203652381896973
+                    1.3862963914871216,
+                    1.3859999179840088,
+                    1.386201024055481
                 ]
             },
             "useAlbedoMap": true,

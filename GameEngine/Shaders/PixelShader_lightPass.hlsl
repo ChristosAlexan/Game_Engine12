@@ -110,7 +110,7 @@ float4 Main(PSInput input) : SV_TARGET
     
     float raytracedShadows = raytracingTexture.Sample(gSampler, input.uv).r;
     float3 compute = computeTexture.Sample(gSampler, input.uv).rgb;
-    //return float4(compute, 1.0f);
+
     return float4(color * raytracedShadows, 1.0);
 }
 

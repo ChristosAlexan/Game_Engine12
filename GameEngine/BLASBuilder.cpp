@@ -76,13 +76,14 @@ void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmd
 {
 	if (!mesh->skinnedBlas)
 		return;
+
 	auto inputs = mesh->skinnedBlas->inputs;
 	inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 	
 	auto geometry = mesh->skinnedBlas->geometry;
-	/*geometry.Triangles.VertexBuffer.StartAddress = mesh->skinningVertexBufferOutput.GetGPUAddress();
+	geometry.Triangles.VertexBuffer.StartAddress = mesh->skinningVertexBufferOutput.GetGPUAddress();
 	geometry.Triangles.VertexBuffer.StrideInBytes = 16;
-	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;*/
+	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc{};
 	desc.Inputs = inputs;
