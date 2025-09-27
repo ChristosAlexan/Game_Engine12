@@ -59,7 +59,7 @@ namespace ECS
 				mesh->skinnedBlas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
 					mesh->vertexBuffer.GetVertexBufferVirtualAddress(), mesh->vertexCount, mesh->vertexBuffer.vbView.StrideInBytes,
 					mesh->indexBuffer.GetIndexBufferVirtualAddress(), mesh->indexCount, mesh->indexBuffer.ibView.Format,
-					D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
+					D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
 			}
 		}
 

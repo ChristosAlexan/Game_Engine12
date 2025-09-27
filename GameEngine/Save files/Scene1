@@ -114,6 +114,44 @@
             "tex_format": 0,
             "transform": {
                 "position": [
+                    2.9947762489318848,
+                    2.124502182006836,
+                    3.2610039710998535
+                ],
+                "rotation": [
+                    0.6940165758132935,
+                    0.07607048004865646,
+                    0.058212120085954666,
+                    0.7135584354400635
+                ],
+                "scale": [
+                    0.4799993336200714,
+                    0.48003318905830383,
+                    0.4800221920013428
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "ballAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-basecolor.dds",
+            "filePath": ".//Data/Assets/Test Scene/ball/sphere.gltf",
+            "hasAnimation": false,
+            "hasTextures": true,
+            "materialName": "ballMaterial",
+            "meshType": 2,
+            "metalRoughnessTextureName": "ballMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-metallic-smoothness.dds",
+            "metalness": 0.0,
+            "name": "Ball",
+            "normalTextureName": "ballNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
                     -5.117689609527588,
                     0.5653613209724426,
                     3.490424871444702
@@ -268,18 +306,18 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.7191896438598633,
-                    0.12993451952934265,
-                    -0.2963554561138153
+                    -1.7349683046340942,
+                    0.2635319232940674,
+                    -0.534117579460144
                 ],
                 "rotation": [
-                    0.0008683925843797624,
+                    0.0008683933992870152,
                     0.9991077184677124,
-                    0.02619866095483303,
+                    0.026198673993349075,
                     -0.0331168957054615
                 ],
                 "scale": [
-                    2.5206663608551025,
+                    2.520750045776367,
                     2.5199995040893555,
                     2.5203652381896973
                 ]
@@ -300,27 +338,27 @@
             "metalRoughnessTextureName": "roboMetalRougness1",
             "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
             "metalness": 0.0,
-            "name": "Robo1",
+            "name": "Celsius",
             "normalTextureName": "roboNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.1687251329421997,
-                    0.17616315186023712,
-                    -3.116821050643921
+                    -0.43983733654022217,
+                    0.05663803592324257,
+                    -6.987819671630859
                 ],
                 "rotation": [
-                    0.0008683943888172507,
+                    0.0008684059139341116,
                     0.9991077184677124,
-                    0.026198672130703926,
-                    -0.0331169031560421
+                    0.026198754087090492,
+                    -0.03311681002378464
                 ],
                 "scale": [
-                    1.3862963914871216,
-                    1.3859999179840088,
-                    1.386201024055481
+                    1.3841516971588135,
+                    1.3837822675704956,
+                    1.3839858770370483
                 ]
             },
             "useAlbedoMap": true,
