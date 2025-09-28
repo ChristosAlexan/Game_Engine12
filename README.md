@@ -54,5 +54,5 @@ PBR rendering
 ## Build Instructions
 1. Clone the repository
 2. Run install_deps.bat to download necessary dependencies
-3. Open the project in Visual Studio 2022  
+3. Open the project in Visual Studio 2026  
 4. Build in x64 Debug/Release   
