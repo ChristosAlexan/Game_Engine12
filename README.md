@@ -35,7 +35,13 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 
 ## Showcase
 BLAS rebuild for skinned meshes and PBR rendering
+
+
+
+
 https://github.com/user-attachments/assets/650d4ee7-dd54-4406-b15b-6ee7eae12df7
+
+
 
 ---
 
