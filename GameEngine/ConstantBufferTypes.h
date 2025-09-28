@@ -46,7 +46,7 @@ struct CB_PS_PBR
 	DirectX::XMFLOAT3 padding2;
 };
 
-struct CB_PS_LIGHTS
+struct CB_SHADER_LIGHTS
 {
 	uint32_t totalLights;
 	DirectX::XMFLOAT3 padding3;

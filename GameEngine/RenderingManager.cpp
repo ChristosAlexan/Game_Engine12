@@ -73,7 +73,6 @@ namespace ECS
 
 			if (renderComponent.meshType == SKELETAL_MESH)
 			{
-				std::cout << "TEST6\n";
 				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), renderComponent);
 			}
 		}
@@ -256,6 +255,8 @@ namespace ECS
 
 	void RenderingManager::DispatchRays(Scene* scene)
 	{
+		CB_SHADER_LIGHTS lights_data = {};
+
 		ReBuildBLAS(scene);
 		BuildTLAS(scene);
 
@@ -272,11 +273,20 @@ namespace ECS
 		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
 		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
 
+		// Get all the light components in the scene
+		auto lightsView = scene->GetRegistry().view<LightComponent>();
+		std::size_t totalLights = lightsView.size();
+		lights_data.totalLights = totalLights;
+		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
+
 		m_dx12.GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture().GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsUAV->GetGPUHandleUAV());
-
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
+		if (m_dx12.dynamicCB)
+		{
+			m_dx12.GetCmdList()->SetComputeRootConstantBufferView(4, m_dx12.dynamicCB->Allocate(lights_data));
+		}
 
 		GetDX12().DispatchRaytracing();
 
@@ -293,7 +303,7 @@ namespace ECS
 	void RenderingManager::RenderLightPass(Scene* scene)
 	{
 		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-		CB_PS_LIGHTS lights_data = {};
+		CB_SHADER_LIGHTS lights_data = {};
 
 		ID3D12DescriptorHeap* heaps[] = { m_dx12.GetSharedSrvHeap() };
 		m_dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
