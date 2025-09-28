@@ -10,7 +10,7 @@
             "lightType": 0,
             "materialName": "LightMaterial",
             "meshType": 4,
-            "name": "Light",
+            "name": "DirectionalLight",
             "radius": 1.0,
             "strength": 10.0,
             "transform": {
@@ -42,7 +42,7 @@
             "lightType": 1,
             "materialName": "LightMaterial",
             "meshType": 4,
-            "name": "Light",
+            "name": "SpotLight",
             "radius": 11.449999809265137,
             "strength": 1000.0,
             "transform": {
@@ -74,14 +74,14 @@
             "lightType": 2,
             "materialName": "LightMaterial",
             "meshType": 4,
-            "name": "Light1",
+            "name": "PointLight",
             "radius": 4.579999923706055,
             "strength": 50.0,
             "transform": {
                 "position": [
-                    1.269500494003296,
-                    2.7044897079467773,
-                    -2.3798139095306396
+                    1.1281633377075195,
+                    2.816505193710327,
+                    -4.5095086097717285
                 ],
                 "rotation": [
                     0.0008684361237101257,
@@ -90,7 +90,39 @@
                     -0.033116478472948074
                 ],
                 "scale": [
-                    0.10046008229255676,
+                    0.10046163201332092,
+                    0.0999997928738594,
+                    0.10003823786973953
+                ]
+            }
+        },
+        {
+            "color": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "cutoff": 5.0,
+            "lightType": 2,
+            "materialName": "LightMaterial",
+            "meshType": 4,
+            "name": "PointLight",
+            "radius": 4.579999923706055,
+            "strength": 50.0,
+            "transform": {
+                "position": [
+                    1.2909413576126099,
+                    2.6874964237213135,
+                    -2.0567386150360107
+                ],
+                "rotation": [
+                    0.0008684361237101257,
+                    0.9991077184677124,
+                    0.026199230924248695,
+                    -0.033116478472948074
+                ],
+                "scale": [
+                    0.10046372562646866,
                     0.0999997928738594,
                     0.10003823786973953
                 ]

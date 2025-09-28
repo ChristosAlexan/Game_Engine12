@@ -17,7 +17,6 @@ namespace ECS
 	{
 		m_textureUAV.reset();
 		m_shadowsUAV.reset();
-		m_computeUAV.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
@@ -50,8 +49,6 @@ namespace ECS
 		m_textureUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
 		m_shadowsUAV = std::make_unique<Texture12>();
 		m_shadowsUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
-		m_computeUAV = std::make_unique<Texture12>();
-		m_computeUAV->CreateTextureUAV(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetDescriptorAllocator(), width, height);
 
 		m_raytracingMap.Initialize(m_dx12.GetDevice(), m_dx12.GetCmdList(), m_dx12.GetCommandAllocator(), m_dx12.GetSharedSrvHeap(), m_dx12.GetDescriptorAllocator(), width, height, formats, 1);
 	}
@@ -352,7 +349,6 @@ namespace ECS
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap.GetSrvGpuHandle(0));
 		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap.GetSrvGpuHandle(0));
-		m_dx12.GetCmdList()->SetGraphicsRootDescriptorTable(19, m_computeUAV->GetGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
@@ -456,12 +452,6 @@ namespace ECS
 				if (GetDX12().GetCmdList())
 				{
 					// Transition back to unorder access
-					CD3DX12_RESOURCE_BARRIER barrierTest = CD3DX12_RESOURCE_BARRIER::Transition(
-						m_computeUAV->m_resource.Get(),
-						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-						D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-					GetDX12().GetCmdList()->ResourceBarrier(1, &barrierTest);
-
 					CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 						renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource(),
 						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
@@ -470,19 +460,19 @@ namespace ECS
 					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 
 					m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_compute.Get());
-					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
+					//GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
-						1, // Root parameter skinning structured buffer input
+						0, // Root parameter skinning structured buffer input
 						gpuMesh->skinningGpuHandleIn
 					);
 					
 					std::size_t vertexCount = cpuMesh->vertices.size();
 					skinningCB.vertexCount = vertexCount;
 
-					m_dx12.GetCmdList()->SetComputeRootConstantBufferView(2, GetDX12().dynamicCB->Allocate(skinningCB));
+					m_dx12.GetCmdList()->SetComputeRootConstantBufferView(1, GetDX12().dynamicCB->Allocate(skinningCB));
 
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
-						3, // Root parameter skinning structured buffer output
+						2, // Root parameter skinning structured buffer output
 						renderComponent.skinningOutData.skinningGpuHandleFinalTransform
 					);
 
@@ -497,12 +487,6 @@ namespace ECS
 						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
-
-					barrierTest = CD3DX12_RESOURCE_BARRIER::Transition(
-						m_computeUAV->m_resource.Get(),
-						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-					GetDX12().GetCmdList()->ResourceBarrier(1, &barrierTest);
 				}
 			}
 		}
