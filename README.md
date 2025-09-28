@@ -33,9 +33,9 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 
 ---
 
-## Screenshots / Demos
-<img width="1599" height="898" alt="image" src="https://github.com/user-attachments/assets/6daae816-80a5-4a16-adf5-0bc72014997c" />
- 
+## Showcase
+BLAS rebuild for skinned meshes and PBR rendering
+https://github.com/user-attachments/assets/650d4ee7-dd54-4406-b15b-6ee7eae12df7
 
 ---
 
