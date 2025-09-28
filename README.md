@@ -36,10 +36,13 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 ## Showcase
 BLAS rebuild for skinned meshes
 
-
-
-
 https://github.com/user-attachments/assets/650d4ee7-dd54-4406-b15b-6ee7eae12df7
+
+Multiple light types with ray traced shadows
+
+
+https://github.com/user-attachments/assets/c56da566-f1b1-4c77-a806-4428bbaf84f7
+
 
 
 PBR rendering
