@@ -72,16 +72,16 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	return blas;
 }
 
-void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::GpuMesh* mesh)
+void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::RenderComponent& renderComponent)
 {
-	if (!mesh->skinnedBlas)
+	if (!renderComponent.blas)
 		return;
 
-	auto inputs = mesh->skinnedBlas->inputs;
+	auto inputs = renderComponent.blas->inputs;
 	inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 	
-	auto geometry = mesh->skinnedBlas->geometry;
-	geometry.Triangles.VertexBuffer.StartAddress = mesh->skinningVertexBufferOutput.GetGPUAddress();
+	auto geometry = renderComponent.blas->geometry;
+	geometry.Triangles.VertexBuffer.StartAddress = renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetGPUAddress();
 	geometry.Triangles.VertexBuffer.StrideInBytes = 16;
 	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 
@@ -89,11 +89,11 @@ void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmd
 	desc.Inputs = inputs;
 	desc.Inputs.pGeometryDescs = &geometry;
 	
-	desc.SourceAccelerationStructureData = mesh->skinnedBlas->result->GetGPUVirtualAddress();
-	desc.DestAccelerationStructureData = mesh->skinnedBlas->result->GetGPUVirtualAddress();
-	desc.ScratchAccelerationStructureData = mesh->skinnedBlas->scratch->GetGPUVirtualAddress();
+	desc.SourceAccelerationStructureData = renderComponent.blas->result->GetGPUVirtualAddress();
+	desc.DestAccelerationStructureData = renderComponent.blas->result->GetGPUVirtualAddress();
+	desc.ScratchAccelerationStructureData = renderComponent.blas->scratch->GetGPUVirtualAddress();
 	cmdList->BuildRaytracingAccelerationStructure(&desc, 0, nullptr);
 	
-	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(mesh->skinnedBlas->result.Get());
+	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(renderComponent.blas->result.Get());
 	cmdList->ResourceBarrier(1, &barrier);
 }

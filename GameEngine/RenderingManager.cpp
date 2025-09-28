@@ -65,11 +65,16 @@ namespace ECS
 	void RenderingManager::ReBuildBLAS(Scene* scene)
 	{
 		BLASBuilder blas_builder;
-		for(auto& mesh : scene->GetAssetManager()->m_meshes)
+		auto group = scene->GetRegistry().group<>(entt::get<RenderComponent, AnimatorComponent>);
+
+		for (auto entity : group)
 		{
-			if (mesh.second->cpuMesh->mesh_type == ECS::SKELETAL_MESH)
+			auto& renderComponent = group.get<RenderComponent>(entity);
+
+			if (renderComponent.meshType == SKELETAL_MESH)
 			{
-				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), mesh.second.get());
+				std::cout << "TEST6\n";
+				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), renderComponent);
 			}
 		}
 	}
@@ -417,10 +422,11 @@ namespace ECS
 
 		for (auto entity : group)
 		{
+			auto& renderComponent = group.get<RenderComponent>(entity);
 			auto& gpuMesh = group.get<RenderComponent>(entity).mesh;
 			auto& cpuMesh = group.get<RenderComponent>(entity).mesh->cpuMesh;
 			
-			if (cpuMesh->mesh_type == SKELETAL_MESH)
+			if (renderComponent.meshType == SKELETAL_MESH)
 			{
 				auto& animatorComponent = group.get<AnimatorComponent>(entity);
 
@@ -447,7 +453,7 @@ namespace ECS
 					GetDX12().GetCmdList()->ResourceBarrier(1, &barrierTest);
 
 					CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-						gpuMesh->skinningVertexBufferOutput.GetResource(),
+						renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource(),
 						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
 						D3D12_RESOURCE_STATE_UNORDERED_ACCESS
 						);
@@ -467,7 +473,7 @@ namespace ECS
 
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
 						3, // Root parameter skinning structured buffer output
-						gpuMesh->skinningGpuHandleOut
+						renderComponent.skinningOutData.skinningGpuHandleFinalTransform
 					);
 
 					unsigned int threadsPerGroup = 256;
@@ -477,7 +483,7 @@ namespace ECS
 				
 					// Transition to shader resource
 					barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-						gpuMesh->skinningVertexBufferOutput.GetResource(),
+						renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource(),
 						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);

@@ -19,10 +19,10 @@ void TLASBuilder::Build(ECS::Scene* scene)
 	{
 		std::shared_ptr<ECS::BLAS> blas;
 
-		if(renderComponent.meshType == ECS::STATIC_MESH)
-			blas = renderComponent.mesh->staticBlas;
-		else if (renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
-			blas = renderComponent.mesh->skinnedBlas;
+		if(renderComponent.meshType == ECS::STATIC_MESH || renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
+		{
+			blas = renderComponent.blas;
+		}
 		else
 			continue;
 

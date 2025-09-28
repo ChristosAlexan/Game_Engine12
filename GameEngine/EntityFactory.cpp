@@ -3,6 +3,7 @@
 #include "RenderingManager.h"
 #include "Scene.h"
 #include "MathHelpers.h"
+#include "BLASBuilder.h"
 
 namespace ECS
 {
@@ -13,15 +14,17 @@ namespace ECS
 
 	entt::entity EntityFactory::AddEntity(Scene* scene, EntityDesc& entityDesc)
 	{
+		BLASBuilder blas_builder;
 		std::unique_ptr<ECS::Material> mat;
 
 		auto id = scene->CreateEntity();
 	
+		RenderComponent renderComponent = {};
 
 		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(scene, entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
 
-		RenderComponent renderComponent = {};
+		
 		renderComponent.mesh = mesh;
 		renderComponent.material = material;
 		renderComponent.name = entityDesc.name;
@@ -33,7 +36,32 @@ namespace ECS
 		GenerateAABB(entityDesc.transform.aabb, &renderComponent);
 
 		if(entityDesc.meshType == ECS::MESH_TYPE::SKELETAL_MESH || entityDesc.meshType == ECS::MESH_TYPE::STATIC_MESH)
-		renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+
+		if(renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
+		{
+			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
+				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
+				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
+				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
+
+			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), 
+				renderComponent.mesh->cpuMesh->vertices.size(), true);
+
+			DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+			renderComponent.skinningOutData.skinningCpuHandleFinalTransform = allocator.cpuHandle;
+			renderComponent.skinningOutData.skinningGpuHandleFinalTransform = allocator.gpuHandle;
+
+			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(), 
+				renderComponent.skinningOutData.skinningCpuHandleFinalTransform);
+		}
+		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
+		{
+			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
+				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
+				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
+				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
+		}
 
 		if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{
@@ -52,9 +80,7 @@ namespace ECS
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
 
-		if(renderComponent.mesh->staticBlas)
-			scene->blas_total++;
-		if (renderComponent.mesh->skinnedBlas)
+		if(renderComponent.blas)
 			scene->blas_total++;
 
 		if (entityDesc.hasAnimation)

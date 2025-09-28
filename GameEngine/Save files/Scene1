@@ -266,20 +266,60 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.4304371178150177,
-                    0.027948398143053055,
-                    2.77718186378479
+                    1.245023250579834,
+                    0.02889089845120907,
+                    -0.7138487100601196
                 ],
                 "rotation": [
-                    0.186747744679451,
-                    -0.6807987093925476,
-                    0.684398889541626,
-                    0.1823093146085739
+                    0.18674792349338531,
+                    -0.6807990074157715,
+                    0.6843984723091125,
+                    0.18230906128883362
                 ],
                 "scale": [
-                    11.999981880187988,
-                    11.999999046325684,
-                    0.09413949400186539
+                    11.999939918518066,
+                    11.999966621398926,
+                    0.09413959085941315
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasTextures": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -4.084258079528809,
+                    0.17155104875564575,
+                    1.378328561782837
+                ],
+                "rotation": [
+                    0.0008683941559866071,
+                    0.9991077184677124,
+                    0.02619869075715542,
+                    -0.0331168957054615
+                ],
+                "scale": [
+                    2.5208563804626465,
+                    2.5199995040893555,
+                    2.5203652381896973
                 ]
             },
             "useAlbedoMap": true,
@@ -345,20 +385,59 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.43983733654022217,
-                    0.05663803592324257,
-                    -6.987819671630859
+                    -0.24451716244220734,
+                    0.11946038156747818,
+                    -4.0447258949279785
                 ],
                 "rotation": [
-                    0.0008684059139341116,
+                    0.0008684072527103126,
                     0.9991077184677124,
                     0.026198754087090492,
-                    -0.03311681002378464
+                    -0.03311676159501076
                 ],
                 "scale": [
-                    1.3841516971588135,
+                    1.384170651435852,
                     1.3837822675704956,
-                    1.3839858770370483
+                    1.383994460105896
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimSize": 0,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/blender 2.83/CesiumMan1.gltf",
+            "hasAnimation": true,
+            "hasTextures": false,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Celsius",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -3.938870906829834,
+                    0.05663812533020973,
+                    -6.755603790283203
+                ],
+                "rotation": [
+                    0.0008684072527103126,
+                    0.9991077184677124,
+                    0.026198754087090492,
+                    -0.03311676159501076
+                ],
+                "scale": [
+                    1.3841643333435059,
+                    1.3837822675704956,
+                    1.383994460105896
                 ]
             },
             "useAlbedoMap": true,

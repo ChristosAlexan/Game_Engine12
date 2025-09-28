@@ -89,8 +89,6 @@ Model::Model()
 void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAlloc)
 {
       m_cpuMesh.skinningVertexBuffer.Initialize(device, m_cpuMesh.vertices.size());
-      m_gpuMesh.skinningVertexBufferOutput.Initialize(device, m_cpuMesh.vertices.size(), true);
-
 
       DescriptorAllocator::DescriptorHandle allocator = descriptorAlloc->Allocate();
 
@@ -112,12 +110,6 @@ void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandLis
       }
 
       m_cpuMesh.skinningVertexBuffer.UploadData(cmdList, gpuSkinninningData);
-
-      allocator = descriptorAlloc->Allocate();
-      m_cpuMesh.skinningCpuHandleOut = allocator.cpuHandle;
-      m_gpuMesh.skinningGpuHandleOut = allocator.gpuHandle;
-
-      m_gpuMesh.skinningVertexBufferOutput.CreateUAV(device, m_cpuMesh.skinningCpuHandleOut);
 }
 
 bool Model::LoadModel(const std::string& filepath)

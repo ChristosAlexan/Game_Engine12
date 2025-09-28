@@ -7,6 +7,13 @@
 
 namespace ECS
 {
+    struct SkinningOutputData
+    {
+        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuHandleFinalTransform{};
+        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuHandleFinalTransform{};
+        StructuredBuffer<GPUSkinningBufferVertexDataOutput> skinningVertexBufferFinalTransform;
+    };
+
     struct RenderComponent 
     {
         ECS::MESH_TYPE meshType;
@@ -16,5 +23,7 @@ namespace ECS
         std::string name;
         bool hasAnimation = false;
         bool hasTextures = false;
+        SkinningOutputData skinningOutData; // Data per render component for compute skinning
+        std::shared_ptr<BLAS> blas; // BLAS per render component
     };
 }
