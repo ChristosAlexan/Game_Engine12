@@ -57,8 +57,6 @@ namespace ECS
 
 	void LightManager::UpdateVisibleLights(ID3D12GraphicsCommandList* cmdList, Camera& camera)
 	{
-		auto& cameraView = camera.GetViewMatrix();
-
 		for (int i = 0; i < m_lights.size(); ++i)
 		{
 			auto& worldMatrix = m_lightTransforms[i]->worldMatrix;

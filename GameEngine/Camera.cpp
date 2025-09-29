@@ -27,13 +27,13 @@ void Camera::OrthographicFov(int screenWidth, int screenHeight, float nearZ, flo
 	this->projectionMatrix = DirectX::XMMatrixOrthographicLH(screenWidth, screenHeight, nearZ, farZ);
 }
 
-DirectX::XMMATRIX& Camera::GetViewMatrix()
+DirectX::XMMATRIX Camera::GetViewMatrix() const
 {
 	return this->viewMatrix;
 }
 
 
-DirectX::XMMATRIX& Camera::GetProjectionMatrix()
+DirectX::XMMATRIX Camera::GetProjectionMatrix() const
 {
 	return this->projectionMatrix;
 }

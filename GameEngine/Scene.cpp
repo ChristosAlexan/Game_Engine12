@@ -6,8 +6,7 @@
 #include "RenderingManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
-
-
+#include "MathHelpers.h"
 
 namespace ECS
 {
@@ -58,19 +57,28 @@ namespace ECS
 
 	void Scene::Update(float dt, Camera& camera)
 	{
+		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+
 		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
-		// Update
+
+		// Update animations and transforms
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			GetAnimationManager()->Update(dt, this, entity, renderComponent);
 			GetTransformManager()->Update(this, entity, transformComponent);
-	
 		}
+
 		GetRenderingManager()->CalculateCompute(this);
+
 		// Present
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
+			auto aabb = GetWorldAABB(&transformComponent, &renderComponent);
+
+			if (!IsAABBInFrustum(aabb, frustum))
+				continue;
+
 			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent);
 		}
 

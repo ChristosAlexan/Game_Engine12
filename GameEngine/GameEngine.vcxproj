@@ -267,7 +267,6 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityFactory.cpp" />
     <ClCompile Include="ErrorLogger.cpp" />
-    <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GFXGui.cpp" />
     <ClCompile Include="GraphEditor.cpp" />
@@ -324,7 +323,6 @@
     <ClInclude Include="EntityECS.h" />
     <ClInclude Include="EntityFactory.h" />
     <ClInclude Include="ErrorLogger.h" />
-    <ClInclude Include="Frustum.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GFXGui.h" />
     <ClInclude Include="GFX_MACROS.h" />

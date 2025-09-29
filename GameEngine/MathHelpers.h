@@ -6,11 +6,73 @@
 #include "RenderingECS.h"
 #include <iostream>
 
-struct Ray {
+struct Ray 
+{
 	DirectX::XMVECTOR origin;
 	DirectX::XMVECTOR direction;
 };
 
+struct Frustum 
+{
+	DirectX::XMVECTOR planes[6];
+};
+
+inline Frustum ExtractFrustum(const DirectX::XMMATRIX& viewProj)
+{
+	Frustum frustum;
+
+	// Transpose for easier access if needed
+	DirectX::XMFLOAT4X4 m;
+	DirectX::XMStoreFloat4x4(&m, viewProj);
+
+	// Left plane: m[0][3] + m[0][0], m[1][3] + m[1][0], m[2][3] + m[2][0], m[3][3] + m[3][0]
+	frustum.planes[0] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._14 + m._11, m._24 + m._21, m._34 + m._31, m._44 + m._41));
+
+	// Right plane
+	frustum.planes[1] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._14 - m._11, m._24 - m._21, m._34 - m._31, m._44 - m._41));
+
+	// Bottom plane
+	frustum.planes[2] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._14 + m._12, m._24 + m._22, m._34 + m._32, m._44 + m._42));
+
+	// Top plane
+	frustum.planes[3] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._14 - m._12, m._24 - m._22, m._34 - m._32, m._44 - m._42));
+
+	// Near plane
+	frustum.planes[4] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._13, m._23, m._33, m._43));
+
+	// Far plane
+	frustum.planes[5] = DirectX::XMPlaneNormalize(
+		DirectX::XMVectorSet(m._14 - m._13, m._24 - m._23, m._34 - m._33, m._44 - m._43));
+
+	return frustum;
+}
+
+inline bool IsAABBInFrustum(const ECS::AABB& aabb, const Frustum& frustum)
+{
+	for (int i = 0; i < 6; ++i)
+	{
+		// Get the positive vertex (furthest point in plane normal direction)
+		DirectX::XMVECTOR positiveVertex = DirectX::XMVectorSelect(
+			aabb.min,
+			aabb.max,
+			DirectX::XMVectorGreater(frustum.planes[i], DirectX::XMVectorZero())
+		);
+
+		// If the positive vertex is outside (negative side), AABB is outside
+		float distance = DirectX::XMVectorGetX(
+			DirectX::XMPlaneDotCoord(frustum.planes[i], positiveVertex));
+
+		if (distance < 0.0f)
+			return false; // AABB is completely outside this plane
+	}
+
+	return true;
+}
 
 inline DirectX::XMFLOAT3 QuaternionToEulerAngles(DirectX::XMVECTOR q)
 {

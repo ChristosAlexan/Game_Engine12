@@ -9,8 +9,8 @@ public:
 	void PerspectiveFov(float fovDegrees, float aspectRatio, float nearZ, float farZ);
 	void OrthographicFov(int screenWidth, int screenHeight, float nearZ, float farZ);
 
-	DirectX::XMMATRIX& GetViewMatrix();
-	DirectX::XMMATRIX& GetProjectionMatrix();
+	DirectX::XMMATRIX GetViewMatrix() const;
+	DirectX::XMMATRIX GetProjectionMatrix() const;
 
 	const DirectX::XMVECTOR& GetPositionVector() const;
 	const DirectX::XMFLOAT3& GetPositionFloat3() const;

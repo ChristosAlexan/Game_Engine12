@@ -144,9 +144,6 @@
     <ClCompile Include="GFXGui.cpp">
       <Filter>GFX\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Frustum.cpp">
-      <Filter>GFX\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
@@ -297,9 +294,6 @@
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GFXGui.h">
-      <Filter>GFX\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Frustum.h">
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DX12.h">
