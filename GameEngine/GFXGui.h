@@ -17,6 +17,7 @@ public:
 
 	bool Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap, DescriptorAllocator* descAllocator);
 	void SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
+	void GeneralGuiSettings(ECS::SceneManager* sceneManager);
 	void UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
 	void UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
 	void BeginRender();

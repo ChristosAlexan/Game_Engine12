@@ -1,6 +1,7 @@
 #include "GFXGui.h"
 #include "ErrorLogger.h"
 #include "MathHelpers.h"
+#include "RenderingManager.h"
 
 GFXGui::GFXGui()
 {
@@ -76,6 +77,14 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 			m_closestEntityName = renderComponent.name;
 		}
 	}
+}
+
+void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
+{
+	ImGui::Begin("GeneralGuiSettings");
+	auto scene = sceneManager->GetCurrentScene();
+	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
+	ImGui::End();
 }
 
 void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)

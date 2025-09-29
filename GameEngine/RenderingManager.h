@@ -37,6 +37,7 @@ namespace ECS
 		void DispatchRays(Scene* scene);
 		void RenderRayTracingToRenderTarget();
 		void CalculateCompute(Scene* scene);
+		DirectX::XMFLOAT3 GetAmbientColor() const;
 	private:
 		void RenderLightPass(Scene* scene);
 
@@ -47,6 +48,7 @@ namespace ECS
 		GBuffer m_gBuffer;
 		std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
 		std::unique_ptr<Texture12> m_shadowsUAV; // Ray traced shadows output
+
  	public:
 
 		HDR_IMAGE hdr_map1;
@@ -56,9 +58,8 @@ namespace ECS
 		TLASBuilder m_tlasBuilder;
 
 		bool bRenderPbrPass = true;
-		bool btest = true;
 
-
+		DirectX::XMFLOAT3 m_ambientColor;
 		ECS::TLAS m_tlas;
 	};
 }

@@ -45,7 +45,7 @@ float4 Main(PSInput input) : SV_TARGET
     const float MAX_REF_LOD = 5.0f;
     const float exposure = 0.4f;
     const float gamma = 2.2f;
-    float ambientStrength = 0.2f;
+    float3 ambientStrength = ambientColor;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
     float mask = metalRoughnessMaskTexture.Sample(gSampler, input.uv).b;

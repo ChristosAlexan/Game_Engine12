@@ -43,7 +43,7 @@ struct CB_PS_Camera
 struct CB_PS_PBR
 {
 	float mip_roughness;
-	DirectX::XMFLOAT3 padding2;
+	DirectX::XMFLOAT3 ambientColor;
 };
 
 struct CB_SHADER_LIGHTS

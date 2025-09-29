@@ -170,6 +170,8 @@ void Engine::Update(int width, int height)
 	{
 		m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntity(m_sceneManager.get(), width, height, camera);
 	}
+
+	m_sceneManager->GetRenderingManager()->GetGFXGui().GeneralGuiSettings(m_sceneManager.get());
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
 

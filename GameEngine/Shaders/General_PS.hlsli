@@ -19,5 +19,5 @@ cbuffer CB_PS_Camera : register(b2)
 cbuffer CB_PS_PBR : register(b3)
 {
     float mip_roughness;
-    float3 padding2;
+    float3 ambientColor;
 };

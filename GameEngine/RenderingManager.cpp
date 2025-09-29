@@ -11,6 +11,7 @@ namespace ECS
 {
 	RenderingManager::RenderingManager()
 	{
+		m_ambientColor = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f);
 	}
 
 	RenderingManager::~RenderingManager()
@@ -132,6 +133,7 @@ namespace ECS
 		CB_PS_SimpleShader psCB = {};
 		CB_PS_Material psMaterialCB = {};
 		CB_PS_Camera psCameraCB = {};
+		CB_PS_PBR cb_ps_pbr = {};
 
 		m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_Gbuffer.Get());
 		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
@@ -181,6 +183,8 @@ namespace ECS
 		psCameraCB.cameraPos = camera.pos;
 		psCameraCB.padding1 = 0.0f;
 
+		cb_ps_pbr.mip_roughness = 0.0f;
+		cb_ps_pbr.ambientColor = GetAmbientColor();
 
 		if (m_dx12.GetCmdList())
 		{
@@ -191,6 +195,7 @@ namespace ECS
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, GetDX12().dynamicCB->Allocate(skinningCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psMaterialCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
+				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
 			}
 
 			if(renderComponent.hasTextures)
@@ -490,5 +495,9 @@ namespace ECS
 				}
 			}
 		}
+	}
+	DirectX::XMFLOAT3 RenderingManager::GetAmbientColor() const
+	{
+		return m_ambientColor;
 	}
 }
