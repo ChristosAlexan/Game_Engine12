@@ -63,7 +63,6 @@ void MyRaygenShader()
             float3 toLight = g_Lights[i].position.xyz - worldPos.xyz;
             lightDistance = length(toLight);
             lightDir = toLight / lightDistance;
-           
         }
         
         RayDesc ray;
@@ -89,7 +88,7 @@ void MyRaygenShader()
 [shader("closesthit")]
 void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
 {
-    payload.color = float4(0.2,0.2,0.2, 1);
+    payload.color = float4(0.0,0.0,0.0, 1);
 }
 
 [shader("miss")]
