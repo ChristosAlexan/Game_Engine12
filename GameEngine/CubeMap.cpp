@@ -233,6 +233,7 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
 			cb_ps_pbr.mip_roughness = roughness;
 			cb_ps_pbr.ambientColor = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+			cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 			dx12.GetCmdList()->OMSetRenderTargets(1, &m_cubemapTexture.m_rtvHandles[offset], FALSE, &dsvHandle);
 			float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };

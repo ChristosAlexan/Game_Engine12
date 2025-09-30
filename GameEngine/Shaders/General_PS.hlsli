@@ -20,4 +20,5 @@ cbuffer CB_PS_PBR : register(b3)
 {
     float mip_roughness;
     float3 ambientColor;
+    float4 exposureGamma;
 };

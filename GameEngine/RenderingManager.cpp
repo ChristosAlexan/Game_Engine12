@@ -12,6 +12,8 @@ namespace ECS
 	RenderingManager::RenderingManager()
 	{
 		m_ambientColor = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f);
+		m_exposure = 0.5f;
+		m_gamma = 2.2f;
 	}
 
 	RenderingManager::~RenderingManager()
@@ -102,12 +104,7 @@ namespace ECS
 		renderTarget.SetRenderTarget(m_dx12.GetCmdList(), m_dx12.dsvHandle, clearColor);
 	}
 
-	void RenderingManager::LightPass(Scene* scene)
-	{
-		RenderLightPass(scene);
-	}
-
-	void RenderingManager::RenderPbrPass(Camera& camera)
+	void RenderingManager::RenderPbrMaps(Camera& camera)
 	{
 		if (bRenderPbrPass)
 		{
@@ -185,6 +182,7 @@ namespace ECS
 
 		cb_ps_pbr.mip_roughness = 0.0f;
 		cb_ps_pbr.ambientColor = GetAmbientColor();
+		cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(GetExposure(), GetGamma(), 0.0f, 0.0f);
 
 		if (m_dx12.GetCmdList())
 		{
@@ -496,8 +494,32 @@ namespace ECS
 			}
 		}
 	}
+
+	void RenderingManager::UpdatePBR(Scene* scene, Camera& camera)
+	{
+		// Render cube maps, irradiance, prefilter and brdf maps
+		RenderPbrMaps(camera);
+		// Render light pass
+		RenderLightPass(scene);
+	}
+
+	void RenderingManager::SetGbufferRenderTarget()
+	{
+		// Render the scene to the geometry pass
+		float clearColor[] = { 0,0,0,1 };
+		SetRenderTarget(GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
+	}
+
 	DirectX::XMFLOAT3 RenderingManager::GetAmbientColor() const
 	{
 		return m_ambientColor;
+	}
+	float RenderingManager::GetExposure() const
+	{
+		return m_exposure;
+	}
+	float RenderingManager::GetGamma() const
+	{
+		return m_gamma;
 	}
 }

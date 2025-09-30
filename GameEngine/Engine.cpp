@@ -51,24 +51,8 @@ void Engine::Update(int width, int height)
 
 	// Start rendering of a frame
 	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
-	// Reset all render targets before rendering
-	m_sceneManager->GetRenderingManager()->ResetRenderTargets();
-	// Render the scene to the geometry pass
-	float clearColor[] = { 0,0,0,1 };
-	m_sceneManager->GetRenderingManager()->SetRenderTarget(m_sceneManager->GetRenderingManager()->GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
 	// Update current scene(animations, rendering etc.)
 	m_sceneManager->Update(dt, camera);
-	// Render cube maps, irradiance, prefilter and brdf maps
-	m_sceneManager->GetRenderingManager()->RenderPbrPass(camera);
-
-	// Reset viewport to camera
-	camera.PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
-	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
-	m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
-
-	// Render light pass
-	m_sceneManager->GetRenderingManager()->LightPass(m_sceneManager->GetCurrentScene());
-
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;

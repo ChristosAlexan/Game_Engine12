@@ -10,9 +10,10 @@ struct PSInput
 
 float3 ReinhardToneMapping(float3 color, float exposure)
 {
-    float3 mappedColor = color / (color + 1.0);
-    mappedColor = pow(mappedColor, float3(1.0 / exposure, 1.0 / exposure, 1.0 / exposure));
-    return mappedColor;
+    color *= exposure;
+
+    //Reinhard
+    return color / (color + 1.0);
 }
 
 float3 fresnelSchlick(float cosTheta, float3 F0);
@@ -43,8 +44,8 @@ SamplerState gSampler : register(s0);
 float4 Main(PSInput input) : SV_TARGET
 {
     const float MAX_REF_LOD = 5.0f;
-    const float exposure = 0.4f;
-    const float gamma = 2.2f;
+    const float exposure = exposureGamma.x;
+    const float gamma = exposureGamma.y;
     float3 ambientStrength = ambientColor;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
@@ -99,17 +100,15 @@ float4 Main(PSInput input) : SV_TARGET
     float3 prefilteredColor = prefilterTexture.SampleLevel(gSampler, R, roughness * MAX_REF_LOD).rgb;
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
     float3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-
-    float3 ambient = (kD * diffuse + specular) * ambientStrength;
-    float3 color = ambient + Lo;
-
-    color = ReinhardToneMapping(color, exposure);
-    color = pow(color, float3(1.0f / gamma, 1.0f / gamma, 1.0f / gamma));
-    
     
     float raytracedShadows = raytracingTexture.Sample(gSampler, input.uv).r;
 
-    return float4(color * raytracedShadows, 1.0);
+    float3 ambient = (kD * diffuse + specular) * ambientStrength;
+    float3 color = ambient + Lo * raytracedShadows;
+
+    color = ReinhardToneMapping(color, exposure);
+ 
+    return float4(color, 1.0);
 }
 
 float3 fresnelSchlick(float cosTheta, float3 F0)

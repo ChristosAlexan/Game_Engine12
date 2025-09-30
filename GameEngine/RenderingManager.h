@@ -29,15 +29,18 @@ namespace ECS
 		GBuffer& GetGbuffer();
 		void ResetRenderTargets();
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
-		void LightPass(Scene* scene);
-		void RenderPbrPass(Camera& camera);
+		void RenderPbrMaps(Camera& camera);
 		void RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
 			TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
 		void RenderRayTracingToRenderTarget();
 		void CalculateCompute(Scene* scene);
+		void UpdatePBR(Scene* scene, Camera& camera);
+		void SetGbufferRenderTarget();
 		DirectX::XMFLOAT3 GetAmbientColor() const;
+		float GetExposure() const;
+		float GetGamma() const;
 	private:
 		void RenderLightPass(Scene* scene);
 
@@ -60,6 +63,8 @@ namespace ECS
 		bool bRenderPbrPass = true;
 
 		DirectX::XMFLOAT3 m_ambientColor;
+		float m_exposure;
+		float m_gamma;
 		ECS::TLAS m_tlas;
 	};
 }

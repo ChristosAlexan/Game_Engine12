@@ -84,6 +84,8 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
 	ImGui::Begin("GeneralGuiSettings");
 	auto scene = sceneManager->GetCurrentScene();
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
+	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
+	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);
 	ImGui::End();
 }
 

@@ -420,6 +420,13 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     tempSwapChain.As(&swapChain);
     frameIndex = swapChain->GetCurrentBackBufferIndex();
 
+    UINT support = 0;
+    if (SUCCEEDED(swapChain->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709, &support)) &&
+        (support & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT))
+    {
+        swapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709);
+    }
+
     // --- Create Render Target Views ---
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < 2; ++i) {
@@ -427,6 +434,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
         device->CreateRenderTargetView(renderTargets[i].Get(), nullptr, rtvHandle);
         rtvHandle.Offset(1, rtvDescriptorSize);
     }
+
 }
 
 void DX12::CreateFenceAndSyncObjects()

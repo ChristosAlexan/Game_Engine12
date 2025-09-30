@@ -57,6 +57,9 @@ namespace ECS
 
 	void Scene::Update(float dt, Camera& camera)
 	{
+		// Reset all render targets before rendering
+		GetRenderingManager()->ResetRenderTargets();
+
 		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
 
 		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
@@ -71,6 +74,7 @@ namespace ECS
 
 		GetRenderingManager()->CalculateCompute(this);
 
+		GetRenderingManager()->SetGbufferRenderTarget();
 		// Present
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
@@ -84,6 +88,8 @@ namespace ECS
 
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
+
+		GetRenderingManager()->UpdatePBR(this, camera);
 	}	
 
 	const std::string Scene::GetName() const

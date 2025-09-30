@@ -44,6 +44,7 @@ struct CB_PS_PBR
 {
 	float mip_roughness;
 	DirectX::XMFLOAT3 ambientColor;
+	DirectX::XMFLOAT4 exposureGamma;
 };
 
 struct CB_SHADER_LIGHTS

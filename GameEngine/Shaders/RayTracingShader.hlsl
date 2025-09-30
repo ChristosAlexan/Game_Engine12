@@ -80,7 +80,6 @@ void MyRaygenShader()
         
         finalColor += shadowFactor;
     }
-    finalColor = finalColor / (finalColor + 1.0f);
     
     gOutput[launchIndex] = float4(finalColor, 1.0f);
 }
