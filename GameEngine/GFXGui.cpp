@@ -103,8 +103,7 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 		DirectX::XMMATRIX projMatrix = camera.GetProjectionMatrix();
 
 
-		std::string entityLabel = m_closestEntityName + ": " + std::to_string(static_cast<uint32_t>(m_closestEntity)) +
-			"##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string entityLabel = m_closestEntityName + ": " + std::to_string(static_cast<uint32_t>(m_closestEntity));
 		std::string entityName = m_closestEntityName + ": " + std::to_string(static_cast<uint32_t>(m_closestEntity));
 
 		ImGui::Text(entityName.c_str());
@@ -130,9 +129,9 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 			mode[0] = false;
 			mode[1] = false;
 		}
-		std::string posOffset = "Pos##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-		std::string scaleOffset = "Scale##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-		std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+		std::string posOffset = "Pos" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
+		std::string scaleOffset = "Scale" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
+		std::string rotOffset = "Rot" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 
 
 		ImGui::DragFloat3(posOffset.c_str(), &m_closestTransform->position.x, 0.05f);
@@ -156,10 +155,10 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 
 				if (renderComponent.hasAnimation)
 				{
-					std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					std::string label = "CurrentAnim" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
 
-					label = "blendDuration##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					label = "blendDuration" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
 				}
 			}
@@ -170,13 +169,13 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 				{
 					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
 					std::string label;
-					label = "Color##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					label = "Color" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1, 0);
-					label = "Radius##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					label = "Radius" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.01, 0);
-					label = "Strength##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					label = "Strength" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.01, 0);
-					label = "Cutoff##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
+					label = "Cutoff" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &lightComponent.cutoff, 0.01, 0);
 				}
 			}
@@ -207,9 +206,8 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 	ImGui::End();
 }
 
-void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
+void GFXGui::SelectEntityList(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera)
 {
-
 	auto scene = sceneManager->GetCurrentScene();
 	auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 
@@ -217,49 +215,12 @@ void GFXGui::UpdateAllEntities(ECS::SceneManager* sceneManager, UINT screenWidth
 
 	for (auto [entity, transform, renderComponent] : group.each())
 	{
-		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity)) + "##" + std::to_string(static_cast<uint32_t>(entity));
-		if (ImGui::CollapsingHeader(entityLabel.c_str()))
+		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity));
+		if (ImGui::Button(entityLabel.c_str()))
 		{
-			std::string posOffset = "Pos##" + std::to_string(static_cast<uint32_t>(entity));
-			std::string scaleOffset = "Scale##" + std::to_string(static_cast<uint32_t>(entity));
-			std::string rotOffset = "Rot##" + std::to_string(static_cast<uint32_t>(entity));
-
-			ImGui::DragFloat3(posOffset.c_str(), &transform.position.x, 0.05f);
-			ImGui::DragFloat3(scaleOffset.c_str(), &transform.scale.x, 0.05f);
-			if (ImGui::DragFloat4(rotOffset.c_str(), &m_closestTransform->rotation.x, 0.01f)) {
-				DirectX::XMVECTOR q = DirectX::XMLoadFloat4(&m_closestTransform->rotation);
-				q = DirectX::XMQuaternionNormalize(q);
-				DirectX::XMStoreFloat4(&m_closestTransform->rotation, q);
-			}
-
-			if(renderComponent.hasAnimation)
-			{
-				if (scene->GetRegistry().all_of<AnimatorComponent>(entity))
-				{
-					AnimatorComponent& animComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
-					std::string label = "CurrentAnim##" + std::to_string(static_cast<uint32_t>(entity));
-					ImGui::DragInt(label.c_str(), &animComponent.currentAnim, 1, 0);
-
-					label = "blendDuration##" + std::to_string(static_cast<uint32_t>(entity));
-					ImGui::DragFloat(label.c_str(), &animComponent.blendDuration, 0.01, 0);
-				}
-			}
-			if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
-			{
-				if (scene->GetRegistry().all_of<ECS::LightComponent>(entity))
-				{
-					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
-					std::string label;
-					label = "Color##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1, 0);
-					label = "Radius##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.01, 0);
-					label = "Strength##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.01, 0);
-					label = "Cutoff##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat(label.c_str(), &lightComponent.cutoff, 0.01, 0);
-				}
-			}
+			m_closestEntity = entity;
+			m_closestTransform = &transform;
+			m_closestEntityName = renderComponent.name;
 		}
 	}
 

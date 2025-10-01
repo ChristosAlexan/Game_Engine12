@@ -157,10 +157,7 @@ void Engine::Update(int width, int height)
 
 	m_sceneManager->GetRenderingManager()->GetGFXGui().GeneralGuiSettings(m_sceneManager.get());
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
-	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateAllEntities(m_sceneManager.get(), width, height, camera);
-
-	//m_sceneManager->GetCurrentScene()->GetRenderingManager()->m_cubeMap1.RenderDebug(m_sceneManager->GetCurrentScene()->GetRenderingManager()->GetDX12(), camera, 9);
-
+	m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntityList(m_sceneManager.get(), width, height, camera);
 	
 	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 
