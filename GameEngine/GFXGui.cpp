@@ -216,7 +216,7 @@ void GFXGui::SelectEntityList(ECS::SceneManager* sceneManager, UINT screenWidth,
 	for (auto [entity, transform, renderComponent] : group.each())
 	{
 		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity));
-		if (ImGui::Button(entityLabel.c_str()))
+		if (ImGui::Selectable(entityLabel.c_str()))
 		{
 			m_closestEntity = entity;
 			m_closestTransform = &transform;
