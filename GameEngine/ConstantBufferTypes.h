@@ -10,7 +10,8 @@ struct CB_VS_SimpleShader
 };
 struct CB_VS_AnimationShader
 {
-	DirectX::XMMATRIX skinningMatrix[100];
+	uint32_t vertexCount;
+	DirectX::XMFLOAT3 padding;
 	bool HasAnim;
 };
 

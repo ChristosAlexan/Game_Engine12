@@ -15,12 +15,21 @@ namespace ECS
         DirectX::XMFLOAT4 position;
         DirectX::XMFLOAT4 boneWeights;
         uint32_t boneIndices[4] = { 0,0,0,0 };
+        DirectX::XMFLOAT4 normal;
+        DirectX::XMFLOAT4 tangent;
+        DirectX::XMFLOAT4 binormal;
     };
 
     struct GPUSkinningBufferVertexDataOutput
     {
         DirectX::XMFLOAT3 position;
         float padding;
+        DirectX::XMFLOAT3 normal;
+        float padding1;
+        DirectX::XMFLOAT3 tangent;
+        float padding2;
+        DirectX::XMFLOAT3 binormal;
+        float padding3;
     };
 
     enum MESH_TYPE

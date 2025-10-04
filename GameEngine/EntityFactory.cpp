@@ -48,11 +48,18 @@ namespace ECS
 				renderComponent.mesh->cpuMesh->vertices.size(), true);
 
 			DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
-			renderComponent.skinningOutData.skinningCpuHandleFinalTransform = allocator.cpuHandle;
-			renderComponent.skinningOutData.skinningGpuHandleFinalTransform = allocator.gpuHandle;
+			renderComponent.skinningOutData.skinningCpuUavHandleFinalTransform = allocator.cpuHandle;
+			renderComponent.skinningOutData.skinningGpuUavHandleFinalTransform = allocator.gpuHandle;
 
 			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(), 
-				renderComponent.skinningOutData.skinningCpuHandleFinalTransform);
+				renderComponent.skinningOutData.skinningCpuUavHandleFinalTransform);
+
+			allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+			renderComponent.skinningOutData.skinningCpuSrvHandleFinalTransform = allocator.cpuHandle;
+			renderComponent.skinningOutData.skinningGpuSrvHandleFinalTransform = allocator.gpuHandle;
+
+			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(),
+				renderComponent.skinningOutData.skinningCpuSrvHandleFinalTransform);
 		}
 		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		{

@@ -107,6 +107,10 @@ void Model::CreateGPUSkinningData(ID3D12Device* device, ID3D12GraphicsCommandLis
           gpuSkinninningData[i].boneWeights = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].boneWeights[0], m_cpuMesh.vertices[i].boneWeights[1], m_cpuMesh.vertices[i].boneWeights[2], m_cpuMesh.vertices[i].boneWeights[3]);
           for (int index = 0; index < 4; ++index)
               gpuSkinninningData[i].boneIndices[index] = m_cpuMesh.vertices[i].boneIndices[index];
+
+          gpuSkinninningData[i].normal = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].normal.x, m_cpuMesh.vertices[i].normal.y, m_cpuMesh.vertices[i].normal.z, 0.0f);
+          gpuSkinninningData[i].tangent = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].tangent.x, m_cpuMesh.vertices[i].tangent.y, m_cpuMesh.vertices[i].tangent.z, m_cpuMesh.vertices[i].tangent.w);
+          gpuSkinninningData[i].binormal = DirectX::XMFLOAT4(m_cpuMesh.vertices[i].binormal.x, m_cpuMesh.vertices[i].binormal.y, m_cpuMesh.vertices[i].binormal.z, 0.0f);
       }
 
       m_cpuMesh.skinningVertexBuffer.UploadData(cmdList, gpuSkinninningData);

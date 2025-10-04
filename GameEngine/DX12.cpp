@@ -895,8 +895,10 @@ void DX12::InitializeBuffers()
     raytracingLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 4); // t3 space4 raytracing lightpass input
     CD3DX12_DESCRIPTOR_RANGE1 computeLightPassSrvRange;
     computeLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 4); // t5 space4 compute lightpass input
+    CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBuffer;
+    srvSkinningStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 8); // u1 space8 test compute output
 
-    CD3DX12_ROOT_PARAMETER1 rootParams[19];
+    CD3DX12_ROOT_PARAMETER1 rootParams[20];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE , D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -919,6 +921,7 @@ void DX12::InitializeBuffers()
     rootParams[16].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
     rootParams[17].InitAsDescriptorTable(1, &raytracingSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space6: PS raytracing map
     rootParams[18].InitAsDescriptorTable(1, &raytracingLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t3 space4: PS raytracing map
+    rootParams[19].InitAsDescriptorTable(1, &srvSkinningStructuredBuffer, D3D12_SHADER_VISIBILITY_VERTEX); // u1 space8: UAV skinning structured buffer out
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -947,7 +950,7 @@ void DX12::InitializeBuffers()
     CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBufferIn;
     srvSkinningStructuredBufferIn.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 8); // t0 space8 skinning structured buffer compute  
     CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBufferOut;
-    srvSkinningStructuredBufferOut.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1, 8); // u0 space8 test compute output
+    srvSkinningStructuredBufferOut.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1, 8); // u1 space8 test compute output
 
     // Compute root signature
     CD3DX12_ROOT_PARAMETER1 computeRootParams[3];

@@ -9,6 +9,7 @@ struct VSInput
     float3 binormal : BINORMAL;
     float4 boneWeights : BONEWEIGHTS;
     uint4 boneIndices : BONEINDICES;
+    uint vertexID : SV_VertexID;
 };
 struct PSInput
 {
@@ -18,8 +19,21 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
-    float4 boneweights : TEXCOORD1;
 };
+
+struct SkinningDataOut
+{
+    float3 position;
+    float padding;
+    float3 normal;
+    float padding1;
+    float3 tangent;
+    float padding2;
+    float3 binormal;
+    float padding3;
+};
+
+StructuredBuffer<SkinningDataOut> g_skinningData : register(t1, space8);
 
 PSInput Main(VSInput input)
 {
@@ -27,33 +41,15 @@ PSInput Main(VSInput input)
     
     if(hasAnim)
     {
-        float Weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        Weights[0] = input.boneWeights.x;
-        Weights[1] = input.boneWeights.y;
-        Weights[2] = input.boneWeights.z;
-        Weights[3] = input.boneWeights.w;
-    
-        float3 skinnedPos = float3(0.0f, 0.0f, 0.0f);
-        float3 n = float3(0.0f, 0.0f, 0.0f);
-        float3 t = float3(0.0f, 0.0f, 0.0f);
-        float3 b = float3(0.0f, 0.0f, 0.0f);
-    
-        for (int i = 0; i < 4; i++)
+        if (input.vertexID < vertexCount)
         {
-            skinnedPos += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.position, 1.0f)).xyz;
-            n += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.normal, 0.0f)).xyz;
-            t += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.tangent.xyz, 0.0f)).xyz;
-            b += Weights[i] * mul(skinningMatrices[input.boneIndices[i]], float4(input.binormal, 0.0f)).xyz;
-    
+            SkinningDataOut skinnedData = g_skinningData[input.vertexID];
+        
+            output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(skinnedData.position, 1.0f))));
+            output.normal = normalize(mul(worldMatrix, float4(skinnedData.normal, 0.0f)));
+            output.tangent = normalize(mul(worldMatrix, float4(skinnedData.tangent, 0.0f)));
+            output.worldPos = mul(worldMatrix, float4(skinnedData.position, 1.0f));
         }
-    
-        output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(skinnedPos, 1.0f))));
-        output.normal = normalize(mul(worldMatrix, float4(n, 0.0f)));
-        output.tangent = normalize(mul(worldMatrix, float4(t, 0.0f)));
-        output.worldPos = mul(worldMatrix, float4(skinnedPos, 1.0f));
-    
-        float4 debugColor = float4(skinningMatrices[input.boneIndices[0]][0][0], 0.0f, 0.0f, 1.0f);
-        output.boneweights = float4(Weights[0], Weights[1], Weights[2], Weights[3]);
     }
     else
     {

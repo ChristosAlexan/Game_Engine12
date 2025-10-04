@@ -137,24 +137,12 @@ namespace ECS
 		vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
 		vsCB.worldMatrix = DirectX::XMMatrixTranspose(transformComponent.worldMatrix);
 
-
+		auto& cpuMesh = renderComponent.mesh->cpuMesh;
+		std::size_t vertexCount = cpuMesh->vertices.size();
+		skinningCB.vertexCount = vertexCount;
+		skinningCB.padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		skinningCB.HasAnim = renderComponent.hasAnimation;
 
-		if (renderComponent.hasAnimation)
-		{
-			if (scene->GetRegistry().all_of<AnimatorComponent>(entity))
-			{
-				AnimatorComponent& animatorComponent = scene->GetRegistry().get<AnimatorComponent>(entity);
-				if (!animatorComponent.finalTransforms.empty())
-				{
-					size_t matrixCount = animatorComponent.finalTransforms.size();
-					assert(matrixCount <= sizeof(skinningCB.skinningMatrix));
-					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), matrixCount * sizeof(DirectX::XMMATRIX));
-				
-				}
-			}
-		}
-		
 		psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
 		psCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -194,6 +182,14 @@ namespace ECS
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psMaterialCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
 				m_dx12.GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
+
+				if (renderComponent.hasAnimation)
+				{
+					GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(
+						19, // Root parameter skinning structured buffer output
+						renderComponent.skinningOutData.skinningGpuSrvHandleFinalTransform
+					);
+				}
 			}
 
 			if(renderComponent.hasTextures)
@@ -475,7 +471,7 @@ namespace ECS
 
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
 						2, // Root parameter skinning structured buffer output
-						renderComponent.skinningOutData.skinningGpuHandleFinalTransform
+						renderComponent.skinningOutData.skinningGpuUavHandleFinalTransform
 					);
 
 					unsigned int threadsPerGroup = 256;

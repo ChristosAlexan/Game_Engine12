@@ -12,7 +12,6 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
-    float4 boneweights : TEXCOORD1;
 };
 
 

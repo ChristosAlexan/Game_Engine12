@@ -9,8 +9,10 @@ namespace ECS
 {
     struct SkinningOutputData
     {
-        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuHandleFinalTransform{};
-        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuHandleFinalTransform{};
+        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuUavHandleFinalTransform{};
+        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuUavHandleFinalTransform{};
+        D3D12_CPU_DESCRIPTOR_HANDLE skinningCpuSrvHandleFinalTransform{};
+        D3D12_GPU_DESCRIPTOR_HANDLE skinningGpuSrvHandleFinalTransform{};
         StructuredBuffer<GPUSkinningBufferVertexDataOutput> skinningVertexBufferFinalTransform;
     };
 
