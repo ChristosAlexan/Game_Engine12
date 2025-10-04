@@ -10,9 +10,10 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Entity-Component-System (ECS) architecture using [EnTT](https://github.com/skypjack/entt)  
 - Deferred rendering pipeline with Physically Based Rendering (PBR)  
 - Skeletal animation support with skinned mesh loading via [tinygltf](https://github.com/syoyo/tinygltf)  
-- JSON-based scene save/load system  
+- JSON-based scene save/load system
+- Compute shader skinning
 - Ray traced shadows for static and skinned meshes using DirectX Raytracing (DXR)
-- BLAS rebuild for animated entities using compute shader skinning
+- BLAS rebuild for animated entities
 - GUI using ImGUi for object manipulation
 
 ---
