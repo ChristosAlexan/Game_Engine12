@@ -19,7 +19,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 #ifdef _DEBUG
 	EnableConsole();
 #ifdef _PIX_
-	LPCSTR pix_path = "C:\\Program Files\\Microsoft PIX\\2507.11\\WinPixGpuCapturer.dll";
+	LPCSTR pix_path = "C:\\Program Files\\Microsoft PIX\\2509.25\\WinPixGpuCapturer.dll";
 	if (std::filesystem::exists(pix_path))
 		LoadLibraryA(pix_path);
 #endif

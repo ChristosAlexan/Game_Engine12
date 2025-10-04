@@ -17,7 +17,7 @@ namespace ECS
 
 		MeshData cpuMesh;
 		Model model;
-
+		
 		switch (entityDesc.meshType)
 		{
 			case QUAD:
@@ -29,10 +29,14 @@ namespace ECS
 			case STATIC_MESH:
 				cpuMesh = GenerateStaticMesh(model, entityDesc);
 				MapModel(model, entityDesc);
+
+				registry->emplace<Model>(entity, model);
 				break;
 			case SKELETAL_MESH:
 				cpuMesh = GenerateSkeletalMesh(model, entityDesc, scene);
 				MapModel(model, entityDesc);
+
+				registry->emplace<Model>(entity, model);
 				break;
 			case LIGHT:
 				cpuMesh = GenerateCubeMesh(entityDesc);

@@ -463,7 +463,6 @@ namespace ECS
 					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 
 					m_dx12.GetCmdList()->SetPipelineState(m_dx12.pipelineState_compute.Get());
-					//GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_computeUAV->GetGPUHandleUAV());
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
 						0, // Root parameter skinning structured buffer input
 						gpuMesh->skinningGpuHandleIn

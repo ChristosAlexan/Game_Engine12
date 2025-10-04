@@ -35,11 +35,10 @@ namespace ECS
 		// Generate AABB from mesh data offline
 		GenerateAABB(entityDesc.transform.aabb, &renderComponent);
 
-		if(entityDesc.meshType == ECS::MESH_TYPE::SKELETAL_MESH || entityDesc.meshType == ECS::MESH_TYPE::STATIC_MESH)
-			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
-
 		if(renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
 		{
+			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+
 			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
 				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
 				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
@@ -57,13 +56,14 @@ namespace ECS
 		}
 		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		{
+			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+
 			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
 				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
 				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
 		}
-
-		if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
+		else if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{
 			LightComponent lightComponent;
 			lightComponent.lightType = entityDesc.lightComponent.lightType;

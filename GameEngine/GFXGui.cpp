@@ -81,11 +81,26 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 
 void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
 {
-	ImGui::Begin("GeneralGuiSettings");
 	auto scene = sceneManager->GetCurrentScene();
+
+	ImGui::Begin("GeneralSettings");
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);
+	ImGui::End();
+
+	ImGui::Begin("Models");
+	auto view = scene->GetRegistry().view<Model>();
+	auto totalModels = view.size();
+	std::vector<const char*> modelNames;
+	static int currItem = -1;
+
+	for (auto [entity, model] : view.each())
+	{
+		modelNames.push_back(model.name.c_str());
+	}
+	ImGui::ListBox(" ", &currItem, modelNames.data(), totalModels);
+
 	ImGui::End();
 }
 
@@ -213,15 +228,22 @@ void GFXGui::SelectEntityList(ECS::SceneManager* sceneManager, UINT screenWidth,
 
 	ImGui::Begin(scene->GetName().c_str());
 
-	for (auto [entity, transform, renderComponent] : group.each())
+	if (ImGui::BeginListBox("Entities"))
 	{
-		std::string entityLabel = renderComponent.name + ": " + std::to_string(static_cast<uint32_t>(entity));
-		if (ImGui::Selectable(entityLabel.c_str()))
+		for (auto [entity, transform, renderComponent] : group.each())
 		{
-			m_closestEntity = entity;
-			m_closestTransform = &transform;
-			m_closestEntityName = renderComponent.name;
+			std::string entityLabel = renderComponent.name + ": " + std::to_string((uint32_t)entity);
+			bool isSelected = (m_closestEntity == entity);
+			if (ImGui::Selectable(entityLabel.c_str(), isSelected))
+			{
+				m_closestEntity = entity;
+				m_closestTransform = &transform;
+				m_closestEntityName = renderComponent.name;
+			}
+			if (isSelected)
+				ImGui::SetItemDefaultFocus();
 		}
+		ImGui::EndListBox();
 	}
 
 	ImGui::End();

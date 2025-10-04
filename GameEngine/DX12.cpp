@@ -327,15 +327,23 @@ void DX12::Initialize(HWND hwnd, int& width, int& height)
 void DX12::CreateDeviceAndFactory()
 {
     HRESULT hr;
-    UINT dxgiFactoryFlags = 0;
-  
 
 #ifdef _DEBUG
-    Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-    if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-        debugController->EnableDebugLayer();
-        dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+    {
+        Microsoft::WRL::ComPtr<ID3D12Debug1> debugController;
+        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+        {
+            debugController->EnableDebugLayer();
+
+#ifdef ENABLE_GPU_BASED_VALIDATION
+            // Enable GPU-based validation
+            debugController->SetEnableGPUBasedValidation(TRUE);
+#endif
+        }
     }
+    UINT dxgiFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+#else
+    UINT dxgiFactoryFlags = 0;
 #endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));

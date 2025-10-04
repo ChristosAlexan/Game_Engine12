@@ -179,7 +179,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CONSOLE;NOMINMAX;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;DX12_API;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_PIX_</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;NOMINMAX;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;DX12_API;_SILENCE_CXX20_CISO646_REMOVED_WARNING;_PIX_;ENABLE_GPU_BASED_VALIDATION</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>

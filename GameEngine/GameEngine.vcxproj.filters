@@ -141,9 +141,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GFXGui.cpp">
-      <Filter>GFX\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DX12.cpp">
       <Filter>GFX\DX12\Source Files</Filter>
     </ClCompile>
@@ -269,6 +266,9 @@
     </ClCompile>
     <ClCompile Include="TransformManager.cpp">
       <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GFXGui.cpp">
+      <Filter>GFX\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
