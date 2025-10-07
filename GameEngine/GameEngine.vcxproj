@@ -192,7 +192,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;LowLevel_static_64.lib;LowLevelAABB_static_64.lib;LowLevelDynamics_static_64.lib;PhysX_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysXTask_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SceneQuery_static_64.lib;SimulationController_static_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../Libraries;C:\GameEngine-master\vcpkg_installed\x64-windows\debug\lib;%(AdditionalLibraryDirectories);..\vcpkg_installed\x64-windows\lib;..\Libraries\debug;..\Libraries\DirectX</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../Libraries;C:\GameEngine-master\vcpkg_installed\x64-windows\debug\lib;%(AdditionalLibraryDirectories);..\vcpkg_installed\x64-windows\lib;..\Libraries\physX_debug;..\Libraries\DirectX</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>6.7</ShaderModel>
@@ -219,7 +219,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;d3d12.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;LowLevel_static_64.lib;LowLevelAABB_static_64.lib;LowLevelDynamics_static_64.lib;PhysX_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXPvdSDK_static_64.lib;PhysXTask_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SceneQuery_static_64.lib;SimulationController_static_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\vcpkg_installed\x64-windows\lib;..\Libraries\checked;..\Libraries\DirectX</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\vcpkg_installed\x64-windows\lib;..\Libraries\physX_checked;..\Libraries\DirectX</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>6.7</ShaderModel>
