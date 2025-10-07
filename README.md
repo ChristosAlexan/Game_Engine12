@@ -16,7 +16,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - BLAS rebuild for animated entities
 - GUI using ImGUi for object manipulation
 - Physics using [Nvidia PhysX](https://nvidia-omniverse.github.io/PhysX/physx/5.6.1/index.html)
-
+[Nvidia PhysX](https://github.com/NVIDIA-Omniverse/PhysX)
 ---
 
 ## Roadmap / Work in Progress
