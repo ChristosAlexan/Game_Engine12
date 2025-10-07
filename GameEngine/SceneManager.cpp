@@ -1,6 +1,7 @@
 #include "MaterialManager.h"
 #include "AssetManager.h"
 #include "RenderingManager.h"
+#include "Physics/PhysicsManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 
@@ -15,15 +16,16 @@ namespace ECS
 	{
 		m_assetManager = std::make_shared<AssetManager>();
 		m_materialManager = std::make_shared<MaterialManager>(device, cmdList, allocator);
+		m_physicsManager = std::make_shared<PHYSICS::PhysicsManager>();
 	}
 	void SceneManager::AllocateRenderingManager()
 	{
 		m_renderingManager = std::make_shared<ECS::RenderingManager>();
 	}
 
-	void SceneManager::LoadScene(const std::string& sceneName, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+	void SceneManager::LoadScene(const std::string& sceneName)
 	{
-		auto scene = std::make_unique<Scene>(sceneName, m_assetManager, m_materialManager, m_renderingManager, device, cmdList);
+		auto scene = std::make_unique<Scene>(sceneName, m_assetManager, m_materialManager, m_renderingManager, m_physicsManager);
 		m_scenes.emplace(sceneName, std::move(scene));
 	}
 
@@ -57,8 +59,8 @@ namespace ECS
 		return m_renderingManager.get();
 	}
 
-	void SceneManager::Update(float dt, Camera& camera)
+	void SceneManager::Update(float dt, float fps, Camera& camera)
 	{
-		m_currentScene->Update(dt, camera);
+		m_currentScene->Update(dt, fps, camera);
 	}
 }

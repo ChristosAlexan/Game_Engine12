@@ -63,12 +63,24 @@ namespace ECS
         void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
         {
             vertexBuffer.Initialize(device, cmdList, cpuMesh->vertices.data(), cpuMesh->vertices.size());
-            indexBuffer.Initialize(device, cmdList, cpuMesh->indices.data(), (uint32_t)cpuMesh->indices.size());
-            indexCount = static_cast<uint32_t>(cpuMesh->indices.size());
             vertexCount = static_cast<uint32_t>(cpuMesh->vertices.size());
+
+            if(cpuMesh->indices.size() > 0)
+            {
+                indexBuffer.Initialize(device, cmdList, cpuMesh->indices.data(), (uint32_t)cpuMesh->indices.size());
+                indexCount = static_cast<uint32_t>(cpuMesh->indices.size());
+            }
+       
         }
 
-        void Draw(ID3D12GraphicsCommandList* cmdList) 
+        void Draw(ID3D12GraphicsCommandList* cmdList)
+        {
+            cmdList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
+            cmdList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
+            cmdList->DrawInstanced(vertexCount, 1, 0, 0);
+        }
+
+        void DrawIndexed(ID3D12GraphicsCommandList* cmdList)
         {
             cmdList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
             cmdList->IASetIndexBuffer(&indexBuffer.ibView);

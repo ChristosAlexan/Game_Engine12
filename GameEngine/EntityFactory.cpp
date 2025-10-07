@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "MathHelpers.h"
 #include "BLASBuilder.h"
+#include "Physics/PhysicsData.h"
 
 namespace ECS
 {
@@ -95,8 +96,20 @@ namespace ECS
 			entityDesc.animComponent = AnimatorComponent{};
 			m_registry->emplace<AnimatorComponent>(id, entityDesc.animComponent);
 		}
-			
-		
+
+		if (entityDesc.hasPhysics)
+		{
+			PHYSICS::PhysicsComponent physicsComponent;
+			physicsComponent.density = entityDesc.physicsComponent.density;
+			physicsComponent.radius = entityDesc.physicsComponent.radius;
+			physicsComponent.transform = TransformToPhysX(entityDesc.transform);
+			physicsComponent.mass = entityDesc.physicsComponent.mass;
+			physicsComponent.shapeType = entityDesc.physicsComponent.shapeType;
+
+			std::cout << physicsComponent.transform.position.x << " | " << physicsComponent.transform.position.y << " | " << physicsComponent.transform.position.z << " |\n";
+			m_registry->emplace<PHYSICS::PhysicsComponent>(id, physicsComponent);
+		}
+
 		return id;
 	}
 }	

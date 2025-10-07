@@ -2,6 +2,7 @@
 #include "EntityFactory.h"
 #include "Scene.h"
 #include "EntityECS.h"
+#include "Physics/PhysicsData.h"
 #include <filesystem>
 #include "ErrorLogger.h"
 
@@ -78,6 +79,16 @@ namespace ECS
 				}
 		
 			}
+			else
+			{
+				if (scene->GetRegistry().all_of<PHYSICS::PhysicsComponent>(entity))
+				{
+					PHYSICS::PhysicsComponent& physicsComponent = scene->GetRegistry().get<PHYSICS::PhysicsComponent>(entity);
+					entityJson["pxShapeType"] = (uint32_t)physicsComponent.shapeType;
+					entityJson["density"] = physicsComponent.density;
+					entityJson["mass"] = physicsComponent.mass;
+				}
+			}
 
 			sceneJson["entities"].push_back(entityJson);
 		}
@@ -114,7 +125,8 @@ namespace ECS
 
 				entityDesc.hasAnimation = entityJson["hasAnimation"];
 				entityDesc.hasTextures = entityJson["hasTextures"];
-			
+				entityDesc.hasPhysics = entityJson["hasPhysics"];
+
 				entityDesc.materialDesc.albedoTextureName = entityJson["albedoTextureName"];
 				entityDesc.materialDesc.albedoTexturePath = entityJson["albedoTexturePath"];
 				entityDesc.materialDesc.normalTextureName = entityJson["normalTextureName"];
@@ -159,6 +171,15 @@ namespace ECS
 				const auto& color = entityJson["color"];
 				entityDesc.lightComponent.color = { color[0], color[1], color[2] };
 				entityDesc.materialDesc.baseColor = entityDesc.lightComponent.color;
+			}
+			else
+			{
+				if (entityDesc.hasPhysics)
+				{
+					entityDesc.physicsComponent.shapeType = entityJson["pxShapeType"];
+					entityDesc.physicsComponent.density = entityJson["density"];
+					entityDesc.physicsComponent.mass = entityJson["mass"];
+				}
 			}
 
 			scene->GetEntityFactory()->AddEntity(scene, entityDesc);

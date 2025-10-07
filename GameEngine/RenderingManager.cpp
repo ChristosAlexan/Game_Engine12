@@ -120,7 +120,7 @@ namespace ECS
 	}
 
 	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
-		TransformComponent& transformComponent, RenderComponent& renderComponent)
+		TransformComponent& transformComponent, RenderComponent& renderComponent, PHYSICS::PhysicsDebugDraw* physicsDebugDraw)
 	{
 		if (!scene)
 			return;
@@ -194,8 +194,10 @@ namespace ECS
 
 			if(renderComponent.hasTextures)
 				scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), m_dx12.GetCmdList(), 2);
-			renderComponent.mesh->Draw(m_dx12.GetCmdList());
+			renderComponent.mesh->DrawIndexed(m_dx12.GetCmdList());
 		}
+
+		//physicsDebugDraw->DebugDraw(GetDX12());
 	}
 
 	void RenderingManager::RenderBRDF()

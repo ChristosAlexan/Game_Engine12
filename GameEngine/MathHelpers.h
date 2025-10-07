@@ -5,6 +5,7 @@
 #include "imgui_internal.h"
 #include "RenderingECS.h"
 #include <iostream>
+#include "Physics/PhysicsData.h"
 
 struct Ray 
 {
@@ -209,6 +210,19 @@ inline ECS::AABB UpdateAABB(ECS::AABB& aabb, DirectX::XMMATRIX& worldMatrix, ECS
 inline ECS::AABB GetWorldAABB(ECS::TransformComponent* trans, ECS::RenderComponent* renderComp)
 {
 	return UpdateAABB(trans->aabb, trans->worldMatrix, renderComp);
+}
+
+inline PHYSICS::PhysicsTransform TransformToPhysX(ECS::TransformComponent& transform)
+{
+	PHYSICS::PhysicsTransform pxTrans;
+
+	pxTrans.position = physx::PxVec3(transform.position.x, transform.position.y, transform.position.z);
+	pxTrans.scale = physx::PxVec3(transform.scale.x, transform.scale.y, transform.scale.z);
+	pxTrans.rotation = physx::PxQuat(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+
+	pxTrans.transform = physx::PxTransform(pxTrans.position, pxTrans.rotation);
+
+	return pxTrans;
 }
 
 inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")

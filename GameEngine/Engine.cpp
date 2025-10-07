@@ -52,7 +52,7 @@ void Engine::Update(int width, int height)
 	// Start rendering of a frame
 	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(dt, camera);
+	m_sceneManager->Update(dt, fps, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
@@ -182,10 +182,11 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 {
 	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), 
 										m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
-	m_sceneManager->LoadScene("Scene1", m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList());
+	m_sceneManager->LoadScene("Scene1");
 	m_sceneManager->SetCurrentScene("Scene1");
 	m_sceneManager->GetCurrentScene()->LoadMaterials();
 	m_sceneManager->GetCurrentScene()->LoadAssets();
+	m_sceneManager->GetCurrentScene()->LoadPhysics();
 	m_sceneManager->SetupLights();
 	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);	
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
