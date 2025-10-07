@@ -15,7 +15,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Ray traced shadows for static and skinned meshes using DirectX Raytracing (DXR)
 - BLAS rebuild for animated entities
 - GUI using ImGUi for object manipulation
-- Physics using [Nvidia PhysX]([https://github.com/syoyo/tinygltf](https://github.com/NVIDIA-Omniverse/PhysX)](https://github.com/NVIDIA-Omniverse/PhysX))
+- Physics using [Nvidia PhysX]((https://github.com/NVIDIA-Omniverse/PhysX)](https://github.com/NVIDIA-Omniverse/PhysX))
 
 ---
 
