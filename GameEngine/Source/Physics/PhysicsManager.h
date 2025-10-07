@@ -28,6 +28,7 @@ namespace PHYSICS
 		physx::PxScene* GetScene() const;
 		physx::PxFoundation* GetFoundation() const;
 		PhysicsDebugDraw* GetDebugDraw() const;
+		
 	private:
 		physx::PxDefaultAllocator      m_allocator;
 		physx::PxDefaultErrorCallback  m_errorCallback;
@@ -41,6 +42,9 @@ namespace PHYSICS
 
 		float m_accumulator = 0.0f;
 		float m_stepSize = 1.0f / 60.0f;
+
+	public:
+		bool m_bRunPhysics = false;
 	};
 
 }

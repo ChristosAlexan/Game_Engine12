@@ -92,8 +92,11 @@ namespace ECS
 			if (!IsAABBInFrustum(aabb, frustum))
 				continue;
 
-			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent, GetPhysicsManager()->GetDebugDraw());
+			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent);
+
 		}
+
+		GetRenderingManager()->DebugDraw(this, camera);
 
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);

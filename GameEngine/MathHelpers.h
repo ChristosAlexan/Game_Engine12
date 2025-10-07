@@ -212,7 +212,7 @@ inline ECS::AABB GetWorldAABB(ECS::TransformComponent* trans, ECS::RenderCompone
 	return UpdateAABB(trans->aabb, trans->worldMatrix, renderComp);
 }
 
-inline PHYSICS::PhysicsTransform TransformToPhysX(ECS::TransformComponent& transform)
+inline PHYSICS::PhysicsTransform TransformToPhysX(const ECS::TransformComponent& transform)
 {
 	PHYSICS::PhysicsTransform pxTrans;
 
@@ -223,6 +223,17 @@ inline PHYSICS::PhysicsTransform TransformToPhysX(ECS::TransformComponent& trans
 	pxTrans.transform = physx::PxTransform(pxTrans.position, pxTrans.rotation);
 
 	return pxTrans;
+}
+
+
+inline ECS::TransformComponent PhysXToTransform(const physx::PxTransform pxTransform, ECS::TransformComponent& transform)
+{
+	transform.position = DirectX::XMFLOAT3(pxTransform.p.x, pxTransform.p.y, pxTransform.p.z);
+	//pxTrans.scale = physx::PxVec3(transform.scale.x, transform.scale.y, transform.scale.z);
+	 
+	transform.rotation = DirectX::XMFLOAT4(pxTransform.q.x, pxTransform.q.y, pxTransform.q.z, pxTransform.q.w);
+
+	return transform;
 }
 
 inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")

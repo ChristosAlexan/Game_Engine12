@@ -5,6 +5,7 @@
 #include "Physics/PhysicsData.h"
 #include <filesystem>
 #include "ErrorLogger.h"
+#include <iostream>
 
 namespace ECS
 {
@@ -31,9 +32,8 @@ namespace ECS
 				entityJson["filePath"] = entityDesc.filePath;
 				entityJson["hasAnimation"] = entityDesc.hasAnimation;
 				entityJson["hasTextures"] = entityDesc.hasTextures;
+				entityJson["hasPhysics"] = entityDesc.hasPhysics;
 
-
-				
 				entityJson["albedoTextureName"] = entityDesc.materialDesc.albedoTextureName;
 				entityJson["albedoTexturePath"] = entityDesc.materialDesc.albedoTexturePath;
 				entityJson["normalTextureName"] = entityDesc.materialDesc.normalTextureName;
@@ -87,6 +87,7 @@ namespace ECS
 					entityJson["pxShapeType"] = (uint32_t)physicsComponent.shapeType;
 					entityJson["density"] = physicsComponent.density;
 					entityJson["mass"] = physicsComponent.mass;
+					entityJson["pxRadius"] = physicsComponent.radius;
 				}
 			}
 
@@ -179,6 +180,7 @@ namespace ECS
 					entityDesc.physicsComponent.shapeType = entityJson["pxShapeType"];
 					entityDesc.physicsComponent.density = entityJson["density"];
 					entityDesc.physicsComponent.mass = entityJson["mass"];
+					entityDesc.physicsComponent.radius = entityJson["pxRadius"];
 				}
 			}
 

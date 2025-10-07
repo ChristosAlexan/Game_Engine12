@@ -2,6 +2,7 @@
 #include "../DX12.h"
 #include <PhysX/PxPhysicsAPI.h>
 #include "../MeshData.h"
+#include "../Camera.h"
 
 namespace PHYSICS
 {
@@ -9,7 +10,7 @@ namespace PHYSICS
 	{
 	public:
 		PhysicsDebugDraw(physx::PxScene* aScene);
-		void DebugDraw(DX12& dx12);
+		void DebugDraw(DX12& dx12, Camera& camera);
 
 	private:
 		physx::PxScene* m_aScene = nullptr;

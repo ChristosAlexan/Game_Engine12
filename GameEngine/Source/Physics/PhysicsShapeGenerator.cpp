@@ -22,6 +22,7 @@ namespace PHYSICS
 
 			physicsComponent.aActor->getShapes(&physicsComponent.aShape, physicsComponent.aActor->getNbShapes());
 
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
 			physicsComponent.transform.transform = physicsComponent.aActor->getGlobalPose();
 
 			scene->addActor(*physicsComponent.aActor);
@@ -31,7 +32,10 @@ namespace PHYSICS
 			physicsComponent.aStaticActor = physx::PxCreateStatic(*physics, physx::PxTransform(physicsComponent.transform.position), 
 				physx::PxBoxGeometry(physicsComponent.transform.scale), *physicsComponent.aMaterial);
 
-			physicsComponent.transform.transform = physicsComponent.aActor->getGlobalPose();
+			physicsComponent.aStaticActor->getShapes(&physicsComponent.aShape, physicsComponent.aStaticActor->getNbShapes());
+
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
+			physicsComponent.transform.transform = physicsComponent.aStaticActor->getGlobalPose();
 
 			scene->addActor(*physicsComponent.aStaticActor);
 		}
@@ -40,11 +44,11 @@ namespace PHYSICS
 	void PxCreatePlane(physx::PxPhysics* physics, physx::PxScene* scene, PhysicsComponent& physicsComponent)
 	{
 		physicsComponent.aMaterial = physics->createMaterial(1.0f, 1.0f, 0.9f);
-
 		physicsComponent.aStaticActor = physx::PxCreatePlane(*physics, physx::PxPlane(physicsComponent.transform.position, physx::PxVec3(0, 1, 0)), *physicsComponent.aMaterial);
 
 		physicsComponent.aStaticActor->getShapes(&physicsComponent.aShape, physicsComponent.aStaticActor->getNbShapes());
-	
+
+		physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
 		physicsComponent.transform.transform = physicsComponent.aStaticActor->getGlobalPose();
 
 		scene->addActor(*physicsComponent.aStaticActor);
@@ -66,18 +70,19 @@ namespace PHYSICS
 			physx::PxRigidBodyExt::updateMassAndInertia(*physicsComponent.aActor, physicsComponent.density);
 
 			physicsComponent.aActor->getShapes(&physicsComponent.aShape, physicsComponent.aActor->getNbShapes());
-		
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
+			
 			physicsComponent.transform.transform = physicsComponent.aActor->getGlobalPose();
 
 			scene->addActor(*physicsComponent.aActor);
 		}
 		else
 		{
-			physicsComponent.aStaticActor = physx::PxCreateStatic(*physics, physx::PxTransform(physicsComponent.transform.position), physx::PxSphereGeometry(physicsComponent.radius), *physicsComponent.aMaterial);
+			physicsComponent.aStaticActor = physx::PxCreateStatic(*physics, physx::PxTransform(physicsComponent.transform.position, physicsComponent.transform.rotation), physx::PxSphereGeometry(physicsComponent.radius), *physicsComponent.aMaterial);
 
 			physicsComponent.aStaticActor->getShapes(&physicsComponent.aShape, physicsComponent.aStaticActor->getNbShapes());
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
 
-			//physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
 			physicsComponent.transform.transform = physicsComponent.aStaticActor->getGlobalPose();
 			
 			scene->addActor(*physicsComponent.aStaticActor);
@@ -88,18 +93,19 @@ namespace PHYSICS
 	{
 		if (physicsComponent.mass > 0.0f)
 		{
-			physicsComponent.aActor = physics->createRigidDynamic(physx::PxTransform(physicsComponent.transform.position));
-			physx::PxTransform relativePose(physx::PxQuat(physx::PxPi, physx::PxVec3(0, 0, 1)));
+			physicsComponent.aActor = physics->createRigidDynamic(physx::PxTransform(physicsComponent.transform.position, physicsComponent.transform.rotation));
+			physx::PxTransform relativePose(physx::PxQuat(physx::PxHalfPi, physx::PxVec3(0, 0, 1)));
 			physicsComponent.aActor->setMass(physicsComponent.mass);
 			physicsComponent.aMaterial = physics->createMaterial(1.0f, 1.0f, 0.1f);
-			//float radius = 1.0f;
-			physicsComponent.aShape = physx::PxRigidActorExt::createExclusiveShape(*physicsComponent.aActor, physx::PxSphereGeometry(physicsComponent.radius), *physicsComponent.aMaterial);
+
+			physicsComponent.aShape = physx::PxRigidActorExt::createExclusiveShape(*physicsComponent.aActor, physx::PxCapsuleGeometry(physicsComponent.radius, physicsComponent.radius), *physicsComponent.aMaterial);
 			physicsComponent.aShape->setLocalPose(relativePose);
 
 			physx::PxRigidBodyExt::updateMassAndInertia(*physicsComponent.aActor, physicsComponent.density);
 
 			physicsComponent.aActor->getShapes(&physicsComponent.aShape, physicsComponent.aActor->getNbShapes());
-			
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
+
 			physicsComponent.transform.transform = physicsComponent.aActor->getGlobalPose();
 	
 			scene->addActor(*physicsComponent.aActor);
@@ -107,10 +113,13 @@ namespace PHYSICS
 		else
 		{
 			physicsComponent.aMaterial = physics->createMaterial(1.0f, 1.0f, 0.9f);
-			physicsComponent.aStaticActor = physx::PxCreateStatic(*physics, physx::PxTransform(physicsComponent.transform.position), physx::PxSphereGeometry(physicsComponent.radius), *physicsComponent.aMaterial);
+			physicsComponent.aStaticActor = physx::PxCreateStatic(*physics, physx::PxTransform(physicsComponent.transform.position, physicsComponent.transform.rotation), physx::PxCapsuleGeometry(physicsComponent.radius, physicsComponent.radius), *physicsComponent.aMaterial);
 
-			physicsComponent.aStaticActor->getShapes(&physicsComponent.aShape, physicsComponent.aStaticActor->getNbShapes());
+			physicsComponent.aShape = physx::PxRigidActorExt::createExclusiveShape(*physicsComponent.aStaticActor, physx::PxCapsuleGeometry(physicsComponent.radius, physicsComponent.radius), *physicsComponent.aMaterial);
 			
+			physicsComponent.aStaticActor->getShapes(&physicsComponent.aShape, physicsComponent.aStaticActor->getNbShapes());
+
+			physicsComponent.aShape->setFlag(physx::PxShapeFlag::eVISUALIZATION, true);
 			physicsComponent.transform.transform = physicsComponent.aStaticActor->getGlobalPose();
 
 			scene->addActor(*physicsComponent.aStaticActor);

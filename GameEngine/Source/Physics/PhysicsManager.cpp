@@ -43,7 +43,7 @@ namespace PHYSICS
 			ErrorLogger::Log("PxPhysics failed!");
 
 		physx::PxSceneDesc sceneDesc(m_physics->getTolerancesScale());
-		sceneDesc.gravity = physx::PxVec3(0.0f, -14.81f, 0.0f);
+		sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
 		m_dispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 		sceneDesc.cpuDispatcher = m_dispatcher;
 		sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
@@ -94,12 +94,21 @@ namespace PHYSICS
 	void PhysicsManager::Update(ECS::Scene* scene)
 	{
 		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, PhysicsComponent>);
+		std::cout << group.size() << std::endl;
 		for (auto [entity, transformComponent, physicsComponent] : group.each())
 		{
 			if(physicsComponent.mass > 0.0f)
 			{
-				physicsComponent.transform = TransformToPhysX(transformComponent);
-				physicsComponent.aActor->setGlobalPose(physicsComponent.transform.transform);
+				if (m_bRunPhysics)
+				{
+					physicsComponent.transform.transform = physicsComponent.aActor->getGlobalPose();
+					PhysXToTransform(physicsComponent.transform.transform, transformComponent);
+				}
+				else
+				{
+					physicsComponent.transform = TransformToPhysX(transformComponent);
+					physicsComponent.aActor->setGlobalPose(physicsComponent.transform.transform);
+				}
 			}
 			else
 			{
@@ -111,6 +120,9 @@ namespace PHYSICS
 
 	bool PhysicsManager::Advance(float& dt, float& fps, Camera& camera)
 	{
+		if (!m_bRunPhysics)
+			return false;
+
 		m_stepSize = 1.0f / fps;
 		m_accumulator += dt;
 		if (m_accumulator < m_stepSize)

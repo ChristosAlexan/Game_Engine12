@@ -2,6 +2,7 @@
 #include "ErrorLogger.h"
 #include "MathHelpers.h"
 #include "RenderingManager.h"
+#include "Physics/PhysicsManager.h"
 
 GFXGui::GFXGui()
 {
@@ -84,6 +85,7 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
 	auto scene = sceneManager->GetCurrentScene();
 
 	ImGui::Begin("GeneralSettings");
+	ImGui::Checkbox("Run physics", &scene->GetPhysicsManager()->m_bRunPhysics);
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);

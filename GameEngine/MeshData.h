@@ -76,7 +76,6 @@ namespace ECS
         void Draw(ID3D12GraphicsCommandList* cmdList)
         {
             cmdList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
-            cmdList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
             cmdList->DrawInstanced(vertexCount, 1, 0, 0);
         }
 

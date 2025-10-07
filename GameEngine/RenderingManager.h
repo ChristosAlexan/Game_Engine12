@@ -33,12 +33,13 @@ namespace ECS
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderPbrMaps(Camera& camera);
 		void RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
-			TransformComponent& transformComponent, RenderComponent& renderComponent, PHYSICS::PhysicsDebugDraw* physicsDebugDraw);
+			TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
 		void RenderRayTracingToRenderTarget();
 		void CalculateCompute(Scene* scene);
 		void UpdatePBR(Scene* scene, Camera& camera);
+		void DebugDraw(Scene* scene, Camera& camera);
 		void SetGbufferRenderTarget();
 		DirectX::XMFLOAT3 GetAmbientColor() const;
 		float GetExposure() const;

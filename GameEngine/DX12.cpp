@@ -230,8 +230,11 @@ void DX12::ResetCommandList()
 }
 void DX12::SubmitCommand()
 {
+    HRESULT hr;
     // Finish and execute upload
-    commandList->Close();
+    hr = commandList->Close();
+    COM_ERROR_IF_FAILED(hr, "Failed to close command list!");
+
     ID3D12CommandList* commandLists[] = { commandList.Get() };
     commandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
     const UINT64 currentFence = fenceValue;
@@ -552,8 +555,35 @@ void DX12::InitializeShaders()
 
         psBlob = compiler.CompileShader(L"Shaders/GBufferPS.hlsl", L"Main", L"ps_6_7");
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats);
-    }
 
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_debug, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, D3D12_CULL_MODE_NONE, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+    }
+    {
+        auto vsBlob = compiler.CompileShader(L"Shaders/GbufferVS.hlsl", L"Main", L"vs_6_7");
+        auto psBlob = compiler.CompileShader(L"Shaders/PixelShader12.hlsl", L"Main", L"ps_6_7");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+            {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+            {"BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0  },
+            { "BONEWEIGHTS",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "BONEINDICES",   0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT);
+
+        // Create Gbuffer pipelineState
+        DXGI_FORMAT formats[GBUFFER_TEXTURES_NUM];
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ALBEDO] = FORMAT_ALBEDO;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::NORMAL] = FORMAT_NORMAL;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ROUGH_METAL] = FORMAT_ROUGH_METAL;
+        formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::WORLDPOS_DEPTH] = FORMAT_WORLDPOS_DEPTH;
+
+        psBlob = compiler.CompileShader(L"Shaders/GBufferPS.hlsl", L"Main", L"ps_6_7");
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, D3D12_CULL_MODE_BACK);
+    }
     {
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_7");
         auto psBlob = compiler.CompileShader(L"Shaders/PixelShader_lightPass.hlsl", L"Main", L"ps_6_7");
@@ -649,7 +679,7 @@ void DX12::InitializeShaders()
 }
 
 void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, 
-    const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode)
+    const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode, D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 {
     HRESULT hr;
     
@@ -664,7 +694,7 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
     psoDesc.DepthStencilState.DepthEnable = TRUE;
     psoDesc.DepthStencilState.StencilEnable = FALSE;
     psoDesc.SampleMask = UINT_MAX;
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.PrimitiveTopologyType = topology;
     psoDesc.NumRenderTargets = num_renderTargets;
     for(UINT i = 0; i < psoDesc.NumRenderTargets; ++i)
         psoDesc.RTVFormats[i] = formats[i];

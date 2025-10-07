@@ -106,7 +106,6 @@ namespace ECS
 			physicsComponent.mass = entityDesc.physicsComponent.mass;
 			physicsComponent.shapeType = entityDesc.physicsComponent.shapeType;
 
-			std::cout << physicsComponent.transform.position.x << " | " << physicsComponent.transform.position.y << " | " << physicsComponent.transform.position.z << " |\n";
 			m_registry->emplace<PHYSICS::PhysicsComponent>(id, physicsComponent);
 		}
 
