@@ -15,7 +15,8 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Ray traced shadows for static and skinned meshes using DirectX Raytracing (DXR)
 - BLAS rebuild for animated entities
 - GUI using ImGUi for object manipulation
-
+- Physics using [Nvidia PhysX](https://github.com/NVIDIA-Omniverse/PhysX)
+  
 ---
 
 ## Roadmap / Work in Progress
@@ -52,6 +53,14 @@ PBR rendering
 <img width="1585" height="891" alt="Screenshot 2025-09-28 034615" src="https://github.com/user-attachments/assets/fe1b1135-d480-47fd-85ec-b9313667b8fa" />
 
 ---
+
+Physics
+
+
+
+https://github.com/user-attachments/assets/8f1afb74-fdba-4e87-8c4c-cb77a1199aab
+
+
 
 ## Build Instructions
 1. Clone the repository
