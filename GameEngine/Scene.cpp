@@ -4,21 +4,24 @@
 #include "MaterialManager.h"
 #include "AssetManager.h"
 #include "RenderingManager.h"
+#include "Physics/PhysicsManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 #include "MathHelpers.h"
 
+
 namespace ECS
 {
 	Scene::Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr, 
-		std::shared_ptr<RenderingManager> renderingManager,
-		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+		std::shared_ptr<RenderingManager> renderingManager, std::shared_ptr<PHYSICS::PhysicsManager> physicsManager)
 		:m_sceneName(sceneName), m_assetManager(assetMgr),
-		m_materialManager(materialMgr), m_renderingManager(renderingManager)
+		m_materialManager(materialMgr), m_renderingManager(renderingManager), m_physicsManager(physicsManager)
 	{
 		m_registry = entt::registry{};
-		m_entityFactory = std::make_unique<EntityFactory>(m_registry, device, cmdList);
+		m_entityFactory = std::make_unique<EntityFactory>(m_registry, m_renderingManager->GetDX12().GetDevice(), m_renderingManager->GetDX12().GetCmdList());
 		m_lightManager = std::make_shared<LightManager>();
+
+		physicsManager->Initialize();
 	}
 
 	entt::entity Scene::CreateEntity()
@@ -49,13 +52,17 @@ namespace ECS
 		std::string fpath = ".//Save files/" + GetName();
 		m_saveLoadSystem.LoadScene(this, fpath);
 	}
+	void Scene::LoadPhysics()
+	{
+		GetPhysicsManager()->CreatePhysicsShapes(this);
+	}
 
 	void Scene::AccumulateLights()
 	{
 		m_lightManager->Initialize(this);
 	}
 
-	void Scene::Update(float dt, Camera& camera)
+	void Scene::Update(float dt,float fps, Camera& camera)
 	{
 		// Reset all render targets before rendering
 		GetRenderingManager()->ResetRenderTargets();
@@ -72,6 +79,8 @@ namespace ECS
 			GetTransformManager()->Update(this, entity, transformComponent);
 		}
 
+		GetPhysicsManager()->Update(this);
+
 		GetRenderingManager()->CalculateCompute(this);
 
 		GetRenderingManager()->SetGbufferRenderTarget();
@@ -84,44 +93,48 @@ namespace ECS
 				continue;
 
 			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent);
+
 		}
+
+		GetRenderingManager()->DebugDraw(this, camera);
 
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
 
 		GetRenderingManager()->UpdatePBR(this, camera);
+
+		// Advance physics simulation
+		GetPhysicsManager()->Advance(dt, fps, camera);
 	}	
 
 	const std::string Scene::GetName() const
 	{
 		return m_sceneName;
 	}
-
 	AssetManager* Scene::GetAssetManager() const
 	{
 		return m_assetManager.get();
 	}
-
 	MaterialManager* Scene::GetMaterialManager() const
 	{
 		return m_materialManager.get();
 	}
-
 	entt::registry& Scene::GetRegistry()
 	{
 		return m_registry;
 	}
-
 	AnimationManager* Scene::GetAnimationManager() const
 	{
 		return m_animationManager.get();
 	}
-
 	RenderingManager* Scene::GetRenderingManager() const
 	{
 		return m_renderingManager.get();
 	}
-
+	PHYSICS::PhysicsManager* Scene::GetPhysicsManager() const
+	{
+		return m_physicsManager.get();
+	}
 	EntityFactory* Scene::GetEntityFactory() const
 	{
 		return m_entityFactory.get();

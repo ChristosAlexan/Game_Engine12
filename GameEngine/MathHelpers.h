@@ -5,6 +5,7 @@
 #include "imgui_internal.h"
 #include "RenderingECS.h"
 #include <iostream>
+#include "Physics/PhysicsData.h"
 
 struct Ray 
 {
@@ -209,6 +210,30 @@ inline ECS::AABB UpdateAABB(ECS::AABB& aabb, DirectX::XMMATRIX& worldMatrix, ECS
 inline ECS::AABB GetWorldAABB(ECS::TransformComponent* trans, ECS::RenderComponent* renderComp)
 {
 	return UpdateAABB(trans->aabb, trans->worldMatrix, renderComp);
+}
+
+inline PHYSICS::PhysicsTransform TransformToPhysX(const ECS::TransformComponent& transform)
+{
+	PHYSICS::PhysicsTransform pxTrans;
+
+	pxTrans.position = physx::PxVec3(transform.position.x, transform.position.y, transform.position.z);
+	pxTrans.scale = physx::PxVec3(transform.scale.x, transform.scale.y, transform.scale.z);
+	pxTrans.rotation = physx::PxQuat(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+
+	pxTrans.transform = physx::PxTransform(pxTrans.position, pxTrans.rotation);
+
+	return pxTrans;
+}
+
+
+inline ECS::TransformComponent PhysXToTransform(const physx::PxTransform pxTransform, ECS::TransformComponent& transform)
+{
+	transform.position = DirectX::XMFLOAT3(pxTransform.p.x, pxTransform.p.y, pxTransform.p.z);
+	//pxTrans.scale = physx::PxVec3(transform.scale.x, transform.scale.y, transform.scale.z);
+	 
+	transform.rotation = DirectX::XMFLOAT4(pxTransform.q.x, pxTransform.q.y, pxTransform.q.z, pxTransform.q.w);
+
+	return transform;
 }
 
 inline void PrintMatrix(const DirectX::XMMATRIX& mat, const char* label = "")

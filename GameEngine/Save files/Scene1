@@ -131,9 +131,12 @@
         {
             "albedoTextureName": "ballAlbedo",
             "albedoTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-basecolor.dds",
+            "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/ball/sphere.gltf",
             "hasAnimation": false,
+            "hasPhysics": true,
             "hasTextures": true,
+            "mass": 1.0,
             "materialName": "ballMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "ballMetalRougness",
@@ -142,13 +145,15 @@
             "name": "Ball",
             "normalTextureName": "ballNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-normal.dds",
+            "pxRadius": 0.5,
+            "pxShapeType": 2,
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    3.2027359008789063,
-                    1.0465186834335327,
-                    3.2885794639587402
+                    1.5114973783493042,
+                    9.813315391540527,
+                    3.064328193664551
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -169,9 +174,12 @@
         {
             "albedoTextureName": "ballAlbedo",
             "albedoTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-basecolor.dds",
+            "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/ball/sphere.gltf",
             "hasAnimation": false,
+            "hasPhysics": true,
             "hasTextures": true,
+            "mass": 1.0,
             "materialName": "ballMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "ballMetalRougness",
@@ -180,13 +188,15 @@
             "name": "Ball",
             "normalTextureName": "ballNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/ball/iron-rusted4-normal.dds",
+            "pxRadius": 0.5,
+            "pxShapeType": 2,
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -5.117689609527588,
-                    0.5653613209724426,
-                    3.490424871444702
+                    -6.986955165863037,
+                    10.254990577697754,
+                    3.2425687313079834
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -207,9 +217,12 @@
         {
             "albedoTextureName": "cubeAlbedo",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
+            "hasPhysics": true,
             "hasTextures": true,
+            "mass": 1.0,
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
@@ -218,23 +231,25 @@
             "name": "Cube",
             "normalTextureName": "cubeNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
+            "pxRadius": 0.5,
+            "pxShapeType": 0,
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.03725001588463783,
-                    1.4994419813156128,
-                    0.1507696509361267
+                    -1.4701176881790161,
+                    8.663739204406738,
+                    -1.8276880979537964
                 ],
                 "rotation": [
                     0.6040524840354919,
                     -0.06656839698553085,
-                    0.24011372029781342,
+                    0.24011382460594177,
                     0.7569905519485474
                 ],
                 "scale": [
                     0.4799993336200714,
-                    0.48003333806991577,
+                    0.48003336787223816,
                     0.4800223708152771
                 ]
             },
@@ -247,6 +262,7 @@
             "albedoTexturePath": ".//Data/Assets/Test Scene/DamagedHelmet/glTF/Default_albedo.dds",
             "filePath": ".//Data/Assets/Test Scene/DamagedHelmet/glTF/DamagedHelmet.gltf",
             "hasAnimation": false,
+            "hasPhysics": false,
             "hasTextures": true,
             "materialName": "TestMaterial",
             "meshType": 2,
@@ -283,9 +299,12 @@
         {
             "albedoTextureName": "floorAlbedo",
             "albedoTexturePath": ".//Data/Assets/Test Scene/FloorWood/mahogfloor_basecolor.dds",
+            "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/FloorWood/floorCube.gltf",
             "hasAnimation": false,
+            "hasPhysics": true,
             "hasTextures": true,
+            "mass": 0.0,
             "materialName": "FloorMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "floorMetalRougness",
@@ -294,24 +313,26 @@
             "name": "Floor",
             "normalTextureName": "floorNormal",
             "normalTexturePath": ".//Data/Assets/Test Scene/FloorWood/mahogfloor_normal.dds",
+            "pxRadius": 0.5,
+            "pxShapeType": 1,
             "roughness": 0.5,
             "tex_format": 0,
             "transform": {
                 "position": [
-                    1.245023250579834,
-                    0.02889089845120907,
+                    1.2455813884735107,
+                    0.14985257387161255,
                     -0.7138487100601196
                 ],
                 "rotation": [
-                    0.18674792349338531,
-                    -0.6807990074157715,
-                    0.6843984723091125,
-                    0.18230906128883362
+                    0.0,
+                    0.0,
+                    0.7110748887062073,
+                    0.7031162977218628
                 ],
                 "scale": [
-                    11.999939918518066,
-                    11.999966621398926,
-                    0.09413959085941315
+                    0.009999999776482582,
+                    19.999969482421875,
+                    20.0
                 ]
             },
             "useAlbedoMap": true,
@@ -325,6 +346,7 @@
             "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
             "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
             "hasAnimation": true,
+            "hasPhysics": false,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
@@ -338,9 +360,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -4.084494590759277,
-                    0.10310399532318115,
-                    1.3747444152832031
+                    -4.0845136642456055,
+                    0.0974213033914566,
+                    1.3744466304779053
                 ],
                 "rotation": [
                     0.0008683941559866071,
@@ -349,7 +371,7 @@
                     -0.0331168957054615
                 ],
                 "scale": [
-                    2.520885467529297,
+                    2.5208897590637207,
                     2.5199995040893555,
                     2.5203652381896973
                 ]
@@ -365,6 +387,7 @@
             "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
             "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
             "hasAnimation": true,
+            "hasPhysics": false,
             "hasTextures": true,
             "materialName": "RoboMaterial",
             "meshType": 3,
@@ -378,18 +401,18 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.0944974422454834,
-                    0.11294099688529968,
-                    -0.5845435261726379
+                    6.345613956451416,
+                    0.24203914403915405,
+                    -1.0715229511260986
                 ],
                 "rotation": [
-                    0.0008683941559866071,
+                    0.0008683946216478944,
                     0.9991077184677124,
-                    0.02619869075715542,
+                    0.026198701933026314,
                     -0.0331168957054615
                 ],
                 "scale": [
-                    2.520829200744629,
+                    2.5209131240844727,
                     2.5199995040893555,
                     2.5203652381896973
                 ]
@@ -404,6 +427,7 @@
             "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
             "filePath": ".//Data/Assets/Test Scene/blender 2.83/CesiumMan1.gltf",
             "hasAnimation": true,
+            "hasPhysics": false,
             "hasTextures": false,
             "materialName": "RoboMaterial",
             "meshType": 3,
@@ -417,9 +441,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.3998674750328064,
-                    0.24257805943489075,
-                    -6.385549068450928
+                    -0.40030989050865173,
+                    0.11529545485973358,
+                    -6.392213344573975
                 ],
                 "rotation": [
                     0.0008684072527103126,
@@ -428,7 +452,7 @@
                     -0.03311676159501076
                 ],
                 "scale": [
-                    1.3841813802719116,
+                    1.3841923475265503,
                     1.3837822675704956,
                     1.383994460105896
                 ]
@@ -443,6 +467,7 @@
             "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
             "filePath": ".//Data/Assets/Test Scene/blender 2.83/CesiumMan1.gltf",
             "hasAnimation": true,
+            "hasPhysics": false,
             "hasTextures": false,
             "materialName": "RoboMaterial",
             "meshType": 3,
@@ -456,9 +481,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -3.938870906829834,
-                    0.05663812533020973,
-                    -6.755603790283203
+                    -3.9387423992156982,
+                    0.09361608326435089,
+                    -6.753666877746582
                 ],
                 "rotation": [
                     0.0008684072527103126,
@@ -467,7 +492,7 @@
                     -0.03311676159501076
                 ],
                 "scale": [
-                    1.3841643333435059,
+                    1.3841700553894043,
                     1.3837822675704956,
                     1.383994460105896
                 ]

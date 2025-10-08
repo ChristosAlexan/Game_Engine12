@@ -270,6 +270,15 @@
     <ClCompile Include="GFXGui.cpp">
       <Filter>GFX\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Physics\PhysicsDebugDraw.cpp">
+      <Filter>Physics\Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Physics\PhysicsManager.cpp">
+      <Filter>Physics\Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Physics\PhysicsShapeGenerator.cpp">
+      <Filter>Physics\Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COMException.h">
@@ -327,9 +336,6 @@
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="RenderingECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ComponentStorage12.h">
       <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="MeshManager.h">
@@ -475,6 +481,24 @@
     </ClInclude>
     <ClInclude Include="TransformManager.h">
       <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PhysicsData.h">
+      <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PhysicsDebugDraw.h">
+      <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PhysicsManager.h">
+      <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PhysicsShapeGenerator.h">
+      <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PxDefaultAllocator.h">
+      <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\PxDefaultErrorCallback.h">
+      <Filter>Physics\Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

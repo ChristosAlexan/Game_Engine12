@@ -3,6 +3,12 @@
 #include "Scene.h"
 
 class GameWindow;
+
+namespace PHYSICS
+{
+	class PhysicsManager;
+}
+
 namespace ECS
 {
 	class AssetManager;
@@ -15,18 +21,19 @@ namespace ECS
 		SceneManager();
 		void InitializeManagers(GameWindow& game_window, int& width, int& height, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
 		void AllocateRenderingManager();
-		void LoadScene(const std::string& sceneName, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+		void LoadScene(const std::string& sceneName);
 		void SetCurrentScene(std::string sceneName);
 		Scene* GetCurrentScene() const;
 		void SetupLights();
 		RenderingManager* GetRenderingManager();
-		void Update(float dt, Camera& camera);
+		void Update(float dt, float fps, Camera& camera);
 		
 	private:
 		ID3D12Device* m_device = nullptr;
 		std::shared_ptr <AssetManager> m_assetManager;
 		std::shared_ptr <MaterialManager> m_materialManager;
 		std::shared_ptr <RenderingManager> m_renderingManager;
+		std::shared_ptr <PHYSICS::PhysicsManager> m_physicsManager;
 
 		std::unordered_map<std::string, std::unique_ptr<Scene>> m_scenes;
 		Scene* m_currentScene = nullptr;

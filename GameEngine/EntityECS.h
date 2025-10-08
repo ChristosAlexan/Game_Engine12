@@ -3,6 +3,7 @@
 #include "TransformECS.h"
 #include "MaterialECS.h"
 #include "LightECS.h"
+#include "Physics/PhysicsData.h"
 
 namespace ECS
 {
@@ -17,9 +18,12 @@ namespace ECS
 		MaterialDesc materialDesc = MaterialDesc::Default();
 		AnimatorComponent animComponent;
 		LightComponent lightComponent;
+		PHYSICS::PhysicsComponent physicsComponent;
+
 		bool visible = true;
 		bool castShadows = false;
 		bool hasTextures = false;
 		bool hasAnimation = false;
+		bool hasPhysics = false;
 	};
 }

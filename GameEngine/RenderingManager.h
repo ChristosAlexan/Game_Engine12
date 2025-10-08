@@ -10,8 +10,10 @@
 #include "HDR_IMAGE.h"
 #include "CubeMap.h"
 #include "TLASBuilder.h"
+#include "Physics/PhysicsDebugDraw.h"
 
 class GameWindow;
+
 namespace ECS
 {
 	class Scene;
@@ -37,6 +39,7 @@ namespace ECS
 		void RenderRayTracingToRenderTarget();
 		void CalculateCompute(Scene* scene);
 		void UpdatePBR(Scene* scene, Camera& camera);
+		void DebugDraw(Scene* scene, Camera& camera);
 		void SetGbufferRenderTarget();
 		DirectX::XMFLOAT3 GetAmbientColor() const;
 		float GetExposure() const;
@@ -66,6 +69,8 @@ namespace ECS
 		float m_exposure;
 		float m_gamma;
 		ECS::TLAS m_tlas;
+
+
 	};
 }
 
