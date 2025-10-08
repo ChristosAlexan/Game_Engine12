@@ -70,7 +70,7 @@ namespace ECS
 		float m_gamma;
 		ECS::TLAS m_tlas;
 
-
+		bool m_bEnableDebugDraw = false;
 	};
 }
 

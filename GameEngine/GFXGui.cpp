@@ -86,6 +86,7 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
 
 	ImGui::Begin("GeneralSettings");
 	ImGui::Checkbox("Run physics", &scene->GetPhysicsManager()->m_bRunPhysics);
+	ImGui::Checkbox("Debug draw", &scene->GetRenderingManager()->m_bEnableDebugDraw);
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);

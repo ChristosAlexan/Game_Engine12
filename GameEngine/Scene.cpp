@@ -96,7 +96,8 @@ namespace ECS
 
 		}
 
-		GetRenderingManager()->DebugDraw(this, camera);
+		if(GetRenderingManager()->m_bEnableDebugDraw)
+			GetRenderingManager()->DebugDraw(this, camera);
 
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
