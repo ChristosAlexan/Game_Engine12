@@ -82,7 +82,7 @@ void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmd
 	
 	auto geometry = renderComponent.blas->geometry;
 	geometry.Triangles.VertexBuffer.StartAddress = renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetGPUAddress();
-	geometry.Triangles.VertexBuffer.StrideInBytes = 64; // 64 bytes to properly offset to the next data set. (position, normal, tangent, binormal) each is 16 bytes with padding
+	geometry.Triangles.VertexBuffer.StrideInBytes = sizeof(ECS::GPUSkinningBufferVertexDataOutput); // size of skinning buffer in bytes to properly offset to the next data set. (position, normal, tangent, binormal) each is 16 bytes with padding
 	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc{};
