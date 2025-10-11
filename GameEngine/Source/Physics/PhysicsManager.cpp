@@ -55,10 +55,6 @@ namespace PHYSICS
 		m_manager = PxCreateControllerManager(*m_aScene);
 
 		m_physicsDebugDraw = std::make_unique<PhysicsDebugDraw>(m_aScene);
-
-		//m_aScene->setVisualizationCullingBox(physx::PxBounds3(physx::PxVec3(camera.pos.x - 40.0f, camera.pos.y - 40.0f, camera.pos.z - 40.0f), physx::PxVec3(camera.pos.x + 40.0f, camera.pos.y + 40.0f, camera.pos.z + 40.0f)));
-		m_aScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
-		m_aScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
 	}
 
 	void PhysicsManager::CreatePhysicsShapes(ECS::Scene* scene)
@@ -91,8 +87,12 @@ namespace PHYSICS
 		}
 	}
 
-	void PhysicsManager::Update(ECS::Scene* scene)
+	void PhysicsManager::Update(ECS::Scene* scene, Camera& camera)
 	{
+		m_aScene->setVisualizationCullingBox(physx::PxBounds3(physx::PxVec3(camera.pos.x - 40.0f, camera.pos.y - 40.0f, camera.pos.z - 40.0f), physx::PxVec3(camera.pos.x + 40.0f, camera.pos.y + 40.0f, camera.pos.z + 40.0f)));
+		m_aScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
+		m_aScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
+
 		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, PhysicsComponent>);
 		std::cout << group.size() << std::endl;
 		for (auto [entity, transformComponent, physicsComponent] : group.each())

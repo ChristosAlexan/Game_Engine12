@@ -12,16 +12,16 @@
 
 namespace ECS
 {
-	Scene::Scene(const std::string& sceneName, std::shared_ptr<AssetManager> assetMgr, std::shared_ptr<MaterialManager> materialMgr, 
-		std::shared_ptr<RenderingManager> renderingManager, std::shared_ptr<PHYSICS::PhysicsManager> physicsManager)
+	Scene::Scene(const std::string& sceneName, AssetManager* assetMgr, MaterialManager* materialMgr,
+		RenderingManager* renderingManager, PHYSICS::PhysicsManager* physicsManager)
 		:m_sceneName(sceneName), m_assetManager(assetMgr),
 		m_materialManager(materialMgr), m_renderingManager(renderingManager), m_physicsManager(physicsManager)
 	{
 		m_registry = entt::registry{};
 		m_entityFactory = std::make_unique<EntityFactory>(m_registry, m_renderingManager->GetDX12().GetDevice(), m_renderingManager->GetDX12().GetCmdList());
-		m_lightManager = std::make_shared<LightManager>();
-
-		physicsManager->Initialize();
+		m_lightManager = std::make_unique<LightManager>();
+		m_transformManager = std::make_unique<TransformManager>();
+		m_animationManager = std::make_unique<AnimationManager>();
 	}
 
 	entt::entity Scene::CreateEntity()
@@ -79,7 +79,7 @@ namespace ECS
 			GetTransformManager()->Update(this, entity, transformComponent);
 		}
 
-		GetPhysicsManager()->Update(this);
+		GetPhysicsManager()->Update(this, camera);
 
 		GetRenderingManager()->CalculateCompute(this);
 
@@ -114,11 +114,11 @@ namespace ECS
 	}
 	AssetManager* Scene::GetAssetManager() const
 	{
-		return m_assetManager.get();
+		return m_assetManager;
 	}
 	MaterialManager* Scene::GetMaterialManager() const
 	{
-		return m_materialManager.get();
+		return m_materialManager;
 	}
 	entt::registry& Scene::GetRegistry()
 	{
@@ -130,11 +130,11 @@ namespace ECS
 	}
 	RenderingManager* Scene::GetRenderingManager() const
 	{
-		return m_renderingManager.get();
+		return m_renderingManager;
 	}
 	PHYSICS::PhysicsManager* Scene::GetPhysicsManager() const
 	{
-		return m_physicsManager.get();
+		return m_physicsManager;
 	}
 	EntityFactory* Scene::GetEntityFactory() const
 	{

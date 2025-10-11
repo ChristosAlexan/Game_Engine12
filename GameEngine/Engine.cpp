@@ -50,7 +50,7 @@ void Engine::Update(int width, int height)
 	}
 
 	// Start rendering of a frame
-	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 	// Update current scene(animations, rendering etc.)
 	m_sceneManager->Update(dt, fps, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
@@ -159,7 +159,7 @@ void Engine::Update(int width, int height)
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntityList(m_sceneManager.get(), width, height, camera);
 	
-	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager.get(), m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
 
 	if (bStopEngine)
 	{

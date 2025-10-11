@@ -1034,7 +1034,7 @@ void DX12::SetRenderTargetToBackBuffer()
         nullptr
     );
 }
-void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera& camera, int width, int height, float& dt)
+void DX12::StartRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt)
 {
     // Reset allocator and command list
     ResetCommands();
@@ -1057,7 +1057,7 @@ void DX12::StartRenderFrame(ECS::SceneManager* sceneManager,GFXGui& gui, Camera&
     SetRenderTargetToBackBuffer();
 }
 
-void DX12::EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt)
+void DX12::EndRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt)
 {
 
     gui.EndRender(commandList.Get());

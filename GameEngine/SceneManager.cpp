@@ -17,6 +17,8 @@ namespace ECS
 		m_assetManager = std::make_shared<AssetManager>();
 		m_materialManager = std::make_shared<MaterialManager>(device, cmdList, allocator);
 		m_physicsManager = std::make_shared<PHYSICS::PhysicsManager>();
+
+		m_physicsManager->Initialize();
 	}
 	void SceneManager::AllocateRenderingManager()
 	{
@@ -25,7 +27,7 @@ namespace ECS
 
 	void SceneManager::LoadScene(const std::string& sceneName)
 	{
-		auto scene = std::make_unique<Scene>(sceneName, m_assetManager, m_materialManager, m_renderingManager, m_physicsManager);
+		auto scene = std::make_unique<Scene>(sceneName, m_assetManager.get(), m_materialManager.get(), m_renderingManager.get(), m_physicsManager.get());
 		m_scenes.emplace(sceneName, std::move(scene));
 	}
 

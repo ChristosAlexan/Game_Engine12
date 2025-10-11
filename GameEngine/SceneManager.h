@@ -29,7 +29,6 @@ namespace ECS
 		void Update(float dt, float fps, Camera& camera);
 		
 	private:
-		ID3D12Device* m_device = nullptr;
 		std::shared_ptr <AssetManager> m_assetManager;
 		std::shared_ptr <MaterialManager> m_materialManager;
 		std::shared_ptr <RenderingManager> m_renderingManager;

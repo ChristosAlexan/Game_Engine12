@@ -11,7 +11,6 @@
 #include "AppTimer.h"
 #include "GFXGui.h"
 #include "RenderTargetTexture.h"
-#include "SceneManager.h"
 
 class DX12
 {
@@ -44,8 +43,8 @@ public:
 	void TransitionBackBufferToRTV();
 	void TransitionBackBufferToPresent();
 	void SetRenderTargetToBackBuffer();
-	void StartRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
-	void EndRenderFrame(ECS::SceneManager* sceneManager, GFXGui& gui, Camera& camera, int width, int height, float& dt);
+	void StartRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt);
+	void EndRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt);
 
 	void ResetCommands();
 	void ResetCommandList();

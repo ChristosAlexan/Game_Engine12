@@ -20,7 +20,7 @@ namespace PHYSICS
 
 		void Initialize();
 		void CreatePhysicsShapes(ECS::Scene* scene);
-		void Update(ECS::Scene* scene);
+		void Update(ECS::Scene* scene, Camera& camera);
 		bool Advance(float& dt, float& fps, Camera& camera);
 		void ShutDown();
 
