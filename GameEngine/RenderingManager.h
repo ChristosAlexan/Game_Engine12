@@ -57,14 +57,13 @@ namespace ECS
 		std::unique_ptr<RenderTargetTexture> m_brdfMap, m_raytracingMap;
 		HDR_IMAGE hdr_map1;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
-
 		TLASBuilder m_tlasBuilder;
-		DirectX::XMFLOAT3 m_ambientColor;
-		float m_exposure;
-		float m_gamma;
 		ECS::TLAS m_tlas;
 		bool bRenderPbrPass = true;
  	public:
+		DirectX::XMFLOAT3 m_ambientColor;
+		float m_exposure;
+		float m_gamma;
 		bool m_bEnableDebugDraw = false;
 	};
 }
