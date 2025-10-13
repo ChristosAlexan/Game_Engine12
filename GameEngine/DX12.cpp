@@ -123,6 +123,7 @@ inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
 DX12::DX12()
 {
     timer.Start();
+    m_vsync = 1;
 }
 
 DX12::~DX12()
@@ -1065,7 +1066,7 @@ void DX12::EndRenderFrame(GFXGui& gui, Camera& camera, int width, int height, fl
     TransitionBackBufferToPresent();
     SubmitCommand();
     // Present the frame
-    swapChain->Present(1, 0);
+    swapChain->Present(m_vsync, 0);
     //Update frame index
     frameIndex = swapChain->GetCurrentBackBufferIndex();
 }

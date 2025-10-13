@@ -63,7 +63,6 @@ public:
 	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetComputeRootSignature() const;
 	void DispatchRaytracing();
-
 public:
 	DXCShaderCompiler shaderCompiler;
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
@@ -76,14 +75,11 @@ public:
 		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget, pipelineState_compute;
 	Microsoft::WRL::ComPtr<ID3D12StateObject> rtpso; // Ray tracing state object
 
-
-
-
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue = 0;
 	HANDLE fenceEvent = nullptr;
 
-
+	uint32_t m_vsync;
 private:
 	uint32_t m_screenWidth, m_screenHeight;
 
@@ -104,16 +100,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
 	CD3DX12_RESOURCE_BARRIER m_barrier;
 
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_sbtBuffer, m_sbtUploadBuffer;
 	// SAMPLE DESCS
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
-
 	//Ray tracing descs
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc;
-
-
-
 	AppTimer timer;
 
 	const wchar_t* c_hitGroupName = L"MyHitGroup";

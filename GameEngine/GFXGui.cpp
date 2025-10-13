@@ -87,6 +87,9 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
 	ImGui::Begin("GeneralSettings");
 	ImGui::Checkbox("Run physics", &scene->GetPhysicsManager()->m_bRunPhysics);
 	ImGui::Checkbox("Debug draw", &scene->GetRenderingManager()->m_bEnableDebugDraw);
+	const uint32_t min_v = 0;
+	const uint32_t max_v = 4;
+	ImGui::SliderScalar("Vsync", ImGuiDataType_U32, &scene->GetRenderingManager()->GetDX12().m_vsync, &min_v, &max_v, "%u");
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);
