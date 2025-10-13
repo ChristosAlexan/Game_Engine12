@@ -6,13 +6,15 @@
 
 Texture12::Texture12()
 {
+	m_resource = std::make_unique<ResourceWrapper>(D3D12_RESOURCE_STATE_COPY_DEST);
+	m_uploadBuffer = std::make_unique<ResourceWrapper>(D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
 Texture12::~Texture12()
 {
-	if (m_resource) 
+	if (m_resource->GetComPtrResource())
 	{
-		m_resource.Reset();
+		m_resource->GetComPtrResource().Reset();
 	}
 }
 
@@ -48,20 +50,20 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
-		&texDesc, D3D12_RESOURCE_STATE_COPY_DEST,
-		nullptr, IID_PPV_ARGS(&m_resource));
+		&texDesc, m_resource->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_resource->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create texture resource!");
 
 	// Upload heap
-	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource.Get(), 0, 1);
-	m_uploadBuffer.Reset();
+	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource->GetResource(), 0, 1);
+	//m_uploadBuffer->GetResource()->Reset();
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
 	hr = device->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE,
-		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&m_uploadBuffer));
+		&bufferDesc, m_uploadBuffer->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_uploadBuffer->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create upload buffer");
 
@@ -71,13 +73,14 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 	subresourceData.RowPitch = image->rowPitch;
 	subresourceData.SlicePitch = image->slicePitch;
 
-	UpdateSubresources(cmdList, m_resource.Get(), m_uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
 	// Transition to shader
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//cmdList->ResourceBarrier(1, &barrier);
 
-	cmdList->ResourceBarrier(1, &barrier);
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
 	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
@@ -90,7 +93,7 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
+	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
 }
 
 void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator)
@@ -125,20 +128,20 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
-		&texDesc, D3D12_RESOURCE_STATE_COPY_DEST,
-		nullptr, IID_PPV_ARGS(&m_resource));
+		&texDesc, m_resource->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_resource->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create texture resource!");
 
 	// Upload heap
-	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource.Get(), 0, 1);
-	m_uploadBuffer.Reset();
+	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource->GetResource(), 0, 1);
+	//m_uploadBuffer->GetResource().Reset();
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
 	hr = device->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE,
-		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&m_uploadBuffer));
+		&bufferDesc, m_uploadBuffer->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_uploadBuffer->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create upload buffer");
 
@@ -148,13 +151,14 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 	subresourceData.RowPitch = image->rowPitch;
 	subresourceData.SlicePitch = image->slicePitch;
 
-	UpdateSubresources(cmdList, m_resource.Get(), m_uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
 	// Transition to shader
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//cmdList->ResourceBarrier(1, &barrier);
 
-	cmdList->ResourceBarrier(1, &barrier);
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
 	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
@@ -167,7 +171,7 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
+	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
 }
 
 void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator)
@@ -203,20 +207,20 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
-		&texDesc, D3D12_RESOURCE_STATE_COPY_DEST,
-		nullptr, IID_PPV_ARGS(&m_resource));
+		&texDesc, m_resource->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_resource->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create texture resource!");
 
 	// Upload heap
-	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource.Get(), 0, 1);
-	m_uploadBuffer.Reset();
+	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource->GetResource(), 0, 1);
+	//m_uploadBuffer->GetResource().Reset();
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
 	hr = device->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE,
-		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&m_uploadBuffer));
+		&bufferDesc, m_uploadBuffer->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_uploadBuffer->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create upload buffer");
 
@@ -226,13 +230,15 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 	subresourceData.RowPitch = image->rowPitch;
 	subresourceData.SlicePitch = image->slicePitch;
 
-	UpdateSubresources(cmdList, m_resource.Get(), m_uploadBuffer.Get(), 0, 0, 1, &subresourceData);
+	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
 	// Transition to shader
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//
+	//cmdList->ResourceBarrier(1, &barrier);
 
-	cmdList->ResourceBarrier(1, &barrier);
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
 	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
@@ -245,7 +251,7 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
+	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandle() const
@@ -260,21 +266,25 @@ D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandleUAV() const
 
 void Texture12::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 {
-	auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_resource.Get(),
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	cmdList->ResourceBarrier(1, &barrierToSRV);
+	//auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET
+	//);
+	//cmdList->ResourceBarrier(1, &barrierToSRV);
+
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 }
 void Texture12::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
 {
-	auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_resource.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
-	cmdList->ResourceBarrier(1, &barrierToSRV);
+	//auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	m_resource.Get(),
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET,
+	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	//);
+	//cmdList->ResourceBarrier(1, &barrierToSRV);
+
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator, const UINT width, const UINT height)
@@ -291,10 +301,11 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList
 	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
+	m_resource->SetCurrentState(D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
 	HRESULT hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
-		&texDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		nullptr, IID_PPV_ARGS(&m_resource));
+		&texDesc, m_resource->GetCurrentState(),
+		nullptr, IID_PPV_ARGS(m_resource->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create texture resource!");
 
@@ -308,7 +319,7 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList
 	m_cpuHandleUAV = handle.cpuHandle;
 	m_gpuHandleUAV = handle.gpuHandle;
 
-	device->CreateUnorderedAccessView(m_resource.Get(), nullptr, &uavDesc, m_cpuHandleUAV);
+	device->CreateUnorderedAccessView(m_resource->GetResource(), nullptr, &uavDesc, m_cpuHandleUAV);
 
 	// Create SRV
 	handle = descriptorAllocator->Allocate();
@@ -321,16 +332,22 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_cpuHandle);
+	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
 }
 
 void Texture12::Reset(ID3D12GraphicsCommandList* cmdList)
 {
-	auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_resource.Get(),
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	cmdList->ResourceBarrier(1, &barrierToRTV);
-	
+	//auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
+	//	m_resource->GetResource().Get(),
+	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET
+	//);
+	//cmdList->ResourceBarrier(1, &barrierToRTV);
+
+	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+}
+
+ResourceWrapper* Texture12::GetResource() const
+{
+	return m_resource.get();
 }

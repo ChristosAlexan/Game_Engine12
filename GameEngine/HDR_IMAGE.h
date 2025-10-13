@@ -7,10 +7,10 @@ class HDR_IMAGE
 public:
 	HDR_IMAGE();
 	~HDR_IMAGE();
-	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator, 
+	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator,
 		const std::string& filepath);
-	Texture12 GetHDRtexture();
+	Texture12* GetHDRtexture() const;
 private:
-	Texture12 m_texture;
+	std::unique_ptr<Texture12> m_texture;
 };
 

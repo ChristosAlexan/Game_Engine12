@@ -12,7 +12,7 @@ public:
 	CubeMap();
 	void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator,
 		ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, const uint32_t width, const uint32_t height, const UINT16 mipLevels = 1);
-	RenderTargetTexture& GetCubeMapRenderTargetTexture();
+	RenderTargetTexture* GetCubeMapRenderTargetTexture();
 	void ResetRenderTarget(ID3D12GraphicsCommandList* cmdList);
 	void RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex);
 	void Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle);
@@ -23,6 +23,5 @@ public:
 
 	bool bRender = true;
 private:
-	RenderTargetTexture m_cubemapTexture;
-	
+	std::unique_ptr<RenderTargetTexture> m_cubemapTexture;
 };

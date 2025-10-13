@@ -52,11 +52,13 @@ namespace ECS
 
 	ID3D12Resource* LightManager::GetResource() const
 	{
-		return m_lightBuffer.GetResource();
+		return m_lightBuffer.GetResource()->GetResource();
 	}
 
 	void LightManager::UpdateVisibleLights(ID3D12GraphicsCommandList* cmdList, Camera& camera)
 	{
+		// Transition to copy dest
+		m_lightBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
 		for (int i = 0; i < m_lights.size(); ++i)
 		{
 			auto& worldMatrix = m_lightTransforms[i]->worldMatrix;
@@ -77,12 +79,8 @@ namespace ECS
 			m_lightBuffer.UploadData(cmdList, m_gpuLights);
 			
 		}
-		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			m_lightBuffer.GetResource(),
-			D3D12_RESOURCE_STATE_COPY_DEST,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
-		);
-		cmdList->ResourceBarrier(1, &barrier);
+		// Transition to non pixel/pixel
+		m_lightBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		cmdList->SetGraphicsRootDescriptorTable(
 			7, // Root parameter light's structured buffer index is 7
 			m_gpuHandle

@@ -1,12 +1,18 @@
 #include "RenderTargetTexture.h"
 #include "COMException.h"
 
-RenderTargetTexture::RenderTargetTexture()
+RenderTargetTexture::RenderTargetTexture(const uint32_t renderTargets_size)
 {
+	m_renderTargets_size = renderTargets_size;
+	m_renderTextures.resize(m_renderTargets_size);
+	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
+	{
+		m_renderTextures[i] = std::make_unique<ResourceWrapper>(D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
 }
 
-HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator, 
-	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator, 
+HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator,
+	ID3D12DescriptorHeap* sharedRsvHeap, DescriptorAllocator* descriptorAllocator,
 	const uint32_t width, const uint32_t height, std::vector<DXGI_FORMAT>& formats, const uint32_t renderTargets_size)
 {
 	m_width = width;
@@ -14,9 +20,7 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 
 	HRESULT hr;
 	m_srvHeap = sharedRsvHeap;
-	m_renderTargets_size = renderTargets_size;
 	m_rtvHeaps.resize(m_renderTargets_size);
-	m_renderTextures.resize(m_renderTargets_size);
 	m_rtvHandles.resize(m_renderTargets_size);
 	m_cpuHandle.resize(m_renderTargets_size);
 	m_gpuHandle.resize(m_renderTargets_size);
@@ -54,13 +58,13 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 		hr = device->CreateCommittedResource(&heapProps,
 			D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET,
-			&clearValue, IID_PPV_ARGS(&m_renderTextures[i]));
+			&clearValue, IID_PPV_ARGS(m_renderTextures[i]->ReleaseAndGetAddressOf()));
 		COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
 		m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // Size of the rtvHeap
 		m_rtvHandles[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeaps[i]->GetCPUDescriptorHandleForHeapStart(), i, m_rtvDescriptorSize); // offset per rtv heap to get the correct handle
-		device->CreateRenderTargetView(m_renderTextures[i].Get(), nullptr, m_rtvHandles[i]);
+		device->CreateRenderTargetView(m_renderTextures[i]->GetResource(), nullptr, m_rtvHandles[i]);
 	}
-		TransitionToSRV(cmdList);
+	TransitionToSRV(cmdList);
 
 	for (uint32_t i = 0; i < m_renderTargets_size; ++i)
 	{
@@ -75,7 +79,7 @@ HRESULT RenderTargetTexture::Initialize(ID3D12Device* device, ID3D12GraphicsComm
 		srvHeapDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvHeapDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srvHeapDesc.Texture2D.MipLevels = 1;
-		device->CreateShaderResourceView(m_renderTextures[i].Get(), &srvHeapDesc, m_cpuHandle[i]);
+		device->CreateShaderResourceView(m_renderTextures[i]->GetResource(), &srvHeapDesc, m_cpuHandle[i]);
 	}
 
 	return hr;
@@ -129,7 +133,7 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device->CreateCommittedResource(&heapProps,
 		D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET,
-		&clearValue, IID_PPV_ARGS(&m_renderTextures[0]));
+		&clearValue, IID_PPV_ARGS(m_renderTextures[0]->ReleaseAndGetAddressOf()));
 	COM_ERROR_IF_FAILED(hr, "Failed to create commited resource!");
 
 
@@ -153,7 +157,7 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 				m_rtvHeaps[0]->GetCPUDescriptorHandleForHeapStart(),
 				offset, m_rtvDescriptorSize);
 
-			device->CreateRenderTargetView(m_renderTextures[0].Get(), &rtvDesc, m_rtvHandles[offset]);
+			device->CreateRenderTargetView(m_renderTextures[0]->GetResource(), &rtvDesc, m_rtvHandles[offset]);
 		}
 	}
 
@@ -168,8 +172,8 @@ HRESULT RenderTargetTexture::InitializeCubeMap(ID3D12Device* device, ID3D12Graph
 	srvHeapDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvHeapDesc.TextureCube.MipLevels = desc.MipLevels;
 	srvHeapDesc.TextureCube.MostDetailedMip = 0;
-	device->CreateShaderResourceView(m_renderTextures[0].Get(), &srvHeapDesc, m_cpuHandle[0]);
-	
+	device->CreateShaderResourceView(m_renderTextures[0]->GetResource(), &srvHeapDesc, m_cpuHandle[0]);
+
 	return hr;
 }
 
@@ -198,48 +202,32 @@ void RenderTargetTexture::SetRenderTargetIndex(ID3D12GraphicsCommandList* cmdLis
 
 ID3D12Resource* RenderTargetTexture::GetRenderTextureSource(uint32_t index)
 {
-	return m_renderTextures[index].Get();
+	return m_renderTextures[index]->GetResource();
 }
 
 void RenderTargetTexture::Reset(ID3D12GraphicsCommandList* cmdList)
 {
 	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)
 	{
-		auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetRenderTextureSource(i),
-			m_curreState,
-			D3D12_RESOURCE_STATE_RENDER_TARGET
-		);
-		cmdList->ResourceBarrier(1, &barrierToRTV);
+		m_renderTextures[i]->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	}
 
 }
 
 void RenderTargetTexture::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 {
-	for(uint32_t i = 0; i < m_renderTextures.size(); ++i)
-	{
-		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetRenderTextureSource(i),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET
-		);
-		cmdList->ResourceBarrier(1, &barrierToSRV);
-	}
-	
-}
-
-void RenderTargetTexture::TransitionState(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES currentState, D3D12_RESOURCE_STATES nextState)
-{
-	m_curreState = nextState;
 	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)
 	{
-		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetRenderTextureSource(i),
-			currentState,
-			nextState
-		);
-		cmdList->ResourceBarrier(1, &barrierToSRV);
+		m_renderTextures[i]->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
+
+}
+
+void RenderTargetTexture::TransitionState(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES nextState)
+{
+	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)
+	{
+		m_renderTextures[i]->TransitionState(cmdList, nextState);
 	}
 }
 
@@ -247,11 +235,6 @@ void RenderTargetTexture::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
 {
 	for (uint32_t i = 0; i < m_renderTextures.size(); ++i)
 	{
-		auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-			GetRenderTextureSource(i),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
-		cmdList->ResourceBarrier(1, &barrierToSRV);
+		m_renderTextures[i]->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 }

@@ -1,11 +1,18 @@
 #pragma once
 #include "DX12Includes.h"
 #include "COMException.h"
+#include "ResourceWrapper.h"
 
 template<typename T>
 class StructuredBuffer
 {
 public:
+	StructuredBuffer()
+	{
+		m_gpuBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_COPY_DEST);
+		m_uploadBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
 	void Initialize(ID3D12Device* device, UINT elementCount, bool isUAV = false)
 	{
 		HRESULT hr;
@@ -22,26 +29,27 @@ public:
 			bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
 			hr = device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
-				&bufferDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(&m_gpuBuffer));
+				&bufferDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(m_gpuBuffer->ReleaseAndGetAddressOf()));
 			COM_ERROR_IF_FAILED(hr, "Failed to create gpu buffer commited resource!");
 		}
 		else
 		{
+			//m_gpuBuffer->SetCurrentState(D3D12_RESOURCE_STATE_COPY_DEST);
 			bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_NONE);
 
 			hr = device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
-				&bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_gpuBuffer));
+				&bufferDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(m_gpuBuffer->ReleaseAndGetAddressOf()));
 			COM_ERROR_IF_FAILED(hr, "Failed to create gpu buffer commited resource!");
 
 			// Create upload buffer
 			CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
 			hr = device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
-				&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_uploadBuffer));
+				&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(m_uploadBuffer->ReleaseAndGetAddressOf()));
 			COM_ERROR_IF_FAILED(hr, "Failed to create upload buffer commited resource!");
 
 			// Map upload buffer
 			CD3DX12_RANGE readRange(0, 0);
-			hr = m_uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUpload));
+			hr = m_uploadBuffer->GetResource()->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUpload));
 			COM_ERROR_IF_FAILED(hr, "Failed to map upload buffer!");
 		}
 		
@@ -51,7 +59,7 @@ public:
 	{
 		assert(data.size() <= m_elementCount);
 		memcpy(m_mappedUpload, data.data(), data.size() * sizeof(T));
-		cmdList->CopyBufferRegion(m_gpuBuffer.Get(), 0, m_uploadBuffer.Get(), 0, data.size() * sizeof(T));
+		cmdList->CopyBufferRegion(m_gpuBuffer->GetResource(), 0, m_uploadBuffer->GetResource(), 0, data.size() * sizeof(T));
 	}
 
 	void CreateSRV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle)
@@ -65,7 +73,7 @@ public:
 		srvDesc.Buffer.StructureByteStride = m_stride;
 		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-		device->CreateShaderResourceView(m_gpuBuffer.Get(), &srvDesc, srvHandle);
+		device->CreateShaderResourceView(m_gpuBuffer->GetResource(), &srvDesc, srvHandle);
 	}
 
 	void CreateUAV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE uavHandle)
@@ -78,17 +86,17 @@ public:
 		uavDesc.Buffer.StructureByteStride = m_stride;
 		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
-		device->CreateUnorderedAccessView(m_gpuBuffer.Get(), nullptr, &uavDesc, uavHandle);
+		device->CreateUnorderedAccessView(m_gpuBuffer->GetResource(), nullptr, &uavDesc, uavHandle);
 	}
 
-	ID3D12Resource* GetResource() const 
+	ResourceWrapper* GetResource() const
 	{
-		return m_gpuBuffer.Get(); 
+		return m_gpuBuffer;
 	}
 
 	D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress() const 
 	{ 
-		return m_gpuBuffer->GetGPUVirtualAddress(); 
+		return m_gpuBuffer->GetResource()->GetGPUVirtualAddress(); 
 	}
 
 	const UINT GetElementCount() const
@@ -97,8 +105,11 @@ public:
 	}
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_gpuBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_uploadBuffer;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> m_gpuBuffer;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> m_uploadBuffer;
+	ResourceWrapper* m_gpuBuffer = nullptr;
+	ResourceWrapper* m_uploadBuffer = nullptr;
+
 	UINT8* m_mappedUpload = nullptr;
 
 	UINT m_elementCount = 0;

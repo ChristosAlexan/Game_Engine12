@@ -5,7 +5,7 @@
 
 CubeMap::CubeMap()
 {
-
+	m_cubemapTexture = std::make_unique<RenderTargetTexture>(6);
 }
 
 void CubeMap::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, ID3D12CommandAllocator* commandAllocator,
@@ -15,22 +15,22 @@ void CubeMap::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdLis
 	m_cubeShape.pos = DirectX::XMFLOAT3(0, 0, 0);
 	m_cubeShape.scale = DirectX::XMFLOAT3(1, 1, 1);
 	m_cubeShape.rot = DirectX::XMFLOAT3(0, 0, 0);
-	m_cubemapTexture.InitializeCubeMap(device, cmdList, commandAllocator, sharedRsvHeap, descriptorAllocator, width, height, mipLevels);
+	m_cubemapTexture->InitializeCubeMap(device, cmdList, commandAllocator, sharedRsvHeap, descriptorAllocator, width, height, mipLevels);
 }
 
-RenderTargetTexture& CubeMap::GetCubeMapRenderTargetTexture()
+RenderTargetTexture* CubeMap::GetCubeMapRenderTargetTexture()
 {
-	return m_cubemapTexture;
+	return m_cubemapTexture.get();
 }
 
 void CubeMap::ResetRenderTarget(ID3D12GraphicsCommandList* cmdList)
 {
-	m_cubemapTexture.Reset(cmdList);
+	m_cubemapTexture->Reset(cmdList);
 }
 
 void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 {
-	m_cubemapTexture.TransitionToRTV(dx12.GetCmdList());
+	m_cubemapTexture->TransitionToRTV(dx12.GetCmdList());
 	ID3D12DescriptorHeap* heaps[] = { dx12.GetSharedSrvHeap() };
 	dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
 
@@ -50,10 +50,10 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 		nullptr
 	);
 	dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_CubemapDebug.Get());
-	//dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_Cubemap.Get());
 
-	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, m_cubemapTexture.GetSrvGpuHandle(0));
-	//dx12.GetCmdList()->SetGraphicsRootDescriptorTable(8, hdr_map1.GetHDRtexture().GetGPUHandle());
+
+	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, m_cubemapTexture->GetSrvGpuHandle(0));
+
 
 	DirectX::XMVECTOR pos_vec = DirectX::XMLoadFloat3(&camera.pos);
 	DirectX::XMVECTOR rot_vec = DirectX::XMVectorZero();
@@ -79,7 +79,7 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 	m_cubeShape.Draw(dx12.GetCmdList());
 
 	// Transition to SRV
-	m_cubemapTexture.TransitionToSRV(dx12.GetCmdList());
+	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 }
 
 void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle)
@@ -108,7 +108,7 @@ void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineSt
 	dx12.GetCmdList()->SetDescriptorHeaps(1, heaps);
 	dx12.GetCmdList()->SetPipelineState(pipelineState);
 
-	float aspect = static_cast<float>(m_cubemapTexture.m_width)/ static_cast<float>(m_cubemapTexture.m_height);
+	float aspect = static_cast<float>(m_cubemapTexture->m_width) / static_cast<float>(m_cubemapTexture->m_height);
 	float nearZ = 0.01f;
 	float farZ = 1000.0f;
 	DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
@@ -116,29 +116,28 @@ void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineSt
 	D3D12_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = static_cast<float>(m_cubemapTexture.m_width);
-	viewport.Height = static_cast<float>(m_cubemapTexture.m_height);
+	viewport.Width = static_cast<float>(m_cubemapTexture->m_width);
+	viewport.Height = static_cast<float>(m_cubemapTexture->m_height);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
 	D3D12_RECT scissorRect = {};
 	scissorRect.left = 0;
 	scissorRect.top = 0;
-	scissorRect.right = m_cubemapTexture.m_width;
-	scissorRect.bottom = m_cubemapTexture.m_height;
+	scissorRect.right = m_cubemapTexture->m_width;
+	scissorRect.bottom = m_cubemapTexture->m_height;
 
 	dx12.GetCmdList()->RSSetViewports(1, &viewport);
 	dx12.GetCmdList()->RSSetScissorRects(1, &scissorRect);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dx12.dsvHeap->GetCPUDescriptorHandleForHeapStart();
 
-	//dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, hdr_map1.GetHDRtexture().GetGPUHandle());
 	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(rootParameterIndex, gpu_handle);
 	for (uint32_t face = 0; face < 6; ++face)
 	{
-		dx12.GetCmdList()->OMSetRenderTargets(1, &m_cubemapTexture.m_rtvHandles[face], FALSE, &dsvHandle);
+		dx12.GetCmdList()->OMSetRenderTargets(1, &m_cubemapTexture->m_rtvHandles[face], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		dx12.GetCmdList()->ClearRenderTargetView(m_cubemapTexture.m_rtvHandles[face], clearColor, 0, nullptr);
+		dx12.GetCmdList()->ClearRenderTargetView(m_cubemapTexture->m_rtvHandles[face], clearColor, 0, nullptr);
 		dx12.GetCmdList()->ClearDepthStencilView(
 			dsvHandle,
 			D3D12_CLEAR_FLAG_DEPTH,
@@ -161,7 +160,7 @@ void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineSt
 		m_cubeShape.Draw(dx12.GetCmdList());
 	}
 
-	m_cubemapTexture.TransitionToSRV(dx12.GetCmdList());
+	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 }
 
 void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle)
@@ -169,7 +168,7 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 	using namespace DirectX;
 
 	CB_PS_PBR cb_ps_pbr = {};
-	unsigned int maxMipLevels = m_cubemapTexture.m_mipLevels;
+	unsigned int maxMipLevels = m_cubemapTexture->m_mipLevels;
 
 	const XMVECTOR directions[6] = {
 		XMVectorSet(+1,  0,  0, 0),  // +X
@@ -198,10 +197,9 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 
 	for (uint32_t mip = 0; mip < maxMipLevels; ++mip)
 	{
-		unsigned int mipWidth = static_cast<unsigned int>(m_cubemapTexture.m_width * std::pow(0.5, mip));
-		unsigned int mipHeight = static_cast<unsigned int>(m_cubemapTexture.m_height * std::pow(0.5, mip));
-		//mipWidth = m_cubemapTexture.m_width;
-		//mipHeight = m_cubemapTexture.m_height;
+		unsigned int mipWidth = static_cast<unsigned int>(m_cubemapTexture->m_width * std::pow(0.5, mip));
+		unsigned int mipHeight = static_cast<unsigned int>(m_cubemapTexture->m_height * std::pow(0.5, mip));
+
 		for (uint32_t face = 0; face < 6; ++face)
 		{
 			float aspect = static_cast<float>(mipWidth) / static_cast<float>(mipHeight);
@@ -235,9 +233,9 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 			cb_ps_pbr.ambientColor = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 			cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
-			dx12.GetCmdList()->OMSetRenderTargets(1, &m_cubemapTexture.m_rtvHandles[offset], FALSE, &dsvHandle);
+			dx12.GetCmdList()->OMSetRenderTargets(1, &m_cubemapTexture->m_rtvHandles[offset], FALSE, &dsvHandle);
 			float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			dx12.GetCmdList()->ClearRenderTargetView(m_cubemapTexture.m_rtvHandles[offset], clearColor, 0, nullptr);
+			dx12.GetCmdList()->ClearRenderTargetView(m_cubemapTexture->m_rtvHandles[offset], clearColor, 0, nullptr);
 			dx12.GetCmdList()->ClearDepthStencilView(
 				dsvHandle,
 				D3D12_CLEAR_FLAG_DEPTH,
@@ -263,5 +261,5 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 
 	}
 
-	m_cubemapTexture.TransitionToSRV(dx12.GetCmdList());
+	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 }

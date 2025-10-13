@@ -54,22 +54,17 @@ namespace ECS
 		GBuffer m_gBuffer;
 		std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
 		std::unique_ptr<Texture12> m_shadowsUAV; // Ray traced shadows output
-
- 	public:
-
+		std::unique_ptr<RenderTargetTexture> m_brdfMap, m_raytracingMap;
 		HDR_IMAGE hdr_map1;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
-		RenderTargetTexture m_brdfMap;
-		RenderTargetTexture m_raytracingMap;
+
 		TLASBuilder m_tlasBuilder;
-
-		bool bRenderPbrPass = true;
-
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;
 		float m_gamma;
 		ECS::TLAS m_tlas;
-
+		bool bRenderPbrPass = true;
+ 	public:
 		bool m_bEnableDebugDraw = false;
 	};
 }

@@ -45,8 +45,9 @@ namespace ECS
 		m_irradianceMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 64, 64);
 		m_prefilterMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, 5);
 
-		std::vector<DXGI_FORMAT> formats = {DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT};
-		m_brdfMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, formats, 1);
+		std::vector<DXGI_FORMAT> formats = { DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT };
+		m_brdfMap = std::make_unique<RenderTargetTexture>(1);
+		m_brdfMap->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, formats, 1);
 
 
 		m_textureUAV = std::make_unique<Texture12>();
@@ -54,7 +55,8 @@ namespace ECS
 		m_shadowsUAV = std::make_unique<Texture12>();
 		m_shadowsUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), width, height);
 
-		m_raytracingMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), width, height, formats, 1);
+		m_raytracingMap = std::make_unique<RenderTargetTexture>(1);
+		m_raytracingMap->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), width, height, formats, 1);
 	}
 
 	void RenderingManager::BuildTLAS(Scene* scene)
@@ -97,7 +99,7 @@ namespace ECS
 	void RenderingManager::ResetRenderTargets()
 	{
 		m_gBuffer.ResetRenderTargets(GetDX12().GetCmdList());
-		m_raytracingMap.Reset(GetDX12().GetCmdList());
+		m_raytracingMap->Reset(GetDX12().GetCmdList());
 	}
 
 	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
@@ -109,11 +111,11 @@ namespace ECS
 	{
 		if (bRenderPbrPass)
 		{
-			m_cubeMap1.Render(GetDX12(), camera, GetDX12().pipelineState_Cubemap.Get(), 8, hdr_map1.GetHDRtexture().GetGPUHandle());
+			m_cubeMap1.Render(GetDX12(), camera, GetDX12().pipelineState_Cubemap.Get(), 8, hdr_map1.GetHDRtexture()->GetGPUHandle());
 			// Render the irradiance map
-			m_irradianceMap.Render(GetDX12(), camera, GetDX12().pipelineState_IrradianceConv.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+			m_irradianceMap.Render(GetDX12(), camera, GetDX12().pipelineState_IrradianceConv.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 			// Render the prefilter map
-			m_prefilterMap.RenderMips(GetDX12(), camera, GetDX12().pipelineState_Prefilter.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
+			m_prefilterMap.RenderMips(GetDX12(), camera, GetDX12().pipelineState_Prefilter.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 			// Render the brdf map
 			RenderBRDF();
 			bRenderPbrPass = false;
@@ -205,7 +207,7 @@ namespace ECS
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_Brdf.Get());
 
 
-		float aspect = static_cast<float>(m_brdfMap.m_width) / static_cast<float>(m_brdfMap.m_height);
+		float aspect = static_cast<float>(m_brdfMap->m_width) / static_cast<float>(m_brdfMap->m_height);
 		float nearZ = 0.01f;
 		float farZ = 1000.0f;
 		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
@@ -213,16 +215,16 @@ namespace ECS
 		D3D12_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(m_brdfMap.m_width);
-		viewport.Height = static_cast<float>(m_brdfMap.m_height);
+		viewport.Width = static_cast<float>(m_brdfMap->m_width);
+		viewport.Height = static_cast<float>(m_brdfMap->m_height);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 
 		D3D12_RECT scissorRect = {};
 		scissorRect.left = 0;
 		scissorRect.top = 0;
-		scissorRect.right = m_brdfMap.m_width;
-		scissorRect.bottom = m_brdfMap.m_height;
+		scissorRect.right = m_brdfMap->m_width;
+		scissorRect.bottom = m_brdfMap->m_height;
 
 		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
 		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
@@ -230,9 +232,9 @@ namespace ECS
 
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
 		
-		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_brdfMap.m_rtvHandles[0], FALSE, &dsvHandle);
+		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_brdfMap->m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		GetDX12().GetCmdList()->ClearRenderTargetView(m_brdfMap.m_rtvHandles[0], clearColor, 0, nullptr);
+		GetDX12().GetCmdList()->ClearRenderTargetView(m_brdfMap->m_rtvHandles[0], clearColor, 0, nullptr);
 		GetDX12().GetCmdList()->ClearDepthStencilView(
 			dsvHandle,
 			D3D12_CLEAR_FLAG_DEPTH,
@@ -246,7 +248,7 @@ namespace ECS
 		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
 
-		m_brdfMap.TransitionToSRV(GetDX12().GetCmdList());
+		m_brdfMap->TransitionToSRV(GetDX12().GetCmdList());
 	}
 
 	void RenderingManager::DispatchRays(Scene* scene)
@@ -258,13 +260,9 @@ namespace ECS
 
 		GetDX12().CreateSBT(scene->blas_total);
 
-		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
-		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			m_shadowsUAV->m_resource.Get(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+		m_shadowsUAV->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
 		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
@@ -275,7 +273,7 @@ namespace ECS
 		lights_data.totalLights = totalLights;
 		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
 
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture().GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsUAV->GetGPUHandleUAV());
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
@@ -287,18 +285,14 @@ namespace ECS
 		GetDX12().DispatchRaytracing();
 
 		// Transition to shader resource
-		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			m_shadowsUAV->m_resource.Get(),
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+		m_shadowsUAV->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		RenderRayTracingToRenderTarget();
 	}
 
 	void RenderingManager::RenderLightPass(Scene* scene)
 	{
-		m_gBuffer.GetGbufferRenderTargetTexture().TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		CB_SHADER_LIGHTS lights_data = {};
 
 		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
@@ -343,11 +337,11 @@ namespace ECS
 		);
 
 
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture().GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture().GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap.GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap.GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap->GetSrvGpuHandle(0));
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
@@ -373,7 +367,7 @@ namespace ECS
 		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_raytracingRenderTarget.Get());
 
-		float aspect = static_cast<float>(m_raytracingMap.m_width) / static_cast<float>(m_raytracingMap.m_height);
+		float aspect = static_cast<float>(m_raytracingMap->m_width) / static_cast<float>(m_raytracingMap->m_height);
 		float nearZ = 0.01f;
 		float farZ = 1000.0f;
 		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
@@ -381,16 +375,16 @@ namespace ECS
 		D3D12_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(m_raytracingMap.m_width);
-		viewport.Height = static_cast<float>(m_raytracingMap.m_height);
+		viewport.Width = static_cast<float>(m_raytracingMap->m_width);
+		viewport.Height = static_cast<float>(m_raytracingMap->m_height);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 
 		D3D12_RECT scissorRect = {};
 		scissorRect.left = 0;
 		scissorRect.top = 0;
-		scissorRect.right = m_raytracingMap.m_width;
-		scissorRect.bottom = m_raytracingMap.m_height;
+		scissorRect.right = m_raytracingMap->m_width;
+		scissorRect.bottom = m_raytracingMap->m_height;
 
 		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
 		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
@@ -398,9 +392,9 @@ namespace ECS
 
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
 
-		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_raytracingMap.m_rtvHandles[0], FALSE, &dsvHandle);
+		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_raytracingMap->m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		GetDX12().GetCmdList()->ClearRenderTargetView(m_raytracingMap.m_rtvHandles[0], clearColor, 0, nullptr);
+		GetDX12().GetCmdList()->ClearRenderTargetView(m_raytracingMap->m_rtvHandles[0], clearColor, 0, nullptr);
 		GetDX12().GetCmdList()->ClearDepthStencilView(
 			dsvHandle,
 			D3D12_CLEAR_FLAG_DEPTH,
@@ -416,7 +410,7 @@ namespace ECS
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
 
 
-		m_raytracingMap.TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_raytracingMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::CalculateCompute(Scene* scene)
@@ -451,12 +445,7 @@ namespace ECS
 				if (GetDX12().GetCmdList())
 				{
 					// Transition back to unorder access
-					CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-						renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource(),
-						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-						D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-						);
-					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+					renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 					GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_compute.Get());
 					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
@@ -480,11 +469,7 @@ namespace ECS
 					GetDX12().GetCmdList()->Dispatch(groups, 1, 1);
 				
 					// Transition to shader resource
-					barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-						renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource(),
-						D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-						D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-					GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
+					renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 				}
 			}
 		}
@@ -507,7 +492,7 @@ namespace ECS
 	{
 		// Render the scene to the geometry pass
 		float clearColor[] = { 0,0,0,1 };
-		SetRenderTarget(GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
+		SetRenderTarget(*GetGbuffer().GetGbufferRenderTargetTexture(), clearColor);
 	}
 
 	DirectX::XMFLOAT3 RenderingManager::GetAmbientColor() const

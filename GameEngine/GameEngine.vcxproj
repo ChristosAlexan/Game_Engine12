@@ -361,6 +361,7 @@
     <ClInclude Include="RenderingECS.h" />
     <ClInclude Include="RenderingManager.h" />
     <ClInclude Include="RenderTargetTexture.h" />
+    <ClInclude Include="ResourceWrapper.h" />
     <ClInclude Include="SaveLoadSystem.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
