@@ -4,9 +4,9 @@
 /************ VERTEX SHADERS *******************/
 struct CB_VS_SimpleShader
 {
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX viewMatrix;
-	DirectX::XMMATRIX projectionMatrix;
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMFLOAT4X4 viewMatrix;
+	DirectX::XMFLOAT4X4 projectionMatrix;
 };
 struct CB_VS_AnimationShader
 {
@@ -57,6 +57,7 @@ struct CB_SHADER_LIGHTS
 /************ COMPUTE SHADERS *******************/
 struct CB_CS_AnimationShader
 {
-	DirectX::XMMATRIX skinningMatrix[100];
+	DirectX::XMFLOAT4X4 skinningMatrix[100];
 	uint32_t vertexCount;
+	uint32_t padding[3] = { 0,0,0 };
 };

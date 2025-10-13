@@ -182,22 +182,22 @@ void Camera::SetLookAtPos(DirectX::XMFLOAT3 lookAtPos)
 	this->SetRotation(pitch, yaw, 0.0f);
 }
 
-const DirectX::XMVECTOR& Camera::GetForwardVector()
+const DirectX::XMVECTOR& Camera::GetForwardVector() const
 {
 	return this->vec_forward;
 }
 
-const DirectX::XMVECTOR& Camera::GetRightVector()
+const DirectX::XMVECTOR& Camera::GetRightVector() const
 {
 	return this->vec_right;
 }
 
-const DirectX::XMVECTOR& Camera::GetLeftVector()
+const DirectX::XMVECTOR& Camera::GetLeftVector() const
 {
 	return this->vec_left;
 }
 
-const DirectX::XMVECTOR& Camera::GetBackwardVector()
+const DirectX::XMVECTOR& Camera::GetBackwardVector() const
 {
 	return this->vec_backward;
 }

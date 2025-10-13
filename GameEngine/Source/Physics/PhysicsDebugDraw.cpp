@@ -1,5 +1,6 @@
 #include "PhysicsDebugDraw.h"
 #include "../MeshData.h"
+#include "../MathHelpers.h"
 
 namespace PHYSICS
 {
@@ -21,9 +22,9 @@ namespace PHYSICS
 		CB_VS_AnimationShader skinningCB = {};
 		CB_PS_Material psMaterialCB = {};
 
-		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
-		vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-		vsCB.worldMatrix = DirectX::XMMatrixIdentity();
+		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
+		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+		vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixIdentity());
 
 		psMaterialCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 		psMaterialCB.hasTextures = false;

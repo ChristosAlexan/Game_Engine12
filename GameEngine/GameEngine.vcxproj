@@ -259,6 +259,8 @@
     <ClCompile Include="BLASBuilder.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="COMException.cpp" />
+    <ClCompile Include="ComputeSkinning.cpp" />
+    <ClCompile Include="ComputeWrapper.cpp" />
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="CubeShape12.cpp" />
     <ClCompile Include="DescriptorAllocator.cpp" />
@@ -313,6 +315,8 @@
     <ClInclude Include="BLASBuilder.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="COMException.h" />
+    <ClInclude Include="ComputeSkinning.h" />
+    <ClInclude Include="ComputeWrapper.h" />
     <ClInclude Include="ConstantBufferTypes.h" />
     <ClInclude Include="CubeMap.h" />
     <ClInclude Include="CubeShape12.h" />

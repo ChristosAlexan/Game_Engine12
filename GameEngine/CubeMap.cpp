@@ -2,6 +2,7 @@
 #include "ConstantBufferTypes.h"
 #include "Camera.h"
 #include "DX12.h"
+#include "MathHelpers.h"
 
 CubeMap::CubeMap()
 {
@@ -68,9 +69,9 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 	DirectX::XMMATRIX proj = camera.GetProjectionMatrix();
 	DirectX::XMMATRIX view = camera.GetViewMatrix();
 	CB_VS_SimpleShader vsCB = {};
-	vsCB.viewMatrix = DirectX::XMMatrixTranspose(view);
-	vsCB.projectionMatrix = DirectX::XMMatrixTranspose(proj);
-	vsCB.worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+	vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(view));
+	vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(proj));
+	vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(worldMatrix));
 	if (dx12.dynamicCB)
 	{
 		dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
@@ -149,9 +150,9 @@ void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineSt
 
 		DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(position, position + directions[face], ups[face]);
 		CB_VS_SimpleShader vsCB = {};
-		vsCB.viewMatrix = DirectX::XMMatrixTranspose(view);
-		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(proj);
-		vsCB.worldMatrix = DirectX::XMMatrixIdentity();
+		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(view));
+		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(proj));
+		vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixIdentity());
 		if (dx12.dynamicCB)
 		{
 			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
@@ -247,9 +248,9 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 
 			DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(position, position + directions[face], ups[face]);
 			CB_VS_SimpleShader vsCB = {};
-			vsCB.viewMatrix = DirectX::XMMatrixTranspose(view);
-			vsCB.projectionMatrix = DirectX::XMMatrixTranspose(proj);
-			vsCB.worldMatrix = DirectX::XMMatrixIdentity();
+			vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(view));
+			vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(proj));
+			vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixIdentity());
 			if (dx12.dynamicCB)
 			{
 				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));

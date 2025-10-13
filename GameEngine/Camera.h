@@ -27,10 +27,10 @@ public:
 	void AdjustRotation(const DirectX::XMVECTOR& rot, bool constraint = false);
 	void AdjustRotation(float x, float y, float z, bool constraint = false);
 	void SetLookAtPos(DirectX::XMFLOAT3 lookAtPos);
-	const DirectX::XMVECTOR& GetForwardVector();
-	const DirectX::XMVECTOR& GetRightVector();
-	const DirectX::XMVECTOR& GetLeftVector();
-	const DirectX::XMVECTOR& GetBackwardVector();
+	const DirectX::XMVECTOR& GetForwardVector() const;
+	const DirectX::XMVECTOR& GetRightVector() const;
+	const DirectX::XMVECTOR& GetLeftVector() const;
+	const DirectX::XMVECTOR& GetBackwardVector() const;
 
 	DirectX::XMVECTOR camTarget;
 
@@ -41,7 +41,7 @@ public:
 	bool PossessCharacter = false;
 	DirectX::XMFLOAT3 pos;
 
-	DirectX::XMMATRIX viewMatrix;
+	
 	float m_nearZ;
 	float m_farZ;
 
@@ -50,9 +50,7 @@ private:
 
 	DirectX::XMVECTOR posVector;
 	DirectX::XMVECTOR rotVector;
-
-
-	//DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projectionMatrix;
 
 	const DirectX::XMVECTOR DEFAULT_FORWARD_VECTOR = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);

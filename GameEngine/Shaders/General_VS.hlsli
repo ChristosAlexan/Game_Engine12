@@ -1,8 +1,8 @@
 cbuffer CB_VS_VertexShader : register(b0)
 {
-    matrix worldMatrix;
-    matrix viewMatrix;
-    matrix projectionMatrix;
+    float4x4 worldMatrix;
+    float4x4 viewMatrix;
+    float4x4 projectionMatrix;
 };
 
 cbuffer CB_VS_Skinning : register(b1)

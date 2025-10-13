@@ -809,21 +809,19 @@ void Model::UpdateJoints(Node* node, std::vector<DirectX::XMMATRIX>& finalTransf
 
 void Model::UpdateJointsFlat(Node* node, AnimatorComponent& animData)
 {
-
-    if (node->skin > -1) {
-
+    if (node->skin > -1) 
+    {
         Skin& skin = skins[node->skin];
-        //DirectX::XMMATRIX inverseTransform = DirectX::XMMatrixInverse(nullptr, GetNodeMatrix(node));
-
         size_t numJoints = skin.joints.size();
         animData.finalTransforms.resize(numJoints);
 
         for (size_t i = 0; i < numJoints; i++)
         {
-            animData.finalTransforms[i] = skin.inverseBindMatrices[i] * GetNodeMatrixFlat(skin.joints[i]->index, animData.flatNodes);
-            //finalTransform[i] = finalTransform[i] * inverseTransform ;
+            DirectX::XMMATRIX finalTrans_matrix;
+            finalTrans_matrix = skin.inverseBindMatrices[i] * GetNodeMatrixFlat(skin.joints[i]->index, animData.flatNodes);
+            finalTrans_matrix = DirectX::XMMatrixTranspose(finalTrans_matrix);
 
-            animData.finalTransforms[i] = DirectX::XMMatrixTranspose(animData.finalTransforms[i]);
+            DirectX::XMStoreFloat4x4(&animData.finalTransforms[i], finalTrans_matrix);
         }
     }
 

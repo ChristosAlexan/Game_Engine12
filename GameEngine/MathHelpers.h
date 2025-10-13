@@ -225,6 +225,14 @@ inline PHYSICS::PhysicsTransform TransformToPhysX(const ECS::TransformComponent&
 	return pxTrans;
 }
 
+inline DirectX::XMFLOAT4X4 MatrixToFloat4x4(const DirectX::XMMATRIX inMatrix)
+{
+	DirectX::XMFLOAT4X4 out;
+
+	DirectX::XMStoreFloat4x4(&out, inMatrix);
+
+	return out;
+}
 
 inline ECS::TransformComponent PhysXToTransform(const physx::PxTransform pxTransform, ECS::TransformComponent& transform)
 {

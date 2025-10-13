@@ -84,7 +84,7 @@ struct AnimatorComponent
 	float currentTime = 0.0f;
 	std::vector<FlatNode> flatNodes;
 	std::vector<FlatNode> flatNodesPrev;
-	std::vector<DirectX::XMMATRIX> finalTransforms;
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	bool isBlending = false;
 	float blendDuration = 0.25f;
 	float blendTime = 0.0f;

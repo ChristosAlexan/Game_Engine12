@@ -1,6 +1,7 @@
 #pragma once
 #include "DX12.h"
 #include "Camera.h"
+#include "ComputeSkinning.h"
 #include "DynamicUploadBuffer.h"
 #include "RenderingECS.h"
 #include "ModelData.h"
@@ -60,6 +61,8 @@ namespace ECS
 		TLASBuilder m_tlasBuilder;
 		ECS::TLAS m_tlas;
 		bool bRenderPbrPass = true;
+
+		ComputeSkinning m_computeSkinning;
  	public:
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;

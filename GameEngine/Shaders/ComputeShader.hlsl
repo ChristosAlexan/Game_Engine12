@@ -22,8 +22,9 @@ struct SkinningDataOut
 
 cbuffer CB_CS_Skinning : register(b0, space8)
 {
-    matrix skinningMatrices[100];
+    float4x4 skinningMatrices[100];
     uint vertexCount;
+    uint3 padding;
 };
 
 RWTexture2D<float4> gOutput : register(u0, space8);

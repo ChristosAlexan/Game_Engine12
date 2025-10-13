@@ -7,6 +7,7 @@
 #include "BLASBuilder.h"
 #include "AssetManager.h"
 #include "Physics/PhysicsManager.h"
+#include "MathHelpers.h"
 
 namespace ECS
 {
@@ -33,6 +34,7 @@ namespace ECS
 			return false;
 		}
 		
+		m_computeSkinning.Initialize();
 		return true;
 	}
 
@@ -136,9 +138,9 @@ namespace ECS
 		CB_PS_PBR cb_ps_pbr = {};
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_Gbuffer.Get());
-		vsCB.projectionMatrix = DirectX::XMMatrixTranspose(camera.GetProjectionMatrix());
-		vsCB.viewMatrix = DirectX::XMMatrixTranspose(camera.GetViewMatrix());
-		vsCB.worldMatrix = DirectX::XMMatrixTranspose(transformComponent.worldMatrix);
+		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
+		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+		vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
 
 		auto& cpuMesh = renderComponent.mesh->cpuMesh;
 		std::size_t vertexCount = cpuMesh->vertices.size();
@@ -415,64 +417,7 @@ namespace ECS
 
 	void RenderingManager::CalculateCompute(Scene* scene)
 	{
-		CB_CS_AnimationShader skinningCB = {};
-
-		auto group = scene->GetRegistry().group<>(entt::get<RenderComponent, AnimatorComponent>);
-
-		for (auto entity : group)
-		{
-			auto& renderComponent = group.get<RenderComponent>(entity);
-			auto& gpuMesh = group.get<RenderComponent>(entity).mesh;
-			auto& cpuMesh = group.get<RenderComponent>(entity).mesh->cpuMesh;
-			
-			if (renderComponent.meshType == SKELETAL_MESH)
-			{
-				auto& animatorComponent = group.get<AnimatorComponent>(entity);
-
-				ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
-				GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
-				GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetComputeRootSignature());
-
-				
-				if (!animatorComponent.finalTransforms.empty())
-				{
-					size_t matrixCount = animatorComponent.finalTransforms.size();
-					assert(matrixCount <= sizeof(skinningCB.skinningMatrix));
-					memcpy(skinningCB.skinningMatrix, animatorComponent.finalTransforms.data(), matrixCount * sizeof(DirectX::XMMATRIX));
-
-				}
-				
-				if (GetDX12().GetCmdList())
-				{
-					// Transition back to unorder access
-					renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-					GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_compute.Get());
-					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
-						0, // Root parameter skinning structured buffer input
-						gpuMesh->skinningGpuHandleIn
-					);
-					
-					std::size_t vertexCount = cpuMesh->vertices.size();
-					skinningCB.vertexCount = vertexCount;
-
-					GetDX12().GetCmdList()->SetComputeRootConstantBufferView(1, GetDX12().dynamicCB->Allocate(skinningCB));
-
-					GetDX12().GetCmdList()->SetComputeRootDescriptorTable(
-						2, // Root parameter skinning structured buffer output
-						renderComponent.skinningOutData.skinningGpuUavHandleFinalTransform
-					);
-
-					unsigned int threadsPerGroup = 256;
-					unsigned int groups = (vertexCount + threadsPerGroup - 1) / threadsPerGroup;
-
-					GetDX12().GetCmdList()->Dispatch(groups, 1, 1);
-				
-					// Transition to shader resource
-					renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-				}
-			}
-		}
+		m_computeSkinning.Compute(scene);
 	}
 
 	void RenderingManager::UpdatePBR(Scene* scene, Camera& camera)
