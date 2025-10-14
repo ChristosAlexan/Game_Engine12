@@ -24,7 +24,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Hybrid lighting pipeline (deferred + ray tracing)  
 - Advanced physics simulation (PhysX integration)  
 - Scene graph for hierarchical transformations  
-- Post-processing effects: Bloom, SSR, HBAO+  
+- Post-processing effects: Bloom, SSR, SSAO  
 
 ---
 
