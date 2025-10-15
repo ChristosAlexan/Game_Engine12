@@ -13,7 +13,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - JSON-based scene save/load system
 - Compute shader skinning
 - Ray traced shadows for static and skinned meshes using DirectX Raytracing (DXR)
-- BLAS rebuild for animated entities
+- BLAS refit for animated entities
 - GUI using ImGUi for object manipulation
 - Physics using [Nvidia PhysX](https://github.com/NVIDIA-Omniverse/PhysX)
   
@@ -24,7 +24,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Hybrid lighting pipeline (deferred + ray tracing)  
 - Advanced physics simulation (PhysX integration)  
 - Scene graph for hierarchical transformations  
-- Post-processing effects: Bloom, SSR, HBAO+  
+- Post-processing effects: Bloom, SSR, SSAO  
 
 ---
 
