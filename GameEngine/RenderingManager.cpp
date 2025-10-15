@@ -136,7 +136,6 @@ namespace ECS
 		CB_PS_SimpleShader psCB = {};
 		CB_PS_Material psMaterialCB = {};
 		CB_PS_Camera psCameraCB = {};
-		CB_PS_PBR cb_ps_pbr = {};
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_Gbuffer.Get());
 		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
@@ -173,10 +172,6 @@ namespace ECS
 		psCameraCB.cameraPos = camera.pos;
 		psCameraCB.padding1 = 0.0f;
 
-		cb_ps_pbr.mip_roughness = 0.0f;
-		cb_ps_pbr.ambientColor = GetAmbientColor();
-		cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(GetExposure(), GetGamma(), 0.0f, 0.0f);
-
 		if (GetDX12().GetCmdList())
 		{
 			if (GetDX12().dynamicCB)
@@ -186,7 +181,6 @@ namespace ECS
 				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(3, GetDX12().dynamicCB->Allocate(skinningCB));
 				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psMaterialCB));
 				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
 
 				if (renderComponent.hasAnimation)
 				{
@@ -295,6 +289,8 @@ namespace ECS
 
 	void RenderingManager::RenderLightPass(Scene* scene)
 	{
+		CB_PS_PBR cb_ps_pbr = {};
+
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		CB_SHADER_LIGHTS lights_data = {};
 
@@ -339,8 +335,13 @@ namespace ECS
 			nullptr
 		);
 
+		cb_ps_pbr.mip_roughness = 0.0f;
+		cb_ps_pbr.ambientColor = GetAmbientColor();
+		cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(GetExposure(), GetGamma(), 0.0f, 0.0f);
+
 		m_brdfMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));

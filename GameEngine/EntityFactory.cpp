@@ -47,8 +47,8 @@ namespace ECS
 				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
 
-			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
-			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
 			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), 
 				renderComponent.mesh->cpuMesh->vertices.size(), true);
@@ -79,8 +79,8 @@ namespace ECS
 				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
 
-			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
-			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 		}
 		else if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{
