@@ -72,7 +72,7 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	return blas;
 }
 
-void BLASBuilder::ReBuild(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::RenderComponent& renderComponent)
+void BLASBuilder::Refit(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::RenderComponent& renderComponent)
 {
 	if (!renderComponent.blas)
 		return;

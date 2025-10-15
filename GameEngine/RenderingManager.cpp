@@ -67,7 +67,7 @@ namespace ECS
 		m_tlasBuilder.Build(scene);
 	}
 
-	void RenderingManager::ReBuildBLAS(Scene* scene)
+	void RenderingManager::RefitBLAS(Scene* scene)
 	{
 		BLASBuilder blas_builder;
 		auto group = scene->GetRegistry().group<>(entt::get<RenderComponent, AnimatorComponent>);
@@ -78,7 +78,7 @@ namespace ECS
 
 			if (renderComponent.meshType == SKELETAL_MESH)
 			{
-				blas_builder.ReBuild(GetDX12().GetDevice(), GetDX12().GetCmdList(), renderComponent);
+				blas_builder.Refit(GetDX12().GetDevice(), GetDX12().GetCmdList(), renderComponent);
 			}
 		}
 	}
@@ -257,7 +257,7 @@ namespace ECS
 	{
 		CB_SHADER_LIGHTS lights_data = {};
 
-		ReBuildBLAS(scene);
+		RefitBLAS(scene);
 		BuildTLAS(scene);
 
 		GetDX12().CreateSBT(scene->blas_total);

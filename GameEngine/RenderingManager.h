@@ -26,7 +26,7 @@ namespace ECS
 		bool Initialize(GameWindow& game_window, int width, int height);
 		void InitializeRenderTargets(int& width, int& height);
 		void BuildTLAS(Scene* scene);
-		void ReBuildBLAS(Scene* scene);
+		void RefitBLAS(Scene* scene);
 		DX12& GetDX12();
 		GFXGui& GetGFXGui();
 		GBuffer& GetGbuffer();
