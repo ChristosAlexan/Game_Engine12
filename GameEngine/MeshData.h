@@ -75,14 +75,14 @@ namespace ECS
 
         void Draw(ID3D12GraphicsCommandList* cmdList)
         {
-            cmdList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
+            cmdList->IASetVertexBuffers(0, 1, vertexBuffer.GetBufferViewPtr());
             cmdList->DrawInstanced(vertexCount, 1, 0, 0);
         }
 
         void DrawIndexed(ID3D12GraphicsCommandList* cmdList)
         {
-            cmdList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
-            cmdList->IASetIndexBuffer(&indexBuffer.ibView);
+            cmdList->IASetVertexBuffers(0, 1, vertexBuffer.GetBufferViewPtr());
+            cmdList->IASetIndexBuffer(indexBuffer.GetBufferViewPtr());
             cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
         }

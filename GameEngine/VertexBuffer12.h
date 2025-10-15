@@ -3,19 +3,20 @@
 #include "DX12Includes.h"
 #include <vector>
 #include <stdexcept>
+#include "ResourceWrapper.h"
 
 template<class T>
 class VertexBuffer12
 {
-public:
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer;
-	D3D12_VERTEX_BUFFER_VIEW vbView = {};
-
+private:
+    ResourceWrapper* m_vertexBuffer = nullptr;
+    ResourceWrapper* m_vertexUploadBuffer = nullptr;
+    D3D12_VERTEX_BUFFER_VIEW m_vbView = {};
 public:
 	VertexBuffer12()
 	{
-
+        m_vertexBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_COPY_DEST);
+        m_vertexUploadBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	HRESULT Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const T* data, UINT vertexCount)
@@ -33,7 +34,7 @@ public:
             &bufferDesc,
             D3D12_RESOURCE_STATE_COPY_DEST, // start in copy dest state
             nullptr,
-            IID_PPV_ARGS(&vertexBuffer)
+            IID_PPV_ARGS(m_vertexBuffer->ReleaseAndGetAddressOf())
         );
 
         // Create upload heap
@@ -44,7 +45,7 @@ public:
             &bufferDesc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(&vertexUploadBuffer)
+            IID_PPV_ARGS(m_vertexUploadBuffer->ReleaseAndGetAddressOf())
         );
 
         // Copy data to upload heap
@@ -53,26 +54,35 @@ public:
         vertexData.RowPitch = vbSize;
         vertexData.SlicePitch = vbSize;
 
-        UpdateSubresources(commandList, vertexBuffer.Get(), vertexUploadBuffer.Get(), 0, 0, 1, &vertexData);
+        UpdateSubresources(commandList, m_vertexBuffer->GetResource(), m_vertexUploadBuffer->GetResource(), 0, 0, 1, &vertexData);
 
         // Transition to vertex buffer state
-        CD3DX12_RESOURCE_BARRIER vbBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            vertexBuffer.Get(),
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-        );
-        commandList->ResourceBarrier(1, &vbBarrier);
-
+        m_vertexBuffer->TransitionState(commandList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
         // Set view
-        vbView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-        vbView.StrideInBytes = sizeof(T);
-        vbView.SizeInBytes = vbSize;
+        m_vbView.BufferLocation = m_vertexBuffer->GetResource()->GetGPUVirtualAddress();
+        m_vbView.StrideInBytes = sizeof(T);
+        m_vbView.SizeInBytes = vbSize;
 
 		return S_OK;
 	}
 
     D3D12_GPU_VIRTUAL_ADDRESS GetVertexBufferVirtualAddress() const
     {
-        return vertexBuffer->GetGPUVirtualAddress();
+        return m_vertexBuffer->GetResource()->GetGPUVirtualAddress();
+    }
+
+    ResourceWrapper* GetResource() const
+    {
+        return m_vertexBuffer;
+    }
+
+    D3D12_VERTEX_BUFFER_VIEW GetBufferView() const
+    {
+        return m_vbView;
+    }
+
+    const D3D12_VERTEX_BUFFER_VIEW* GetBufferViewPtr() const
+    {
+        return &m_vbView;
     }
 };

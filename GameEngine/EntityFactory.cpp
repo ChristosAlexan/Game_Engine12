@@ -39,11 +39,16 @@ namespace ECS
 		if(renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
 		{
 			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
 			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
-				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
-				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
+				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.GetBufferView().StrideInBytes,
+				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
+
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
 
 			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), 
 				renderComponent.mesh->cpuMesh->vertices.size(), true);
@@ -61,15 +66,21 @@ namespace ECS
 
 			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(),
 				renderComponent.skinningOutData.skinningCpuSrvHandleFinalTransform);
+
 		}
 		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		{
 			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
 			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
-				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.vbView.StrideInBytes,
-				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.ibView.Format,
+				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.GetBufferView().StrideInBytes,
+				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
+
+			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
 		}
 		else if (entityDesc.meshType == ECS::MESH_TYPE::LIGHT)
 		{

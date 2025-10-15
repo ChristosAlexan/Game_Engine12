@@ -15,8 +15,8 @@ void Shapes12::UploadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* c
 void Shapes12::Draw(ID3D12GraphicsCommandList* commandList)
 {
 	// Bind the vertex and index buffers
-	commandList->IASetVertexBuffers(0, 1, &vertexBuffer.vbView);
-	commandList->IASetIndexBuffer(&indexBuffer.ibView);
+	commandList->IASetVertexBuffers(0, 1, vertexBuffer.GetBufferViewPtr());
+	commandList->IASetIndexBuffer(indexBuffer.GetBufferViewPtr());
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Issue the draw call

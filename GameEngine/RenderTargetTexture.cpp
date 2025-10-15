@@ -211,7 +211,6 @@ void RenderTargetTexture::Reset(ID3D12GraphicsCommandList* cmdList)
 	{
 		m_renderTextures[i]->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	}
-
 }
 
 void RenderTargetTexture::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)

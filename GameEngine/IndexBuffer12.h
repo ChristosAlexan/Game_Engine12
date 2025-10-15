@@ -2,15 +2,21 @@
 
 #include "DX12Includes.h"
 #include <stdexcept>
+#include "ResourceWrapper.h"
 
 class IndexBuffer12
 {
+private:
+	ResourceWrapper* m_indexBuffer = nullptr;
+	ResourceWrapper* m_indexUploadBuffer = nullptr;
+	D3D12_INDEX_BUFFER_VIEW m_ibView = {};
 public:
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexUploadBuffer;
-	D3D12_INDEX_BUFFER_VIEW ibView = {};
-public:
-	IndexBuffer12() {}
+	IndexBuffer12() 
+	{
+		m_indexBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_COPY_DEST);
+		m_indexUploadBuffer = new ResourceWrapper(D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
 	HRESULT Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, const uint32_t* data, UINT indexCount)
 	{
 		HRESULT hr;
@@ -25,7 +31,7 @@ public:
 			&ibResourceDesc,
 			D3D12_RESOURCE_STATE_COPY_DEST,
 			nullptr,
-			IID_PPV_ARGS(&indexBuffer)
+			IID_PPV_ARGS(m_indexBuffer->ReleaseAndGetAddressOf())
 		);
 		if (FAILED(hr)) {
 			throw std::runtime_error("Failed to create default heap");
@@ -39,7 +45,7 @@ public:
 			&ibResourceDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			IID_PPV_ARGS(&indexUploadBuffer)
+			IID_PPV_ARGS(m_indexUploadBuffer->ReleaseAndGetAddressOf())
 		);
 		if (FAILED(hr)) {
 			throw std::runtime_error("Failed to create upload heap");
@@ -51,26 +57,35 @@ public:
 		indexData.RowPitch = ibSize;
 		indexData.SlicePitch = ibSize;
 
-		UpdateSubresources(commandList, indexBuffer.Get(), indexUploadBuffer.Get(), 0, 0, 1, &indexData);
+		UpdateSubresources(commandList, m_indexBuffer->GetResource(), m_indexUploadBuffer->GetResource(), 0, 0, 1, &indexData);
 		
-		CD3DX12_RESOURCE_BARRIER ibBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			indexBuffer.Get(),
-			D3D12_RESOURCE_STATE_COPY_DEST,
-			D3D12_RESOURCE_STATE_INDEX_BUFFER
-		);
-		commandList->ResourceBarrier(1, &ibBarrier);
+		m_indexBuffer->TransitionState(commandList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
 		// Fill out IB view
-		ibView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-		ibView.SizeInBytes = ibSize;
-		ibView.Format = DXGI_FORMAT_R32_UINT;
+		m_ibView.BufferLocation = m_indexBuffer->GetResource()->GetGPUVirtualAddress();
+		m_ibView.SizeInBytes = ibSize;
+		m_ibView.Format = DXGI_FORMAT_R32_UINT;
 
 		return S_OK;
 	}
 
-
 	D3D12_GPU_VIRTUAL_ADDRESS GetIndexBufferVirtualAddress() const
 	{
-		return indexBuffer->GetGPUVirtualAddress();
+		return m_indexBuffer->GetResource()->GetGPUVirtualAddress();
+	}
+
+	ResourceWrapper* GetResource() const
+	{
+		return m_indexBuffer;
+	}
+
+	D3D12_INDEX_BUFFER_VIEW GetBufferView() const
+	{
+		return m_ibView;
+	}
+
+	const D3D12_INDEX_BUFFER_VIEW* GetBufferViewPtr() const
+	{
+		return &m_ibView;
 	}
 };

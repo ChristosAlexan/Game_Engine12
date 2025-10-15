@@ -404,7 +404,6 @@ void Model::LoadSkeleton(tinygltf::Model& input)
 
     for (size_t i = 0; i < input.skins.size(); i++)
     {
-        OutputDebugStringA((input.skins[i].name + "\n").c_str());
         tinygltf::Skin glTFSkin = input.skins[i];
 
         skins[i].name = glTFSkin.name;

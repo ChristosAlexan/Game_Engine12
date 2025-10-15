@@ -102,6 +102,7 @@ namespace ECS
 	{
 		m_gBuffer.ResetRenderTargets(GetDX12().GetCmdList());
 		m_raytracingMap->Reset(GetDX12().GetCmdList());
+		m_brdfMap->Reset(GetDX12().GetCmdList());
 	}
 
 	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
@@ -338,7 +339,7 @@ namespace ECS
 			nullptr
 		);
 
-
+		m_brdfMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
