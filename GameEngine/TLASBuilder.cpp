@@ -44,12 +44,12 @@ void TLASBuilder::Build(ECS::Scene* scene)
 		m_instanceDescs.push_back(instance);
 	}
 
-	BuildRAS(scene->GetRenderingManager()->GetDX12(), bRefit);
+	BuildRAS(scene->GetRenderingManager()->GetDX12(), bUpdate);
 
-	bRefit = true;
+	bUpdate = true;
 }
 
-void TLASBuilder::BuildRAS(DX12& dx12, bool bRefit)
+void TLASBuilder::BuildRAS(DX12& dx12, bool bUpdate)
 {
 	// Upload m_instanceDescs to a GPU buffer
 	const UINT instanceDescsSize = static_cast<UINT>(m_instanceDescs.size() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC));
@@ -63,13 +63,15 @@ void TLASBuilder::BuildRAS(DX12& dx12, bool bRefit)
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC tlasBuildDesc = {};
 
-	if (!bRefit)
+	if (!bUpdate)
 	{
+
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
 		dx12.GetDevice()->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, &prebuildInfo);
+		const UINT64 scratchSize = std::max(prebuildInfo.ScratchDataSizeInBytes, prebuildInfo.UpdateScratchDataSizeInBytes);
 		// Create result buffer for the TLAS
 		m_tlasBuffer = dx12.CreateRayTracingBuffer(prebuildInfo.ResultDataMaxSizeInBytes, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
-		m_scratchBuffer = dx12.CreateRayTracingBuffer(prebuildInfo.ScratchDataSizeInBytes, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		m_scratchBuffer = dx12.CreateRayTracingBuffer(scratchSize, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	
 
 		tlasBuildDesc.Inputs = inputs;
@@ -79,7 +81,7 @@ void TLASBuilder::BuildRAS(DX12& dx12, bool bRefit)
 	}
 	else
 	{
-		inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+		inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 	
 		tlasBuildDesc.Inputs = inputs;
 		tlasBuildDesc.SourceAccelerationStructureData = m_tlasBuffer->GetGPUVirtualAddress();

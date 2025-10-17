@@ -17,12 +17,12 @@ public:
 	std::vector<D3D12_RAYTRACING_INSTANCE_DESC>& GetInstances();
 private:
 	// Build ray tracing accelaration structure
-	void BuildRAS(DX12& dx12, bool bRefit);
+	void BuildRAS(DX12& dx12, bool bUpdate);
 public:
 	std::vector<D3D12_RAYTRACING_INSTANCE_DESC> m_instanceDescs;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_tlasBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_scratchBuffer;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_instanceBuffer;
 private:
-	bool bRefit = false;
+	bool bUpdate = false;
 };
