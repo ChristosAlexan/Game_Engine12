@@ -1,7 +1,7 @@
 #include "MaterialManager.h"
 #include "AssetManager.h"
 #include "RenderingManager.h"
-#include "Physics/PhysicsManager.h"
+#include "PhysicsManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 

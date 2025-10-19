@@ -2,7 +2,7 @@
 #include <PxPhysicsAPI.h>
 #include"PxDefaultErrorCallback.h"
 #include"PxDefaultAllocator.h"
-#include "../Camera.h"
+#include "Camera.h"
 #include "PhysicsDebugDraw.h"
 
 namespace ECS

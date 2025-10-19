@@ -1,6 +1,6 @@
 #include "PhysicsDebugDraw.h"
-#include "../MeshData.h"
-#include "../MathHelpers.h"
+#include "MeshData.h"
+#include "MathHelpers.h"
 
 namespace PHYSICS
 {

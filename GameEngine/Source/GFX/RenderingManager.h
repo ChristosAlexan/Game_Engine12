@@ -11,7 +11,7 @@
 #include "HDR_IMAGE.h"
 #include "CubeMap.h"
 #include "TLASBuilder.h"
-#include "Physics/PhysicsDebugDraw.h"
+#include "PhysicsDebugDraw.h"
 
 class GameWindow;
 

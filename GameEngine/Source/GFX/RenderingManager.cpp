@@ -6,7 +6,7 @@
 #include <cassert>
 #include "BLASBuilder.h"
 #include "AssetManager.h"
-#include "Physics/PhysicsManager.h"
+#include "PhysicsManager.h"
 #include "MathHelpers.h"
 
 namespace ECS

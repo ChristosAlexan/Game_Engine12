@@ -2,7 +2,7 @@
 #include "ErrorLogger.h"
 #include "MathHelpers.h"
 #include "RenderingManager.h"
-#include "Physics/PhysicsManager.h"
+#include "PhysicsManager.h"
 
 GFXGui::GFXGui()
 {

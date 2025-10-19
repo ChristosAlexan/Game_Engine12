@@ -1,10 +1,10 @@
 #include "PhysicsManager.h"
-#include "../ErrorLogger.h"
+#include "ErrorLogger.h"
 #include <iostream>
-#include "../Scene.h"
+#include "Scene.h"
 #include "PhysicsData.h"
 #include "PhysicsShapeGenerator.h"
-#include "../MathHelpers.h";
+#include "MathHelpers.h";
 
 namespace PHYSICS
 {

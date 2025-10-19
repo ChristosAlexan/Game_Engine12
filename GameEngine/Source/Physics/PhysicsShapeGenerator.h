@@ -1,5 +1,5 @@
 #pragma once
-#include "Physics/PhysicsData.h"
+#include "PhysicsData.h"
 
 namespace PHYSICS
 {

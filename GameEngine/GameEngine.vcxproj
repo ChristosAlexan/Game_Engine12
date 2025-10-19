@@ -186,7 +186,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source;..\vcpkg_installed\x64-windows\include;..\GameEngine\Shaders;..\includes/PhysX</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source\Physics;..\GameEngine\Source\GFX;..\GameEngine\Source\Compute;..\GameEngine\Source\ImGui;..\GameEngine\Source\ECS;..\GameEngine\Source\Common;..\vcpkg_installed\x64-windows\include;..\GameEngine\Shaders;..\includes/PhysX;..\GameEngine\Source\Compute</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -211,7 +211,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source;..\vcpkg_installed\x64-windows\include;..\GameEngine\Shaders;..\includes/PhysX;..\DLL\Physx\checked</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source\Physics;..\GameEngine\Source\GFX;..\GameEngine\Source\Compute;..\GameEngine\Source\ImGui;..\GameEngine\Source\ECS;..\GameEngine\Source\Common;..\vcpkg_installed\x64-windows\include;..\GameEngine\Shaders;..\includes/PhysX;..\DLL\Physx\checked;..\GameEngine\Source\Compute</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,7 +238,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source;;C:\GameEngine-master\GameEngine\Shaders12;..\vcpkg_installed\x64-windows\bin;..\includes/PhysX</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\includes;..\GameEngine\Source\Physics;..\GameEngine\Source\GFX;..\GameEngine\Source\Compute;..\GameEngine\Source\ImGui;..\GameEngine\Source\ECS;..\GameEngine\Source\Common;;C:\GameEngine-master\GameEngine\Shaders12;..\vcpkg_installed\x64-windows\bin;..\includes/PhysX;..\GameEngine\Source\Compute</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -253,138 +253,142 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AnimationManager.cpp" />
-    <ClCompile Include="AppTimer.cpp" />
-    <ClCompile Include="AssetManager.cpp" />
-    <ClCompile Include="BLASBuilder.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="COMException.cpp" />
-    <ClCompile Include="ComputeSkinning.cpp" />
-    <ClCompile Include="ComputeWrapper.cpp" />
-    <ClCompile Include="CubeMap.cpp" />
-    <ClCompile Include="CubeShape12.cpp" />
-    <ClCompile Include="DescriptorAllocator.cpp" />
-    <ClCompile Include="DX12.cpp" />
-    <ClCompile Include="DXCShaderCompiler.cpp" />
-    <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="EntityFactory.cpp" />
-    <ClCompile Include="ErrorLogger.cpp" />
-    <ClCompile Include="GBuffer.cpp" />
-    <ClCompile Include="GFXGui.cpp" />
-    <ClCompile Include="GraphEditor.cpp" />
-    <ClCompile Include="HDR_IMAGE.cpp" />
-    <ClCompile Include="ImCurveEdit.cpp" />
-    <ClCompile Include="ImGradient.cpp" />
-    <ClCompile Include="imgui.cpp" />
-    <ClCompile Include="ImGuizmo.cpp" />
-    <ClCompile Include="imgui_demo.cpp" />
-    <ClCompile Include="imgui_draw.cpp" />
-    <ClCompile Include="imgui_impl_dx12.cpp" />
-    <ClCompile Include="imgui_impl_sdl3.cpp" />
-    <ClCompile Include="imgui_impl_win32.cpp" />
-    <ClCompile Include="imgui_tables.cpp" />
-    <ClCompile Include="imgui_widgets.cpp" />
-    <ClCompile Include="ImSequencer.cpp" />
-    <ClCompile Include="LightManager.cpp" />
-    <ClCompile Include="MaterialManager.cpp" />
-    <ClCompile Include="MeshGenerators.cpp" />
-    <ClCompile Include="MeshManager.cpp" />
-    <ClCompile Include="mikktspace.c" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="RectShape12.cpp" />
-    <ClCompile Include="RenderingManager.cpp" />
-    <ClCompile Include="RenderTargetTexture.cpp" />
-    <ClCompile Include="SaveLoadSystem.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="GameWindow.cpp" />
-    <ClCompile Include="Shapes12.cpp" />
+    <ClCompile Include="Source\Common\AppTimer.cpp" />
+    <ClCompile Include="Source\Common\Camera.cpp" />
+    <ClCompile Include="Source\Common\COMException.cpp" />
+    <ClCompile Include="Source\Common\Engine.cpp" />
+    <ClCompile Include="Source\Common\ErrorLogger.cpp" />
+    <ClCompile Include="Source\Common\GameWindow.cpp" />
+    <ClCompile Include="Source\Common\SaveLoadSystem.cpp" />
+    <ClCompile Include="Source\Common\StringHelper.cpp" />
+    <ClCompile Include="Source\Common\WinMain.cpp" />
+    <ClCompile Include="Source\Compute\ComputeSkinning.cpp" />
+    <ClCompile Include="Source\Compute\ComputeWrapper.cpp" />
+    <ClCompile Include="Source\ECS\AnimationManager.cpp" />
+    <ClCompile Include="Source\ECS\AssetManager.cpp" />
+    <ClCompile Include="Source\ECS\EntityFactory.cpp" />
+    <ClCompile Include="Source\ECS\LightManager.cpp" />
+    <ClCompile Include="Source\ECS\Scene.cpp" />
+    <ClCompile Include="Source\ECS\SceneManager.cpp" />
+    <ClCompile Include="Source\ECS\TransformManager.cpp" />
+    <ClCompile Include="Source\GFX\BLASBuilder.cpp" />
+    <ClCompile Include="Source\GFX\CubeMap.cpp" />
+    <ClCompile Include="Source\GFX\CubeShape12.cpp" />
+    <ClCompile Include="Source\GFX\DescriptorAllocator.cpp" />
+    <ClCompile Include="Source\GFX\DX12.cpp" />
+    <ClCompile Include="Source\GFX\DXCShaderCompiler.cpp" />
+    <ClCompile Include="Source\GFX\GBuffer.cpp" />
+    <ClCompile Include="Source\GFX\GFXGui.cpp" />
+    <ClCompile Include="Source\GFX\HDR_IMAGE.cpp" />
+    <ClCompile Include="Source\GFX\MaterialManager.cpp" />
+    <ClCompile Include="Source\GFX\MeshGenerators.cpp" />
+    <ClCompile Include="Source\GFX\MeshManager.cpp" />
+    <ClCompile Include="Source\GFX\mikktspace.c" />
+    <ClCompile Include="Source\GFX\Model.cpp" />
+    <ClCompile Include="Source\GFX\RectShape12.cpp" />
+    <ClCompile Include="Source\GFX\RenderingComponent.cpp" />
+    <ClCompile Include="Source\GFX\RenderingManager.cpp" />
+    <ClCompile Include="Source\GFX\RenderTargetTexture.cpp" />
+    <ClCompile Include="Source\GFX\Shapes12.cpp" />
+    <ClCompile Include="Source\GFX\Texture12.cpp" />
+    <ClCompile Include="Source\GFX\TLASBuilder.cpp" />
+    <ClCompile Include="Source\ImGui\GraphEditor.cpp" />
+    <ClCompile Include="Source\ImGui\ImCurveEdit.cpp" />
+    <ClCompile Include="Source\ImGui\ImGradient.cpp" />
+    <ClCompile Include="Source\ImGui\imgui.cpp" />
+    <ClCompile Include="Source\ImGui\ImGuizmo.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Source\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Source\ImGui\ImSequencer.cpp" />
     <ClCompile Include="Source\Physics\PhysicsDebugDraw.cpp" />
     <ClCompile Include="Source\Physics\PhysicsShapeGenerator.cpp" />
     <ClCompile Include="Source\Physics\PhysicsManager.cpp" />
-    <ClCompile Include="Texture12.cpp" />
-    <ClCompile Include="TLASBuilder.cpp" />
-    <ClCompile Include="TransformManager.cpp" />
-    <ClCompile Include="WinMain.cpp" />
-    <ClCompile Include="StringHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationManager.h" />
-    <ClInclude Include="AppTimer.h" />
-    <ClInclude Include="AssetManager.h" />
-    <ClInclude Include="BLASBuilder.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="COMException.h" />
-    <ClInclude Include="ComputeSkinning.h" />
-    <ClInclude Include="ComputeWrapper.h" />
-    <ClInclude Include="ConstantBufferTypes.h" />
-    <ClInclude Include="CubeMap.h" />
-    <ClInclude Include="CubeShape12.h" />
-    <ClInclude Include="DescriptorAllocator.h" />
-    <ClInclude Include="DX12.h" />
-    <ClInclude Include="DX12Includes.h" />
-    <ClInclude Include="DXCShaderCompiler.h" />
-    <ClInclude Include="DynamicUploadBuffer.h" />
-    <ClInclude Include="Engine.h" />
-    <ClInclude Include="EntityECS.h" />
-    <ClInclude Include="EntityFactory.h" />
-    <ClInclude Include="ErrorLogger.h" />
-    <ClInclude Include="GBuffer.h" />
-    <ClInclude Include="GFXGui.h" />
-    <ClInclude Include="GFX_MACROS.h" />
-    <ClInclude Include="GraphEditor.h" />
-    <ClInclude Include="HDR_IMAGE.h" />
-    <ClInclude Include="imconfig.h" />
-    <ClInclude Include="ImCurveEdit.h" />
-    <ClInclude Include="ImGradient.h" />
-    <ClInclude Include="imgui.h" />
-    <ClInclude Include="ImGuizmo.h" />
-    <ClInclude Include="imgui_impl_dx12.h" />
-    <ClInclude Include="imgui_impl_sdl3.h" />
-    <ClInclude Include="imgui_impl_win32.h" />
-    <ClInclude Include="imgui_internal.h" />
-    <ClInclude Include="ImSequencer.h" />
-    <ClInclude Include="imstb_rectpack.h" />
-    <ClInclude Include="imstb_textedit.h" />
-    <ClInclude Include="imstb_truetype.h" />
-    <ClInclude Include="ImZoomSlider.h" />
-    <ClInclude Include="IndexBuffer12.h" />
-    <ClInclude Include="LightECS.h" />
-    <ClInclude Include="LightManager.h" />
-    <ClInclude Include="MaterialECS.h" />
-    <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MathHelpers.h" />
-    <ClInclude Include="MeshData.h" />
-    <ClInclude Include="MeshGenerators.h" />
-    <ClInclude Include="MeshManager.h" />
-    <ClInclude Include="mikktspace.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="ModelData.h" />
-    <ClInclude Include="RayTraceData.h" />
-    <ClInclude Include="RectShape12.h" />
-    <ClInclude Include="RenderingECS.h" />
-    <ClInclude Include="RenderingManager.h" />
-    <ClInclude Include="RenderTargetTexture.h" />
-    <ClInclude Include="ResourceWrapper.h" />
-    <ClInclude Include="SaveLoadSystem.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="GameWindow.h" />
-    <ClInclude Include="Shapes12.h" />
+    <ClInclude Include="Source\Common\AppTimer.h" />
+    <ClInclude Include="Source\Common\Camera.h" />
+    <ClInclude Include="Source\Common\COMException.h" />
+    <ClInclude Include="Source\Common\Engine.h" />
+    <ClInclude Include="Source\Common\ErrorLogger.h" />
+    <ClInclude Include="Source\Common\GameWindow.h" />
+    <ClInclude Include="Source\Common\MathHelpers.h" />
+    <ClInclude Include="Source\Common\SaveLoadSystem.h" />
+    <ClInclude Include="Source\Common\StringHelper.h" />
+    <ClInclude Include="Source\Compute\ComputeSkinning.h" />
+    <ClInclude Include="Source\Compute\ComputeWrapper.h" />
+    <ClInclude Include="Source\ECS\AnimationManager.h" />
+    <ClInclude Include="Source\ECS\AssetManager.h" />
+    <ClInclude Include="Source\ECS\EntityECS.h" />
+    <ClInclude Include="Source\ECS\EntityFactory.h" />
+    <ClInclude Include="Source\ECS\LightECS.h" />
+    <ClInclude Include="Source\ECS\LightManager.h" />
+    <ClInclude Include="Source\ECS\Scene.h" />
+    <ClInclude Include="Source\ECS\SceneManager.h" />
+    <ClInclude Include="Source\ECS\TransformECS.h" />
+    <ClInclude Include="Source\ECS\TransformManager.h" />
+    <ClInclude Include="Source\GFX\BLASBuilder.h" />
+    <ClInclude Include="Source\GFX\ConstantBufferTypes.h" />
+    <ClInclude Include="Source\GFX\CubeMap.h" />
+    <ClInclude Include="Source\GFX\CubeShape12.h" />
+    <ClInclude Include="Source\GFX\DescriptorAllocator.h" />
+    <ClInclude Include="Source\GFX\DX12.h" />
+    <ClInclude Include="Source\GFX\DX12Includes.h" />
+    <ClInclude Include="Source\GFX\DXCShaderCompiler.h" />
+    <ClInclude Include="Source\GFX\DynamicUploadBuffer.h" />
+    <ClInclude Include="Source\GFX\GBuffer.h" />
+    <ClInclude Include="Source\GFX\GFXGui.h" />
+    <ClInclude Include="Source\GFX\GFX_MACROS.h" />
+    <ClInclude Include="Source\GFX\HDR_IMAGE.h" />
+    <ClInclude Include="Source\GFX\IndexBuffer12.h" />
+    <ClInclude Include="Source\GFX\MaterialECS.h" />
+    <ClInclude Include="Source\GFX\MaterialManager.h" />
+    <ClInclude Include="Source\GFX\MeshData.h" />
+    <ClInclude Include="Source\GFX\MeshGenerators.h" />
+    <ClInclude Include="Source\GFX\MeshManager.h" />
+    <ClInclude Include="Source\GFX\mikktspace.h" />
+    <ClInclude Include="Source\GFX\Model.h" />
+    <ClInclude Include="Source\GFX\ModelData.h" />
+    <ClInclude Include="Source\GFX\RayTraceData.h" />
+    <ClInclude Include="Source\GFX\RectShape12.h" />
+    <ClInclude Include="Source\GFX\RenderingComponent.h" />
+    <ClInclude Include="Source\GFX\RenderingECS.h" />
+    <ClInclude Include="Source\GFX\RenderingManager.h" />
+    <ClInclude Include="Source\GFX\RenderTargetTexture.h" />
+    <ClInclude Include="Source\GFX\ResourceWrapper.h" />
+    <ClInclude Include="Source\GFX\Shapes12.h" />
+    <ClInclude Include="Source\GFX\StructuredBuffer.h" />
+    <ClInclude Include="Source\GFX\Texture12.h" />
+    <ClInclude Include="Source\GFX\TLASBuilder.h" />
+    <ClInclude Include="Source\GFX\Vertex.h" />
+    <ClInclude Include="Source\GFX\VertexBuffer12.h" />
+    <ClInclude Include="Source\ImGui\GraphEditor.h" />
+    <ClInclude Include="Source\ImGui\imconfig.h" />
+    <ClInclude Include="Source\ImGui\ImCurveEdit.h" />
+    <ClInclude Include="Source\ImGui\ImGradient.h" />
+    <ClInclude Include="Source\ImGui\imgui.h" />
+    <ClInclude Include="Source\ImGui\ImGuizmo.h" />
+    <ClInclude Include="Source\ImGui\imgui_impl_dx12.h" />
+    <ClInclude Include="Source\ImGui\imgui_impl_sdl3.h" />
+    <ClInclude Include="Source\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Source\ImGui\imgui_internal.h" />
+    <ClInclude Include="Source\ImGui\ImSequencer.h" />
+    <ClInclude Include="Source\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Source\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Source\ImGui\imstb_truetype.h" />
+    <ClInclude Include="Source\ImGui\ImZoomSlider.h" />
     <ClInclude Include="Source\Physics\PhysicsDebugDraw.h" />
     <ClInclude Include="Source\Physics\PhysicsShapeGenerator.h" />
     <ClInclude Include="Source\Physics\PhysicsData.h" />
     <ClInclude Include="Source\Physics\PhysicsManager.h" />
     <ClInclude Include="Source\Physics\PxDefaultAllocator.h" />
     <ClInclude Include="Source\Physics\PxDefaultErrorCallback.h" />
-    <ClInclude Include="StringHelper.h" />
-    <ClInclude Include="StructuredBuffer.h" />
-    <ClInclude Include="Texture12.h" />
-    <ClInclude Include="TLASBuilder.h" />
-    <ClInclude Include="TransformECS.h" />
-    <ClInclude Include="TransformManager.h" />
-    <ClInclude Include="Vertex.h" />
-    <ClInclude Include="VertexBuffer12.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

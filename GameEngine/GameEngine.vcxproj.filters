@@ -61,15 +61,6 @@
     <Filter Include="AI\PathFinding\Source Files">
       <UniqueIdentifier>{0d70c6a4-f58f-44d6-b104-a7c7e16c3f1f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GFX\DX12">
-      <UniqueIdentifier>{1f869a31-af56-4e9d-90cc-2b35a4e0cda9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GFX\DX12\Header Files">
-      <UniqueIdentifier>{b84f2283-2d83-49b4-b0a5-e2024067992f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GFX\DX12\Source Files">
-      <UniqueIdentifier>{24b76261-ad55-4d93-b8aa-0817753b3067}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ECS">
       <UniqueIdentifier>{aeea8b46-2969-4dd1-ad1b-f9c6f831e077}</UniqueIdentifier>
     </Filter>
@@ -121,155 +112,26 @@
     <Filter Include="Shaders\Compute shaders">
       <UniqueIdentifier>{6e0092f6-110c-4d1f-8b07-4d6845ae8113}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GFX\Compute">
+      <UniqueIdentifier>{4b24f03f-5616-46ba-a31c-5224212b6bfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GFX\Compute\Header">
+      <UniqueIdentifier>{ee723a0d-2efe-4167-b55a-6406d26831d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GFX\Compute\Source">
+      <UniqueIdentifier>{03d2a4e4-8bf3-4d8d-9d79-7ba14e45776f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{57f2e25a-5a2a-43ff-a006-c4471124216e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Header">
+      <UniqueIdentifier>{9df740d1-6f90-445d-b25c-589e9a72bd75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Source">
+      <UniqueIdentifier>{00a83013-508b-41bc-a930-a582fc9b47a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="COMException.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StringHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AppTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DXCShaderCompiler.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RectShape12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapes12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CubeShape12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshGenerators.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AssetManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorLogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_win32.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_dx12.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_widgets.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_tables.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_draw.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_demo.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture12.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DescriptorAllocator.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityFactory.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphEditor.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImCurveEdit.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGradient.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuizmo.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImSequencer.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="GameWindow.cpp">
-      <Filter>SDL\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_impl_sdl3.cpp">
-      <Filter>ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>TINYGLTF\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="SaveLoadSystem.cpp">
-      <Filter>Saves</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTargetTexture.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GBuffer.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LightManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="mikktspace.c">
-      <Filter>TINYGLTF\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="HDR_IMAGE.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CubeMap.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BLASBuilder.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TLASBuilder.cpp">
-      <Filter>GFX\DX12\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TransformManager.cpp">
-      <Filter>ECS\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="GFXGui.cpp">
-      <Filter>GFX\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Physics\PhysicsDebugDraw.cpp">
       <Filter>Physics\Source files</Filter>
     </ClCompile>
@@ -279,208 +141,169 @@
     <ClCompile Include="Source\Physics\PhysicsShapeGenerator.cpp">
       <Filter>Physics\Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ImGui\GraphEditor.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\ImCurveEdit.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\ImGradient.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_impl_dx12.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_impl_sdl3.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_impl_win32.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_tables.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\imgui_widgets.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\ImGuizmo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGui\ImSequencer.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\AnimationManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\AssetManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\EntityFactory.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\LightManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\Scene.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\SceneManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ECS\TransformManager.cpp">
+      <Filter>ECS\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\BLASBuilder.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\CubeMap.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\CubeShape12.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\DescriptorAllocator.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\DX12.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\DXCShaderCompiler.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\GBuffer.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\GFXGui.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\HDR_IMAGE.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\MaterialManager.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\MeshGenerators.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\MeshManager.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\RectShape12.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\RenderingComponent.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\RenderingManager.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\RenderTargetTexture.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\Shapes12.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\Texture12.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\TLASBuilder.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Compute\ComputeSkinning.cpp">
+      <Filter>GFX\Compute\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Compute\ComputeWrapper.cpp">
+      <Filter>GFX\Compute\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\AppTimer.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\Camera.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\COMException.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\Engine.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\ErrorLogger.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\StringHelper.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\WinMain.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\Model.cpp">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\GameWindow.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GFX\mikktspace.c">
+      <Filter>GFX\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\SaveLoadSystem.cpp">
+      <Filter>Common\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="COMException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StringHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AppTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>GFX\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBufferTypes.h">
-      <Filter>GFX\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GFXGui.h">
-      <Filter>GFX\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RectShape12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexBuffer12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IndexBuffer12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DXCShaderCompiler.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapes12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeShape12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DynamicUploadBuffer.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Includes.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TransformECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderingECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshData.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshGenerators.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AssetManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_win32.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_dx12.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_truetype.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_textedit.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imstb_rectpack.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_internal.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="imconfig.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture12.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DescriptorAllocator.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityFactory.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphEditor.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImCurveEdit.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGradient.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuizmo.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImSequencer.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImZoomSlider.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="MathHelpers.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="GameWindow.h">
-      <Filter>SDL\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui_impl_sdl3.h">
-      <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>TINYGLTF\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="ModelData.h">
       <Filter>TINYGLTF\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="SaveLoadSystem.h">
-      <Filter>Saves</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderingManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTargetTexture.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GBuffer.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GFX_MACROS.h">
-      <Filter>GFX\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LightECS.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="LightManager.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="StructuredBuffer.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mikktspace.h">
-      <Filter>TINYGLTF\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="HDR_IMAGE.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeMap.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RayTraceData.h">
-      <Filter>ECS\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="BLASBuilder.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TLASBuilder.h">
-      <Filter>GFX\DX12\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TransformManager.h">
-      <Filter>ECS\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Physics\PhysicsData.h">
       <Filter>Physics\Header files</Filter>
@@ -499,6 +322,219 @@
     </ClInclude>
     <ClInclude Include="Source\Physics\PxDefaultErrorCallback.h">
       <Filter>Physics\Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\GraphEditor.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\ImCurveEdit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\ImGradient.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imgui_impl_dx12.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imgui_impl_sdl3.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imgui_impl_win32.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\ImGuizmo.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\ImSequencer.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGui\ImZoomSlider.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\AnimationManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\AssetManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\EntityECS.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\EntityFactory.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\LightECS.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\LightManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\Scene.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\SceneManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\TransformECS.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ECS\TransformManager.h">
+      <Filter>ECS\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\BLASBuilder.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\ConstantBufferTypes.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\CubeMap.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\CubeShape12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\DescriptorAllocator.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\DX12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\DX12Includes.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\DXCShaderCompiler.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\DynamicUploadBuffer.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\GBuffer.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\GFX_MACROS.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\GFXGui.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\HDR_IMAGE.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\IndexBuffer12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\MaterialECS.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\MaterialManager.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\MeshData.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\MeshGenerators.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\MeshManager.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\ModelData.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RayTraceData.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RectShape12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RenderingComponent.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RenderingECS.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RenderingManager.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\RenderTargetTexture.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\ResourceWrapper.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\Shapes12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\StructuredBuffer.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\Texture12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\TLASBuilder.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\Vertex.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\VertexBuffer12.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Compute\ComputeSkinning.h">
+      <Filter>GFX\Compute\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Compute\ComputeWrapper.h">
+      <Filter>GFX\Compute\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\AppTimer.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Camera.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\COMException.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\Engine.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\ErrorLogger.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\MathHelpers.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\StringHelper.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\Model.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\GameWindow.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GFX\mikktspace.h">
+      <Filter>GFX\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\SaveLoadSystem.h">
+      <Filter>Common\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

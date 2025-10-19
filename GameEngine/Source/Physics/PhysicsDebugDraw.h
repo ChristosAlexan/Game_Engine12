@@ -1,8 +1,8 @@
 #pragma once
-#include "../DX12.h"
+#include "DX12.h"
 #include <PhysX/PxPhysicsAPI.h>
-#include "../MeshData.h"
-#include "../Camera.h"
+#include "MeshData.h"
+#include "Camera.h"
 
 namespace PHYSICS
 {

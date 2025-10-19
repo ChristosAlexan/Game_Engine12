@@ -4,7 +4,7 @@
 #include "Scene.h"
 #include "MathHelpers.h"
 #include "BLASBuilder.h"
-#include "Physics/PhysicsData.h"
+#include "PhysicsData.h"
 
 namespace ECS
 {

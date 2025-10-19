@@ -3,7 +3,7 @@
 #include "TransformECS.h"
 #include "MaterialECS.h"
 #include "LightECS.h"
-#include "Physics/PhysicsData.h"
+#include "PhysicsData.h"
 
 namespace ECS
 {
