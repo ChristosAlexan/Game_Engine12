@@ -8,6 +8,7 @@
 #include "DescriptorAllocator.h"
 #include "SceneManager.h"
 #include "ImGuizmo.h"
+#include "Metrics.h"
 
 class GFXGui
 {
@@ -17,7 +18,7 @@ public:
 
 	bool Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12CommandQueue* cmdQueue, ID3D12DescriptorHeap* descriptorHeap, DescriptorAllocator* descAllocator);
 	void SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
-	void GeneralGuiSettings(ECS::SceneManager* sceneManager);
+	void GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metrics);
 	void UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
 	void SelectEntityList(ECS::SceneManager* sceneManager, UINT screenWidth, UINT screenHeight, Camera& camera);
 	void BeginRender();

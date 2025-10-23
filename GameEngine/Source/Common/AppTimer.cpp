@@ -88,6 +88,22 @@ void AppTimer::CalculateDeltaTime(float& deltaTime, float& fps)
     lastTime = now;
 
     fps = 1.0f / deltaTime;
+}
 
-    //OutputDebugStringA(("fps = " + std::to_string(fps) + " | dt = " + std::to_string(deltaTime) + "\n").c_str());
+float AppTimer::GetAverageFPS(Metrics& metrics)
+{
+	static float fpsBuffer[60] = {};  // store last 60 FPS values (1 second @ 60 FPS)
+	static int fpsIndex = 0;
+
+	float currentFps = 1.0f / metrics.dt; // or your delta time
+	fpsBuffer[fpsIndex] = currentFps;
+	fpsIndex = (fpsIndex + 1) % ARRAYSIZE(fpsBuffer);
+
+	// Compute average
+	metrics.avgFps = 0.0f;
+	for (float v : fpsBuffer)
+		metrics.avgFps += v;
+	metrics.avgFps /= ARRAYSIZE(fpsBuffer);
+
+	return metrics.avgFps;
 }

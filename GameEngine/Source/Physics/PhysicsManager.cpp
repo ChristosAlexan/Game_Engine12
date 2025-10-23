@@ -94,7 +94,6 @@ namespace PHYSICS
 		m_aScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 2.0f);
 
 		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, PhysicsComponent>);
-		std::cout << group.size() << std::endl;
 		for (auto [entity, transformComponent, physicsComponent] : group.each())
 		{
 			if(physicsComponent.mass > 0.0f)

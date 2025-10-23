@@ -7,7 +7,9 @@
 #include "GameWindow.h"
 #include <unordered_set>
 #include "SceneManager.h"
+#include "Metrics.h"
 
+class Metrics;
 class DX12;
 class GFXGui;
 
@@ -28,8 +30,6 @@ private:
 	AppTimer timer;
 	Camera camera;
 	int width, height;
-	float dt = 0.0f;
-	float fps = 0.0f;
 	std::unique_ptr<ECS::SceneManager> m_sceneManager;
 	GameWindow game_window;
 
@@ -39,4 +39,6 @@ private:
 	bool bStopEngine = false;
 	int rawDeltaX = 0;
 	int rawDeltaY = 0;
+
+	Metrics m_metrics;
 };

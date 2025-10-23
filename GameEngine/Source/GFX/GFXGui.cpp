@@ -80,11 +80,15 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 	}
 }
 
-void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager)
+void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metrics)
 {
 	auto scene = sceneManager->GetCurrentScene();
 
 	ImGui::Begin("GeneralSettings");
+	ImGui::BeginDisabled();
+	ImGui::Text("FPS: %.1f", metrics.avgFps);
+	ImGui::Text("MS: %.1f", metrics.ms);
+	ImGui::EndDisabled();
 	ImGui::Checkbox("Run physics", &scene->GetPhysicsManager()->m_bRunPhysics);
 	ImGui::Checkbox("Debug draw", &scene->GetRenderingManager()->m_bEnableDebugDraw);
 	const uint32_t min_v = 0;

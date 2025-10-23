@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <chrono>
+#include "Metrics.h"
 
 class AppTimer
 {
@@ -15,9 +16,8 @@ public:
 	bool Start();
 	void StartSeconds();
 	float GetMilliseconds();
-
 	void CalculateDeltaTime(float& deltaTime, float& fps);
-
+	float GetAverageFPS(Metrics& metrics);
 private:
 
 	bool isRunning = false;

@@ -1,8 +1,8 @@
 #include "Engine.h"
-//#include "DX12.h"
 #include "GFXGui.h"
 #include "RenderingManager.h"
 #include "ErrorLogger.h"
+#include "Metrics.h"
 
 using namespace DirectX;
 
@@ -41,7 +41,9 @@ void Engine::Update(int width, int height)
 	D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
 	D3D12_RECT scissorRect = { 0, 0, width, height };
 
-	timer.CalculateDeltaTime(dt, fps);
+	timer.CalculateDeltaTime(m_metrics.dt, m_metrics.fps);
+	timer.GetAverageFPS(m_metrics);
+	m_metrics.ms = timer.GetMilliseconds();
 	timer.Restart();
 	
 	if (heldKeys.contains(SDLK_ESCAPE))
@@ -50,9 +52,9 @@ void Engine::Update(int width, int height)
 	}
 
 	// Start rendering of a frame
-	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, m_metrics.dt);
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(dt, fps, camera);
+	m_sceneManager->Update(m_metrics.dt, m_metrics.fps, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
@@ -122,27 +124,27 @@ void Engine::Update(int width, int height)
 
 	if (heldKeys.contains(SDLK_W))
 	{
-		camera.AdjustPosition(camera.GetForwardVector() * cameraSpeed * dt);
+		camera.AdjustPosition(camera.GetForwardVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_S))
 	{
-		camera.AdjustPosition(camera.GetBackwardVector() * cameraSpeed * dt);
+		camera.AdjustPosition(camera.GetBackwardVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_A))
 	{
-		camera.AdjustPosition(camera.GetLeftVector() * cameraSpeed * dt);
+		camera.AdjustPosition(camera.GetLeftVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_D))
 	{
-		camera.AdjustPosition(camera.GetRightVector() * cameraSpeed * dt);
+		camera.AdjustPosition(camera.GetRightVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_SPACE))
 	{
-		camera.AdjustPosition(0.0f, cameraSpeed * dt, 0.0f);
+		camera.AdjustPosition(0.0f, cameraSpeed * m_metrics.dt, 0.0f);
 	}
 	if (heldKeys.contains(SDLK_Q))
 	{
-		camera.AdjustPosition(0.0f, -cameraSpeed * dt, 0.0f);
+		camera.AdjustPosition(0.0f, -cameraSpeed * m_metrics.dt, 0.0f);
 	}
 	if (heldKeys.contains(SDLK_F5))
 	{
@@ -155,11 +157,11 @@ void Engine::Update(int width, int height)
 		m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntity(m_sceneManager.get(), width, height, camera);
 	}
 
-	m_sceneManager->GetRenderingManager()->GetGFXGui().GeneralGuiSettings(m_sceneManager.get());
+	m_sceneManager->GetRenderingManager()->GetGFXGui().GeneralGuiSettings(m_sceneManager.get(), m_metrics);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntityList(m_sceneManager.get(), width, height, camera);
 	
-	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, m_metrics.dt);
 
 	if (bStopEngine)
 	{

@@ -319,6 +319,7 @@
     <ClInclude Include="Source\Common\ErrorLogger.h" />
     <ClInclude Include="Source\Common\GameWindow.h" />
     <ClInclude Include="Source\Common\MathHelpers.h" />
+    <ClInclude Include="Source\Common\Metrics.h" />
     <ClInclude Include="Source\Common\SaveLoadSystem.h" />
     <ClInclude Include="Source\Common\StringHelper.h" />
     <ClInclude Include="Source\Compute\ComputeSkinning.h" />

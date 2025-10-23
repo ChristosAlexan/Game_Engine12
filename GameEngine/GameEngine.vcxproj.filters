@@ -536,6 +536,9 @@
     <ClInclude Include="Source\Common\SaveLoadSystem.h">
       <Filter>Common\Header</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Common\Metrics.h">
+      <Filter>Common\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
