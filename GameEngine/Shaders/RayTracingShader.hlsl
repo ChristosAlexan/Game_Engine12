@@ -16,9 +16,10 @@ Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
 Texture2D metalRoughnessMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
-RWTexture2D<float4> gOutput : register(u0, space5);
+RWTexture2DArray<float> gShadowOutput : register(u0, space5);
 RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
+RWStructuredBuffer<GPUShadows> g_Shadows : register(u1, space2);
 
 [shader("raygeneration")]
 void MyRaygenShader()
@@ -27,13 +28,11 @@ void MyRaygenShader()
     float3 worldPos = worldPosDepthTexture.Load(int3(launchIndex, 0)).xyz;
     float3 normal = normalTexture.Load(int3(launchIndex, 0)).xyz;
     
-    float3 finalColor = float3(0, 0, 0);
-
     for (uint i = 0; i < totalLights; ++i)
     {
         float3 lightDir;
         float lightDistance;
-        
+
         if (g_Lights[i].lighType == 0) // Directional light
         {
             lightDir = normalize(-g_Lights[i].direction.xyz);
@@ -51,7 +50,7 @@ void MyRaygenShader()
             
             if (theta < outerCutOff)
             {
-                finalColor += float3(1.0f, 1.0f, 1.0f);
+                gShadowOutput[uint3(launchIndex, i)] = 1.0f;
                 continue;
             }
             
@@ -77,11 +76,8 @@ void MyRaygenShader()
         TraceRay(SceneBVH, RAY_FLAG_NONE, ~0, 0, 1, 0, ray, rayPayload);
         
         float shadowFactor = rayPayload.color.r;
-        
-        finalColor += shadowFactor;
+        gShadowOutput[uint3(launchIndex, i)] = shadowFactor;
     }
-    
-    gOutput[launchIndex] = float4(finalColor, 1.0f);
 }
 
 [shader("closesthit")]

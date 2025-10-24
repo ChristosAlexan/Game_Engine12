@@ -35,10 +35,12 @@ Texture2D worldPosDepthTexture : register(t3, space0);
 TextureCube prefilterTexture : register(t0, space4);
 TextureCube irradianceTexture : register(t1, space4);
 Texture2D brdfTexture : register(t2, space4);
-Texture2D raytracingTexture : register(t3, space4);
+Texture2DArray<float> raytracingShadowTexture : register(t3, space4);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
+StructuredBuffer<GPUShadows> g_Shadows : register(t1, space2);
+
 SamplerState gSampler : register(s0);
 
 float4 Main(PSInput input) : SV_TARGET
@@ -67,27 +69,28 @@ float4 Main(PSInput input) : SV_TARGET
     F0 = lerp(F0, albedo.rgb, metalness);
     float3 Lo = float3(0, 0, 0);
     
+    
     for (uint i = 0; i < totalLights; ++i)
     {
+        float raytracedShadows = raytracingShadowTexture.Sample(gSampler, float3(input.uv, i)).r;
         switch (g_Lights[i].lighType)
         {
             case 0: // Directional
             {
-                    Lo += dirLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i);
+                    Lo += dirLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
                     break;
             }
             case 1: // Spot
             {
-                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i);
-                   break; 
+                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
+                    break;
             }
             case 2: // Point
             {
-                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i);
+                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
                     break;
             }
         }
-        
     }
     float3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0f), F0, roughness);
     float3 kS = F;
@@ -101,13 +104,11 @@ float4 Main(PSInput input) : SV_TARGET
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
     float3 specular = prefilteredColor * (F * brdf.x + brdf.y);
     
-    float raytracedShadows = raytracingTexture.Sample(gSampler, input.uv).r;
-
     float3 ambient = (kD * diffuse + specular) * ambientStrength;
-    float3 color = ambient + Lo * raytracedShadows;
+    float3 color = ambient + Lo;
 
     color = ReinhardToneMapping(color, exposure);
- 
+    
     return float4(color, 1.0);
 }
 

@@ -53,12 +53,29 @@ namespace ECS
 
 
 		m_textureUAV = std::make_unique<Texture12>();
-		m_textureUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), width, height);
-		m_shadowsUAV = std::make_unique<Texture12>();
-		m_shadowsUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), width, height);
+		TextureDesc textDesc;
+		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		textDesc.width = width;
+		textDesc.height = height;
+		textDesc.slices = 1;
+		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		m_textureUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
+	}
 
-		m_raytracingMap = std::make_unique<RenderTargetTexture>(1);
-		m_raytracingMap->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), width, height, formats, 1);
+	void RenderingManager::InitializeShadowTextures(Scene* scene)
+	{
+		// Get all the light components in the scene
+		auto lightsView = scene->GetRegistry().view<LightComponent>();
+		std::size_t totalLights = lightsView.size();
+		
+		m_shadowsUAV = std::make_unique<Texture12>();
+		TextureDesc textDesc;
+		textDesc.format = DXGI_FORMAT_R16_FLOAT;
+		textDesc.width = GetDX12().GetScreenWidth();
+		textDesc.height = GetDX12().GetScreenHeight();
+		textDesc.slices = (UINT16)totalLights;
+		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+		m_shadowsUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
 	}
 
 	void RenderingManager::BuildTLAS(Scene* scene)
@@ -101,7 +118,6 @@ namespace ECS
 	void RenderingManager::ResetRenderTargets()
 	{
 		m_gBuffer.ResetRenderTargets(GetDX12().GetCmdList());
-		m_raytracingMap->Reset(GetDX12().GetCmdList());
 		m_brdfMap->Reset(GetDX12().GetCmdList());
 	}
 
@@ -278,13 +294,12 @@ namespace ECS
 		{
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(4, GetDX12().dynamicCB->Allocate(lights_data));
 		}
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(5, scene->GetLightManager()->GetShadowsUavGPUHandle());
 
 		GetDX12().DispatchRaytracing();
 
 		// Transition to shader resource
 		m_shadowsUAV->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-		RenderRayTracingToRenderTarget();
 	}
 
 	void RenderingManager::RenderLightPass(Scene* scene)
@@ -345,7 +360,7 @@ namespace ECS
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_raytracingMap->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsUAV->GetGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
@@ -357,64 +372,14 @@ namespace ECS
 		{
 			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(14, GetDX12().dynamicCB->Allocate(lights_data));
 		}
+		// Transition to non pixel/pixel
+		scene->GetLightManager()->GetShadowsResourceWrapper()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_2D.Get());
 		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
-	}
-
-	void RenderingManager::RenderRayTracingToRenderTarget()
-	{
-
-		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
-		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
-		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_raytracingRenderTarget.Get());
-
-		float aspect = static_cast<float>(m_raytracingMap->m_width) / static_cast<float>(m_raytracingMap->m_height);
-		float nearZ = 0.01f;
-		float farZ = 1000.0f;
-		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
-		DirectX::XMVECTOR position = DirectX::XMVectorZero();
-		D3D12_VIEWPORT viewport = {};
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(m_raytracingMap->m_width);
-		viewport.Height = static_cast<float>(m_raytracingMap->m_height);
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-
-		D3D12_RECT scissorRect = {};
-		scissorRect.left = 0;
-		scissorRect.top = 0;
-		scissorRect.right = m_raytracingMap->m_width;
-		scissorRect.bottom = m_raytracingMap->m_height;
-
-		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
-		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
-
-
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
-
-		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_raytracingMap->m_rtvHandles[0], FALSE, &dsvHandle);
-		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		GetDX12().GetCmdList()->ClearRenderTargetView(m_raytracingMap->m_rtvHandles[0], clearColor, 0, nullptr);
-		GetDX12().GetCmdList()->ClearDepthStencilView(
-			dsvHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f,
-			0,
-			0,
-			nullptr
-		);
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(17, m_shadowsUAV->GetGPUHandle());
-		
-		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
-		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
-
-
-		m_raytracingMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::CalculateCompute(Scene* scene)

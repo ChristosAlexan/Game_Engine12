@@ -19,3 +19,9 @@ struct GPULight
     float cutoff;
     float2 padding;
 };
+
+struct GPUShadows
+{
+    float bCalculateLight;
+    float3 padding;
+};

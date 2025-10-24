@@ -909,8 +909,9 @@ void DX12::InitializeBuffers()
     CD3DX12_DESCRIPTOR_RANGE1 hdrTextRange;
     hdrTextRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 3); // space3
     CD3DX12_DESCRIPTOR_RANGE1 srvLightsStructuredBuffer;
-    srvLightsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2
-
+    srvLightsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2); // space2 lights' data SRV
+    CD3DX12_DESCRIPTOR_RANGE1 srvShadowsStructuredBuffer;
+    srvShadowsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 2); // t1 space2 shadows' data SRV
 
     CD3DX12_DESCRIPTOR_RANGE1 prefilterRange;
     prefilterRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 4); // t0 space4 prefilterMap
@@ -929,7 +930,8 @@ void DX12::InitializeBuffers()
     CD3DX12_DESCRIPTOR_RANGE1 srvSkinningStructuredBuffer;
     srvSkinningStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 8); // u1 space8 test compute output
 
-    CD3DX12_ROOT_PARAMETER1 rootParams[20];
+
+    CD3DX12_ROOT_PARAMETER1 rootParams[21];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE , D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -953,6 +955,7 @@ void DX12::InitializeBuffers()
     rootParams[17].InitAsDescriptorTable(1, &raytracingSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t0 space6: PS raytracing map
     rootParams[18].InitAsDescriptorTable(1, &raytracingLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t3 space4: PS raytracing map
     rootParams[19].InitAsDescriptorTable(1, &srvSkinningStructuredBuffer, D3D12_SHADER_VISIBILITY_VERTEX); // u1 space8: UAV skinning structured buffer out
+    rootParams[20].InitAsDescriptorTable(1, &srvShadowsStructuredBuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space2: shadows structured buffer SRV
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -960,12 +963,15 @@ void DX12::InitializeBuffers()
 
 
     // Ray tracing root signature
-    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[5];
+    CD3DX12_DESCRIPTOR_RANGE1 uavShadowsBuffer;
+    uavShadowsBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1, 2); // u1 space8 test compute output
+    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[6];
     globalRaytracingRootParams[0].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     globalRaytracingRootParams[1].InitAsShaderResourceView(0, 6, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     globalRaytracingRootParams[2].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
     globalRaytracingRootParams[3].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
     globalRaytracingRootParams[4].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b4 space0: light's data constant buffer
+    globalRaytracingRootParams[5].InitAsDescriptorTable(1, &uavShadowsBuffer, D3D12_SHADER_VISIBILITY_ALL); // u1 space2: light's structure buffer in
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC globalRaytracingRootSigDesc;
     globalRaytracingRootSigDesc.Init_1_1(_countof(globalRaytracingRootParams), globalRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);

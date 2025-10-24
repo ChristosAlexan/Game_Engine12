@@ -4,6 +4,16 @@
 #include "DescriptorAllocator.h"
 #include "ResourceWrapper.h"
 
+struct TextureDesc
+{
+	uint32_t width;
+	uint32_t height;
+	UINT16 slices;
+	DXGI_FORMAT format;
+	D3D12_UAV_DIMENSION viewDimension;
+};
+
+
 class Texture12
 {
 public:
@@ -14,6 +24,7 @@ public:
 		DDS_FILE = 2
 	};
 
+	
 	Texture12();
 	~Texture12();
 	void LoadFromFileWIC(const std::string& filename,
@@ -26,7 +37,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandleUAV() const;
 	void TransitionToRTV(ID3D12GraphicsCommandList* cmdList);
 	void TransitionToSRV(ID3D12GraphicsCommandList* cmdList);
-	void CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator, const UINT width, const UINT height);
+	void CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* descriptorAllocator, const TextureDesc& textureDesc);
 	void Reset(ID3D12GraphicsCommandList* cmdList);
 
 	ResourceWrapper* GetResource() const;

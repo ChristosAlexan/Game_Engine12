@@ -32,5 +32,11 @@ namespace ECS
 		float cutoff;		// 4 bytes
 		DirectX::XMFLOAT2 padding; // 8 bytes
 	};
+
+	struct GPUShadows
+	{
+		float bCalculateLight; // 4 byte
+		DirectX::XMFLOAT3 padding;
+	};
 }
 

@@ -57,7 +57,6 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 
 	// Upload heap
 	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource->GetResource(), 0, 1);
-	//m_uploadBuffer->GetResource()->Reset();
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
@@ -75,11 +74,7 @@ void Texture12::LoadFromFileWIC(const std::string& filename, ID3D12Device* devic
 
 	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
-	// Transition to shader
-	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	//cmdList->ResourceBarrier(1, &barrier);
-
+	// Transition to pixel shader
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
@@ -153,11 +148,7 @@ void Texture12::LoadFromFileDDS(const std::string& filename, ID3D12Device* devic
 
 	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
-	// Transition to shader
-	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	//cmdList->ResourceBarrier(1, &barrier);
-
+	// Transition to pixel shader
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
@@ -214,7 +205,6 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 
 	// Upload heap
 	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_resource->GetResource(), 0, 1);
-	//m_uploadBuffer->GetResource().Reset();
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
 
@@ -232,12 +222,7 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 
 	UpdateSubresources(cmdList, m_resource->GetResource(), m_uploadBuffer->GetResource(), 0, 0, 1, &subresourceData);
 
-	// Transition to shader
-	//CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	//
-	//cmdList->ResourceBarrier(1, &barrier);
-
+	// Transition to pixel shader
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Create SRV
@@ -266,84 +251,98 @@ D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandleUAV() const
 
 void Texture12::TransitionToRTV(ID3D12GraphicsCommandList* cmdList)
 {
-	//auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-	//	m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-	//	D3D12_RESOURCE_STATE_RENDER_TARGET
-	//);
-	//cmdList->ResourceBarrier(1, &barrierToSRV);
-
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 }
 void Texture12::TransitionToSRV(ID3D12GraphicsCommandList* cmdList)
 {
-	//auto barrierToSRV = CD3DX12_RESOURCE_BARRIER::Transition(
-	//	m_resource.Get(),
-	//	D3D12_RESOURCE_STATE_RENDER_TARGET,
-	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	//);
-	//cmdList->ResourceBarrier(1, &barrierToSRV);
-
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
-void Texture12::CreateTextureUAV(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator, const UINT width, const UINT height)
+void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* descriptorAllocator, const TextureDesc& textureDesc)
 {
-	// texture descriptor
+	// Resource
 	D3D12_RESOURCE_DESC texDesc = {};
 	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	texDesc.Width = width;
-	texDesc.Height = height;
-	texDesc.DepthOrArraySize = 1;
+	texDesc.Width = textureDesc.width;
+	texDesc.Height = textureDesc.height;
+	texDesc.DepthOrArraySize = static_cast<UINT16>(textureDesc.slices);
 	texDesc.MipLevels = 1;
-	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	texDesc.SampleDesc.Count = 1;
+	texDesc.Format = textureDesc.format;
+	texDesc.SampleDesc = { 1, 0 };
 	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 	m_resource->SetCurrentState(D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
-	HRESULT hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_NONE,
+	HRESULT hr = device->CreateCommittedResource(
+		&defaultHeap, D3D12_HEAP_FLAG_NONE,
 		&texDesc, m_resource->GetCurrentState(),
 		nullptr, IID_PPV_ARGS(m_resource->ReleaseAndGetAddressOf()));
 	if (FAILED(hr))
 		ErrorLogger::Log(hr, "Failed to create texture resource!");
 
+	// UAV
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.Format = texDesc.Format;
-	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	uavDesc.Texture2D.MipSlice = 0;
+
+	if (textureDesc.viewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY || textureDesc.slices > 1) 
+	{
+		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+		uavDesc.Texture2DArray.MipSlice = 0;
+		uavDesc.Texture2DArray.FirstArraySlice = 0;
+		uavDesc.Texture2DArray.ArraySize = textureDesc.slices;
+		uavDesc.Texture2DArray.PlaneSlice = 0;
+	}
+	else 
+	{
+		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		uavDesc.Texture2D.MipSlice = 0;
+		uavDesc.Texture2D.PlaneSlice = 0;
+	}
 
 	// Create UAV
-	DescriptorAllocator::DescriptorHandle handle = descriptorAllocator->Allocate();
-	m_cpuHandleUAV = handle.cpuHandle;
-	m_gpuHandleUAV = handle.gpuHandle;
+	{
+		auto handle = descriptorAllocator->Allocate();
+		m_cpuHandleUAV = handle.cpuHandle;
+		m_gpuHandleUAV = handle.gpuHandle;
+		device->CreateUnorderedAccessView(m_resource->GetResource(), nullptr, &uavDesc, m_cpuHandleUAV);
+	}
 
-	device->CreateUnorderedAccessView(m_resource->GetResource(), nullptr, &uavDesc, m_cpuHandleUAV);
-
-	// Create SRV
-	handle = descriptorAllocator->Allocate();
-	m_cpuHandle = handle.cpuHandle;
-	m_gpuHandle = handle.gpuHandle;
-
+	// SRV
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Format = textureDesc.format;
 
-	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
+	if (uavDesc.ViewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY) 
+	{
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		srvDesc.Texture2DArray.MostDetailedMip = 0;
+		srvDesc.Texture2DArray.MipLevels = 1;
+		srvDesc.Texture2DArray.FirstArraySlice = 0;
+		srvDesc.Texture2DArray.ArraySize = textureDesc.slices;
+		srvDesc.Texture2DArray.PlaneSlice = 0;
+		srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+	}
+	else 
+	{
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.PlaneSlice = 0;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	}
+
+	// Create SRV
+	{
+		auto handle = descriptorAllocator->Allocate();
+		m_cpuHandle = handle.cpuHandle;
+		m_gpuHandle = handle.gpuHandle;
+		device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
+	}
 }
 
 void Texture12::Reset(ID3D12GraphicsCommandList* cmdList)
 {
-	//auto barrierToRTV = CD3DX12_RESOURCE_BARRIER::Transition(
-	//	m_resource->GetResource().Get(),
-	//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-	//	D3D12_RESOURCE_STATE_RENDER_TARGET
-	//);
-	//cmdList->ResourceBarrier(1, &barrierToRTV);
-
 	m_resource->TransitionState(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 }
 

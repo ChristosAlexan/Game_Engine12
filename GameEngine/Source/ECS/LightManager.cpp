@@ -14,7 +14,10 @@ namespace ECS
 	{
 		AccumulateLights(scene);
 		m_gpuLights.resize(m_lights.size()); // resize to maximum number of lights
+		m_gpuShadows.resize(m_lights.size()); // resize to maximum number of lights
+
 		m_lightBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuLights.size());
+		m_ShadowsBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuShadows.size(), true);
 
 		DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
 	
@@ -22,7 +25,20 @@ namespace ECS
 		m_gpuHandle = allocator.gpuHandle;
 		
 		m_lightBuffer.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuHandle);
-	
+
+		// Allocate shadows srv handles
+		allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+		m_cpuShadowSrvHandle = allocator.cpuHandle;
+		m_gpuShadowSrvHandle = allocator.gpuHandle;
+		m_ShadowsBuffer.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuShadowSrvHandle);
+
+		// Allocate shadows uav handles
+		allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+		m_cpuShadowUavHandle = allocator.cpuHandle;
+		m_gpuShadowUavHandle = allocator.gpuHandle;
+		m_ShadowsBuffer.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuShadowUavHandle);
+
+		m_ShadowsBuffer.GetResource()->TransitionState(scene->GetRenderingManager()->GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	}
 
 	void LightManager::AccumulateLights(Scene* scene)
@@ -90,5 +106,19 @@ namespace ECS
 	D3D12_GPU_DESCRIPTOR_HANDLE LightManager::GetGPUHandle() const
 	{
 		return m_gpuHandle;
+	}
+
+	ResourceWrapper* LightManager::GetShadowsResourceWrapper() const
+	{
+		return m_ShadowsBuffer.GetResource();
+	}
+
+	D3D12_GPU_DESCRIPTOR_HANDLE LightManager::GetShadowsUavGPUHandle() const
+	{
+		return m_gpuShadowUavHandle;
+	}
+	D3D12_GPU_DESCRIPTOR_HANDLE LightManager::GetShadowsSrvGPUHandle() const
+	{
+		return m_gpuShadowSrvHandle;
 	}
 }

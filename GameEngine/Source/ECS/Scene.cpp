@@ -59,7 +59,8 @@ namespace ECS
 
 	void Scene::AccumulateLights()
 	{
-		m_lightManager->Initialize(this);
+		GetLightManager()->Initialize(this);
+		GetRenderingManager()->InitializeShadowTextures(this);
 	}
 
 	void Scene::Update(float dt,float fps, Camera& camera)

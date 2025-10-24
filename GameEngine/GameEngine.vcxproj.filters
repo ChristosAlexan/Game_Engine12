@@ -548,14 +548,14 @@
     <None Include="Shaders\General_VS.hlsli">
       <Filter>Shaders\Vertex Shaders</Filter>
     </None>
-    <None Include="Shaders\RayTraceCommon.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\LightsData.hlsli">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Math_Helpers.hlsli">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\RayTraceCommon.hlsli">
+      <Filter>Shaders\Raytracing shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
