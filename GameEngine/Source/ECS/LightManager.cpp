@@ -7,7 +7,12 @@ namespace ECS
 {
 	LightManager::LightManager()
 	{
-		m_shadowsTexture = std::make_shared<Texture12>();
+		m_shadowsTexture = std::make_unique<Texture12>();
+	}
+
+	LightManager::~LightManager()
+	{
+		m_shadowsTexture.reset();
 	}
 
 	void LightManager::Initialize(Scene* scene)
@@ -125,9 +130,5 @@ namespace ECS
 	Texture12* LightManager::GetShadowsTexturePtr() const
 	{
 		return m_shadowsTexture.get();
-	}
-	std::shared_ptr<Texture12> LightManager::GetShadowsTexture() const
-	{
-		return m_shadowsTexture;
 	}
 }

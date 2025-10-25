@@ -54,7 +54,7 @@ namespace ECS
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
 		std::unique_ptr<Texture12> m_textureUAV; // Ray tracing output
-		std::shared_ptr<Texture12> m_shadowsTexture; // Ray traced shadows output
+		Texture12* m_shadowsTexture = nullptr; // Ray traced shadows output
 		std::unique_ptr<RenderTargetTexture> m_brdfMap;
 		HDR_IMAGE hdr_map1;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;

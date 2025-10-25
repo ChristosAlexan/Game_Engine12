@@ -6,6 +6,7 @@
 #include <cassert>
 #include "BLASBuilder.h"
 #include "AssetManager.h"
+#include "LightManager.h"
 #include "PhysicsManager.h"
 #include "MathHelpers.h"
 
@@ -21,7 +22,6 @@ namespace ECS
 	RenderingManager::~RenderingManager()
 	{
 		m_textureUAV.reset();
-		m_shadowsTexture.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
@@ -68,7 +68,7 @@ namespace ECS
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
 		
-		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexture();
+		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexturePtr();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R16_FLOAT;
 		textDesc.width = GetDX12().GetScreenWidth();

@@ -5,6 +5,10 @@
 #include "AssetManager.h"
 #include "RenderingManager.h"
 #include "PhysicsManager.h"
+#include "LightManager.h"
+#include "TransformManager.h"
+#include "EntityFactory.h"
+#include "AnimationManager.h"
 #include "SceneManager.h"
 #include "ErrorLogger.h"
 #include "MathHelpers.h"
@@ -23,6 +27,8 @@ namespace ECS
 		m_transformManager = std::make_unique<TransformManager>();
 		m_animationManager = std::make_unique<AnimationManager>();
 	}
+
+	Scene::~Scene() = default;
 
 	entt::entity Scene::CreateEntity()
 	{

@@ -12,17 +12,19 @@ namespace ECS
 
 	}
 
+	SceneManager::~SceneManager() = default;
+	
 	void SceneManager::InitializeManagers(GameWindow& game_window, int& width, int& height, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator)
 	{
-		m_assetManager = std::make_shared<AssetManager>();
-		m_materialManager = std::make_shared<MaterialManager>(device, cmdList, allocator);
-		m_physicsManager = std::make_shared<PHYSICS::PhysicsManager>();
+		m_assetManager = std::make_unique<AssetManager>();
+		m_materialManager = std::make_unique<MaterialManager>(device, cmdList, allocator);
+		m_physicsManager = std::make_unique<PHYSICS::PhysicsManager>();
 
 		m_physicsManager->Initialize();
 	}
 	void SceneManager::AllocateRenderingManager()
 	{
-		m_renderingManager = std::make_shared<ECS::RenderingManager>();
+		m_renderingManager = std::make_unique<ECS::RenderingManager>();
 	}
 
 	void SceneManager::LoadScene(const std::string& sceneName)

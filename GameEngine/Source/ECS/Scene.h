@@ -6,10 +6,6 @@
 #include <entt/entt.hpp>
 #include "SaveLoadSystem.h"
 #include "RenderingECS.h"
-#include "LightManager.h"
-#include "TransformManager.h"
-#include "EntityFactory.h"
-#include "AnimationManager.h"
 
 namespace PHYSICS
 {
@@ -21,13 +17,17 @@ namespace ECS
 	class AssetManager;
 	class MaterialManager;
 	class RenderingManager;
-
+	class EntityFactory;
+	class AnimationManager;
+	class TransformManager;
+	class LightManager;
 
 	class Scene
 	{
 	public:
 		Scene(const std::string& sceneName, AssetManager* assetMgr, MaterialManager* materialMgr,
 			RenderingManager* renderingManager, PHYSICS::PhysicsManager* physicsManager);
+		~Scene();
 
 		entt::entity CreateEntity();
 		void LoadMaterials();

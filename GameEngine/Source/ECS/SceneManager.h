@@ -19,6 +19,7 @@ namespace ECS
 	{
 	public:
 		SceneManager();
+		~SceneManager();
 		void InitializeManagers(GameWindow& game_window, int& width, int& height, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* allocator);
 		void AllocateRenderingManager();
 		void LoadScene(const std::string& sceneName);
@@ -29,10 +30,10 @@ namespace ECS
 		void Update(float dt, float fps, Camera& camera);
 		
 	private:
-		std::shared_ptr <AssetManager> m_assetManager;
-		std::shared_ptr <MaterialManager> m_materialManager;
-		std::shared_ptr <RenderingManager> m_renderingManager;
-		std::shared_ptr <PHYSICS::PhysicsManager> m_physicsManager;
+		std::unique_ptr <AssetManager> m_assetManager;
+		std::unique_ptr <MaterialManager> m_materialManager;
+		std::unique_ptr <RenderingManager> m_renderingManager;
+		std::unique_ptr <PHYSICS::PhysicsManager> m_physicsManager;
 
 		std::unordered_map<std::string, std::unique_ptr<Scene>> m_scenes;
 		Scene* m_currentScene = nullptr;
