@@ -19,7 +19,6 @@ Texture2D worldPosDepthTexture : register(t3, space0);
 RWTexture2DArray<float> gShadowOutput : register(u0, space5);
 RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
-RWStructuredBuffer<GPUShadows> g_Shadows : register(u1, space2);
 
 [shader("raygeneration")]
 void MyRaygenShader()

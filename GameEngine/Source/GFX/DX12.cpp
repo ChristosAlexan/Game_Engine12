@@ -965,13 +965,13 @@ void DX12::InitializeBuffers()
     // Ray tracing root signature
     CD3DX12_DESCRIPTOR_RANGE1 uavShadowsBuffer;
     uavShadowsBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1, 2); // u1 space8 test compute output
-    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[6];
+    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[5];
     globalRaytracingRootParams[0].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     globalRaytracingRootParams[1].InitAsShaderResourceView(0, 6, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     globalRaytracingRootParams[2].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
     globalRaytracingRootParams[3].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
     globalRaytracingRootParams[4].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b4 space0: light's data constant buffer
-    globalRaytracingRootParams[5].InitAsDescriptorTable(1, &uavShadowsBuffer, D3D12_SHADER_VISIBILITY_ALL); // u1 space2: light's structure buffer in
+    //globalRaytracingRootParams[5].InitAsDescriptorTable(1, &uavShadowsBuffer, D3D12_SHADER_VISIBILITY_ALL); // u1 space2: light's structure buffer in
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC globalRaytracingRootSigDesc;
     globalRaytracingRootSigDesc.Init_1_1(_countof(globalRaytracingRootParams), globalRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);

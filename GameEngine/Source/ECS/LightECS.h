@@ -35,8 +35,8 @@ namespace ECS
 
 	struct GPUShadows
 	{
-		float bCalculateLight; // 4 byte
-		DirectX::XMFLOAT3 padding;
+		DirectX::XMFLOAT2 shadowResolution; // 4 byte
+		DirectX::XMFLOAT2 padding;
 	};
 }
 

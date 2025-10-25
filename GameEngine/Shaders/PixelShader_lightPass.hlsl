@@ -68,26 +68,37 @@ float4 Main(PSInput input) : SV_TARGET
     float3 F0 = float3(0.04f, 0.04f, 0.04f);
     F0 = lerp(F0, albedo.rgb, metalness);
     float3 Lo = float3(0, 0, 0);
-    
-    
+   
     for (uint i = 0; i < totalLights; ++i)
     {
-        float raytracedShadows = raytracingShadowTexture.Sample(gSampler, float3(input.uv, i)).r;
+        // PCF
+        float shadow = 0.0;
+        float2 shadowRes = g_Shadows[i].shadowResolution;
+        float2 texelSize = 1.0 / shadowRes;
+        for (int x = -2; x <= 2; ++x)
+        {
+            for (int y = -2; y <= 2; ++y)
+            {
+                shadow += raytracingShadowTexture.Sample(gSampler, float3(input.uv + float2(x, y) * texelSize, i)).r;
+            }
+        }
+        shadow /= 9.0;
+        
         switch (g_Lights[i].lighType)
         {
             case 0: // Directional
             {
-                    Lo += dirLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
+                    Lo += dirLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * shadow;
                     break;
             }
             case 1: // Spot
             {
-                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
+                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * shadow;
                     break;
             }
             case 2: // Point
             {
-                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * raytracedShadows;
+                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * shadow;
                     break;
             }
         }

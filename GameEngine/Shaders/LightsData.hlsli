@@ -22,6 +22,6 @@ struct GPULight
 
 struct GPUShadows
 {
-    float bCalculateLight;
-    float3 padding;
+    float2 shadowResolution;
+    float2 padding;
 };

@@ -7,7 +7,7 @@ namespace ECS
 {
 	LightManager::LightManager()
 	{
-
+		m_shadowsTexture = std::make_shared<Texture12>();
 	}
 
 	void LightManager::Initialize(Scene* scene)
@@ -17,7 +17,7 @@ namespace ECS
 		m_gpuShadows.resize(m_lights.size()); // resize to maximum number of lights
 
 		m_lightBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuLights.size());
-		m_ShadowsBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuShadows.size(), true);
+		m_ShadowsBuffer.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), m_gpuShadows.size());
 
 		DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
 	
@@ -31,14 +31,6 @@ namespace ECS
 		m_cpuShadowSrvHandle = allocator.cpuHandle;
 		m_gpuShadowSrvHandle = allocator.gpuHandle;
 		m_ShadowsBuffer.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuShadowSrvHandle);
-
-		// Allocate shadows uav handles
-		allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
-		m_cpuShadowUavHandle = allocator.cpuHandle;
-		m_gpuShadowUavHandle = allocator.gpuHandle;
-		m_ShadowsBuffer.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(), m_cpuShadowUavHandle);
-
-		m_ShadowsBuffer.GetResource()->TransitionState(scene->GetRenderingManager()->GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	}
 
 	void LightManager::AccumulateLights(Scene* scene)
@@ -75,11 +67,14 @@ namespace ECS
 	{
 		// Transition to copy dest
 		m_lightBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+		m_ShadowsBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+
 		for (int i = 0; i < m_lights.size(); ++i)
 		{
 			auto& worldMatrix = m_lightTransforms[i]->worldMatrix;
 	
 			GPULight light{};
+			GPUShadows shadows{};
 			light.color = m_lights[i]->color;
 			light.radius = m_lights[i]->radius;
 			light.strength = m_lights[i]->strength;
@@ -92,9 +87,19 @@ namespace ECS
 			light.padding = DirectX::XMFLOAT2(0.0f, 0.0f);
 			m_gpuLights[i] = light;
 
-			m_lightBuffer.UploadData(cmdList, m_gpuLights);
-			
+
+			auto shadowResDesc = m_shadowsTexture.get()->GetResource()->GetResource()->GetDesc();
+			shadows.shadowResolution = DirectX::XMFLOAT2(shadowResDesc.Width, shadowResDesc.Height);
+			shadows.padding = DirectX::XMFLOAT2(0.0f, 0.0f);
+
+			m_gpuShadows[i] = shadows;
 		}
+		// Upload after the loop
+		m_lightBuffer.UploadData(cmdList, m_gpuLights);
+		m_ShadowsBuffer.UploadData(cmdList, m_gpuShadows);
+
+		// Transition to pixel
+		m_ShadowsBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		// Transition to non pixel/pixel
 		m_lightBuffer.GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		cmdList->SetGraphicsRootDescriptorTable(
@@ -113,12 +118,16 @@ namespace ECS
 		return m_ShadowsBuffer.GetResource();
 	}
 
-	D3D12_GPU_DESCRIPTOR_HANDLE LightManager::GetShadowsUavGPUHandle() const
-	{
-		return m_gpuShadowUavHandle;
-	}
 	D3D12_GPU_DESCRIPTOR_HANDLE LightManager::GetShadowsSrvGPUHandle() const
 	{
 		return m_gpuShadowSrvHandle;
+	}
+	Texture12* LightManager::GetShadowsTexturePtr() const
+	{
+		return m_shadowsTexture.get();
+	}
+	std::shared_ptr<Texture12> LightManager::GetShadowsTexture() const
+	{
+		return m_shadowsTexture;
 	}
 }

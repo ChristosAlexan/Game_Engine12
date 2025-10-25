@@ -3,6 +3,7 @@
 #include "TransformECS.h"
 #include <vector>
 #include "StructuredBuffer.h"
+#include "Texture12.h"
 
 class Camera;
 namespace ECS
@@ -23,9 +24,9 @@ namespace ECS
 		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
 
 		ResourceWrapper* GetShadowsResourceWrapper() const;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetShadowsUavGPUHandle() const;
 		D3D12_GPU_DESCRIPTOR_HANDLE GetShadowsSrvGPUHandle() const;
-
+		Texture12* GetShadowsTexturePtr() const;
+		std::shared_ptr<Texture12> GetShadowsTexture() const;
 	private:
 		std::vector<LightComponent*> m_lights;
 		std::vector<TransformComponent*> m_lightTransforms;
@@ -35,14 +36,13 @@ namespace ECS
 
 		StructuredBuffer<GPULight> m_lightBuffer;
 		StructuredBuffer<GPUShadows> m_ShadowsBuffer;
+		std::shared_ptr<Texture12> m_shadowsTexture; // Ray traced shadows output
 
 		D3D12_CPU_DESCRIPTOR_HANDLE m_cpuHandle{};
 		D3D12_GPU_DESCRIPTOR_HANDLE m_gpuHandle{};
 
 		D3D12_CPU_DESCRIPTOR_HANDLE m_cpuShadowSrvHandle{};
 		D3D12_GPU_DESCRIPTOR_HANDLE m_gpuShadowSrvHandle{};
-		D3D12_CPU_DESCRIPTOR_HANDLE m_cpuShadowUavHandle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE m_gpuShadowUavHandle{};
 	};
 }
 

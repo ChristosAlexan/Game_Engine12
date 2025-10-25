@@ -21,7 +21,7 @@ namespace ECS
 	RenderingManager::~RenderingManager()
 	{
 		m_textureUAV.reset();
-		m_shadowsUAV.reset();
+		m_shadowsTexture.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
@@ -68,14 +68,14 @@ namespace ECS
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
 		
-		m_shadowsUAV = std::make_unique<Texture12>();
+		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexture();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R16_FLOAT;
 		textDesc.width = GetDX12().GetScreenWidth();
 		textDesc.height = GetDX12().GetScreenHeight();
 		textDesc.slices = (UINT16)totalLights;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-		m_shadowsUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
+		m_shadowsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
 	}
 
 	void RenderingManager::BuildTLAS(Scene* scene)
@@ -275,7 +275,7 @@ namespace ECS
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
-		m_shadowsUAV->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
 		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
@@ -288,18 +288,17 @@ namespace ECS
 
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsUAV->GetGPUHandleUAV());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsTexture->GetGPUHandleUAV());
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
 		if (GetDX12().dynamicCB)
 		{
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(4, GetDX12().dynamicCB->Allocate(lights_data));
 		}
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(5, scene->GetLightManager()->GetShadowsUavGPUHandle());
 
 		GetDX12().DispatchRaytracing();
 
 		// Transition to shader resource
-		m_shadowsUAV->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::RenderLightPass(Scene* scene)
@@ -356,25 +355,22 @@ namespace ECS
 
 		m_brdfMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsUAV->GetGPUHandle());
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsTexture->GetGPUHandle());
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
 		lights_data.totalLights = totalLights;
 		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
-
 		if (GetDX12().dynamicCB)
 		{
+			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
 			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(14, GetDX12().dynamicCB->Allocate(lights_data));
 		}
-		// Transition to non pixel/pixel
-		scene->GetLightManager()->GetShadowsResourceWrapper()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_2D.Get());
 		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
