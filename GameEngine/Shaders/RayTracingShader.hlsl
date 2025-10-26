@@ -29,7 +29,24 @@ void MyRaygenShader()
     
     for (uint i = 0; i < totalLights; ++i)
     {
-        float3 lightDir;
+        float3 lightDir = g_Lights[i].position - worldPos;
+        float distSq = dot(lightDir, lightDir);
+
+        // Cull shadows
+        float rCull = g_Lights[i].radius;
+        float rFade = max(0.0f, rCull - g_Lights[i].cutoff);
+
+        if (g_Lights[i].lighType != 0)
+        {
+            if (g_Lights[i].strength <= 0.0f || distSq > rCull * rCull)
+                continue;
+        }
+        else
+        {
+            if (g_Lights[i].strength <= 0.0f)
+                continue;
+        }
+        
         float lightDistance;
 
         if (g_Lights[i].lighType == 0) // Directional light

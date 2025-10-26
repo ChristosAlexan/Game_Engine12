@@ -76,6 +76,7 @@ namespace ECS
 					entityJson["strength"] = lightComponent.strength;
 					entityJson["cutoff"] = lightComponent.cutoff;
 					entityJson["color"] = { lightComponent.color.x, lightComponent.color.y, lightComponent.color.z };
+					entityJson["pcfRange"] = lightComponent.pcfRange;
 				}
 		
 			}
@@ -172,6 +173,7 @@ namespace ECS
 				const auto& color = entityJson["color"];
 				entityDesc.lightComponent.color = { color[0], color[1], color[2] };
 				entityDesc.materialDesc.baseColor = entityDesc.lightComponent.color;
+				entityDesc.lightComponent.pcfRange = entityJson["pcfRange"];
 			}
 			else
 			{

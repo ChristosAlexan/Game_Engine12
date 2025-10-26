@@ -95,7 +95,8 @@ namespace ECS
 
 			auto shadowResDesc = m_shadowsTexture.get()->GetResource()->GetResource()->GetDesc();
 			shadows.shadowResolution = DirectX::XMFLOAT2(shadowResDesc.Width, shadowResDesc.Height);
-			shadows.padding = DirectX::XMFLOAT2(0.0f, 0.0f);
+			shadows.pcfRange = m_lights[i]->pcfRange;
+			shadows.padding = 0.0f;
 
 			m_gpuShadows[i] = shadows;
 		}

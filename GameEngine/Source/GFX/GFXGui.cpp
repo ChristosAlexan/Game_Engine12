@@ -203,6 +203,8 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.01, 0);
 					label = "Cutoff" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &lightComponent.cutoff, 0.01, 0);
+					label = "PcfRange" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
+					ImGui::DragInt(label.c_str(), &lightComponent.pcfRange, 1, 0);
 				}
 			}
 		}

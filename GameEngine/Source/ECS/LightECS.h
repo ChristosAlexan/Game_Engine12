@@ -17,6 +17,7 @@ namespace ECS
 		float strength;
 		float radius;
 		float cutoff;
+		int pcfRange = 1;
 	};
 
 	struct GPULight
@@ -36,7 +37,8 @@ namespace ECS
 	struct GPUShadows
 	{
 		DirectX::XMFLOAT2 shadowResolution; // 4 byte
-		DirectX::XMFLOAT2 padding;
+		int pcfRange;
+		float padding;
 	};
 }
 

@@ -23,5 +23,6 @@ struct GPULight
 struct GPUShadows
 {
     float2 shadowResolution;
-    float2 padding;
+    int pcfRange;
+    float padding;
 };

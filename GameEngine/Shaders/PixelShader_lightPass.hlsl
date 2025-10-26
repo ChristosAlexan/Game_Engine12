@@ -71,13 +71,37 @@ float4 Main(PSInput input) : SV_TARGET
    
     for (uint i = 0; i < totalLights; ++i)
     {
+        float3 lightDir = g_Lights[i].position - worldPos;
+        float distSq = dot(lightDir, lightDir);
+
+         // Cull lights
+        float rCull = g_Lights[i].radius;
+        float rFade = max(0.0f, rCull - g_Lights[i].cutoff);
+        
+        if (g_Lights[i].lighType != 0)
+        {
+            if (g_Lights[i].strength <= 0.0f || distSq > rCull * rCull)
+                continue;
+        }
+        else
+        {
+            if (g_Lights[i].strength <= 0.0f)
+                continue;
+        }
+        
+        float baseAtt = rcp(distSq);
+        float fade = 1.0f - smoothstep(rFade * rFade, rCull * rCull, distSq);
+        float att = baseAtt * fade;
+        
+        
         // PCF
         float shadow = 0.0;
         float2 shadowRes = g_Shadows[i].shadowResolution;
         float2 texelSize = 1.0 / shadowRes;
-        for (int x = -2; x <= 2; ++x)
+        
+        for (int x = -g_Shadows[i].pcfRange; x <= g_Shadows[i].pcfRange; ++x)
         {
-            for (int y = -2; y <= 2; ++y)
+            for (int y = -g_Shadows[i].pcfRange; y <= g_Shadows[i].pcfRange; ++y)
             {
                 shadow += raytracingShadowTexture.Sample(gSampler, float3(input.uv + float2(x, y) * texelSize, i)).r;
             }
@@ -93,12 +117,12 @@ float4 Main(PSInput input) : SV_TARGET
             }
             case 1: // Spot
             {
-                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * shadow;
+                    Lo += SpotLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * att * shadow;
                     break;
             }
             case 2: // Point
             {
-                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * shadow;
+                    Lo += PointLight(albedo.rgb, normal, metalness, roughness, worldPos, F0, i) * att * shadow;
                     break;
             }
         }
