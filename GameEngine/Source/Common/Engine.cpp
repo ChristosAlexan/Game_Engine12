@@ -25,7 +25,7 @@ bool Engine::Initialize(int width, int height)
 	InitializeSceneManager();
 	InitializeDirectX12();
 	// Load scenes from .json files
-	CreateScenes(camera, width, height);
+	CreateScenes(width, height);
 
 	return true;
 }
@@ -52,9 +52,9 @@ void Engine::Update(int width, int height)
 	}
 
 	// Start rendering of a frame
-	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, m_metrics.dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().StartRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), m_sceneManager->GetCurrentScene()->GetCamera(), width, height, m_metrics.dt);
 	// Update current scene(animations, rendering etc.)
-	m_sceneManager->Update(m_metrics.dt, m_metrics.fps, camera);
+	m_sceneManager->Update(m_metrics.dt, m_metrics.fps);
 	m_sceneManager->GetRenderingManager()->GetGFXGui().BeginRender();
 
 	rawDeltaX = 0;
@@ -105,7 +105,7 @@ void Engine::Update(int width, int height)
 
 	if (isMiddleMouseDown && (rawDeltaX != 0 || rawDeltaY != 0))
 	{
-		camera.AdjustRotation(
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustRotation(
 			static_cast<float>(rawDeltaY) * 0.004f,
 			static_cast<float>(rawDeltaX) * 0.004f,
 			0.0f,
@@ -124,27 +124,27 @@ void Engine::Update(int width, int height)
 
 	if (heldKeys.contains(SDLK_W))
 	{
-		camera.AdjustPosition(camera.GetForwardVector() * cameraSpeed * m_metrics.dt);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(m_sceneManager->GetCurrentScene()->GetCamera().GetForwardVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_S))
 	{
-		camera.AdjustPosition(camera.GetBackwardVector() * cameraSpeed * m_metrics.dt);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(m_sceneManager->GetCurrentScene()->GetCamera().GetBackwardVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_A))
 	{
-		camera.AdjustPosition(camera.GetLeftVector() * cameraSpeed * m_metrics.dt);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(m_sceneManager->GetCurrentScene()->GetCamera().GetLeftVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_D))
 	{
-		camera.AdjustPosition(camera.GetRightVector() * cameraSpeed * m_metrics.dt);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(m_sceneManager->GetCurrentScene()->GetCamera().GetRightVector() * cameraSpeed * m_metrics.dt);
 	}
 	if (heldKeys.contains(SDLK_SPACE))
 	{
-		camera.AdjustPosition(0.0f, cameraSpeed * m_metrics.dt, 0.0f);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(0.0f, cameraSpeed * m_metrics.dt, 0.0f);
 	}
 	if (heldKeys.contains(SDLK_Q))
 	{
-		camera.AdjustPosition(0.0f, -cameraSpeed * m_metrics.dt, 0.0f);
+		m_sceneManager->GetCurrentScene()->GetCamera().AdjustPosition(0.0f, -cameraSpeed * m_metrics.dt, 0.0f);
 	}
 	if (heldKeys.contains(SDLK_F5))
 	{
@@ -154,14 +154,14 @@ void Engine::Update(int width, int height)
 
 	if (isRightMouseDown)
 	{
-		m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntity(m_sceneManager.get(), width, height, camera);
+		m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntity(m_sceneManager.get(), width, height, m_sceneManager->GetCurrentScene()->GetCamera());
 	}
 
 	m_sceneManager->GetRenderingManager()->GetGFXGui().GeneralGuiSettings(m_sceneManager.get(), m_metrics);
-	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, camera);
-	m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntityList(m_sceneManager.get(), width, height, camera);
+	m_sceneManager->GetRenderingManager()->GetGFXGui().UpdateSelectedEntity(m_sceneManager.get(), width, height, m_sceneManager->GetCurrentScene()->GetCamera());
+	m_sceneManager->GetRenderingManager()->GetGFXGui().SelectEntityList(m_sceneManager.get(), width, height, m_sceneManager->GetCurrentScene()->GetCamera());
 	
-	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), camera, width, height, m_metrics.dt);
+	m_sceneManager->GetRenderingManager()->GetDX12().EndRenderFrame(m_sceneManager->GetRenderingManager()->GetGFXGui(), m_sceneManager->GetCurrentScene()->GetCamera(), width, height, m_metrics.dt);
 
 	if (bStopEngine)
 	{
@@ -180,7 +180,7 @@ void Engine::InitializeDirectX12()
 	m_sceneManager->AllocateRenderingManager();
 	m_sceneManager->GetRenderingManager()->Initialize(game_window, width, height);
 }
-void Engine::CreateScenes(Camera& camera, int& width, int& height)
+void Engine::CreateScenes(int& width, int& height)
 {
 	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(), 
 										m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());
@@ -194,6 +194,6 @@ void Engine::CreateScenes(Camera& camera, int& width, int& height)
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-	camera.PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
-	camera.SetPosition(0, 0, 0);
+	m_sceneManager->GetCurrentScene()->GetCamera().PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
+	m_sceneManager->GetCurrentScene()->GetCamera().SetPosition(0, 0, 0);
 }

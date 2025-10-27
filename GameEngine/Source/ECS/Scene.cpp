@@ -69,14 +69,14 @@ namespace ECS
 		GetRenderingManager()->InitializeShadowTextures(this);
 	}
 
-	void Scene::Update(float dt,float fps, Camera& camera)
+	void Scene::Update(float dt,float fps)
 	{
 		// Reset all render targets before rendering
 		GetRenderingManager()->ResetRenderTargets();
 
-		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix()));
 
-		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), camera);
+		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), GetCamera());
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
 
 		// Update animations and transforms
@@ -86,7 +86,7 @@ namespace ECS
 			GetTransformManager()->Update(this, entity, transformComponent);
 		}
 
-		GetPhysicsManager()->Update(this, camera);
+		GetPhysicsManager()->Update(this, GetCamera());
 
 		GetRenderingManager()->CalculateCompute(this);
 
@@ -99,20 +99,20 @@ namespace ECS
 			if (!IsAABBInFrustum(aabb, frustum))
 				continue;
 
-			GetRenderingManager()->RenderGbuffer(this, entity, camera, transformComponent, renderComponent);
+			GetRenderingManager()->RenderGbuffer(this, entity, transformComponent, renderComponent);
 
 		}
 
 		if(GetRenderingManager()->m_bEnableDebugDraw)
-			GetRenderingManager()->DebugDraw(this, camera);
+			GetRenderingManager()->DebugDraw(this);
 
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
 
-		GetRenderingManager()->UpdatePBR(this, camera);
+		GetRenderingManager()->UpdatePBR(this);
 
 		// Advance physics simulation
-		GetPhysicsManager()->Advance(dt, fps, camera);
+		GetPhysicsManager()->Advance(dt, fps, GetCamera());
 	}	
 
 	const std::string Scene::GetName() const
@@ -158,6 +158,10 @@ namespace ECS
 	SaveLoadSystem& Scene::GetSaveLoadSystems()
 	{
 		return m_saveLoadSystem;
+	}
+	Camera& Scene::GetCamera()
+	{
+		return m_camera;
 	}
 }
 

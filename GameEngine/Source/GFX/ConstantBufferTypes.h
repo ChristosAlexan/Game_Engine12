@@ -35,7 +35,7 @@ struct CB_PS_Material
 	float padding; // 4 bytes
 };
 
-struct CB_PS_Camera
+struct CB_Shader_Camera
 {
 	DirectX::XMFLOAT3 cameraPos;
 	float padding1;

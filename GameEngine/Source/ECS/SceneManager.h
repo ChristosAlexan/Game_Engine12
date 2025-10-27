@@ -27,7 +27,7 @@ namespace ECS
 		Scene* GetCurrentScene() const;
 		void SetupLights();
 		RenderingManager* GetRenderingManager();
-		void Update(float dt, float fps, Camera& camera);
+		void Update(float dt, float fps);
 		
 	private:
 		std::unique_ptr <AssetManager> m_assetManager;

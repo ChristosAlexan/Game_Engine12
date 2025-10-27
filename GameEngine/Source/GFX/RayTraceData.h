@@ -3,6 +3,13 @@
 
 namespace ECS
 {
+	struct rayTracingResources
+	{
+		Microsoft::WRL::ComPtr<ID3D12StateObject> rtpso;
+		std::string shaderFile;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_sbtBuffer, m_sbtUploadBuffer;
+	};
+
 	struct BLAS
 	{
 		Microsoft::WRL::ComPtr<ID3D12Resource> result;  // final BLAS buffer

@@ -6,6 +6,7 @@
 #include <entt/entt.hpp>
 #include "SaveLoadSystem.h"
 #include "RenderingECS.h"
+#include "Camera.h"
 
 namespace PHYSICS
 {
@@ -34,7 +35,7 @@ namespace ECS
 		void LoadAssets();
 		void LoadPhysics();
 		void AccumulateLights();
-		void Update(float dt, float fps, Camera& camera);
+		void Update(float dt, float fps);
 
 		const std::string GetName() const;
 		AssetManager* GetAssetManager() const;
@@ -47,7 +48,7 @@ namespace ECS
 		LightManager* GetLightManager() const;
 		TransformManager* GetTransformManager() const;
 		SaveLoadSystem& GetSaveLoadSystems();
-
+		Camera& GetCamera();
 	private:
 		std::string m_sceneName;
 		AssetManager* m_assetManager = nullptr;
@@ -64,6 +65,8 @@ namespace ECS
 		UINT m_NextEntityID = 0;
 		entt::registry m_registry;
 		SaveLoadSystem m_saveLoadSystem;
+
+		Camera m_camera;
 	public:
 		uint32_t blas_total = 0;
 	};

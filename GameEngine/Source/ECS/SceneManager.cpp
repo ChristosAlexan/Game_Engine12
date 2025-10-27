@@ -63,8 +63,8 @@ namespace ECS
 		return m_renderingManager.get();
 	}
 
-	void SceneManager::Update(float dt, float fps, Camera& camera)
+	void SceneManager::Update(float dt, float fps)
 	{
-		m_currentScene->Update(dt, fps, camera);
+		m_currentScene->Update(dt, fps);
 	}
 }

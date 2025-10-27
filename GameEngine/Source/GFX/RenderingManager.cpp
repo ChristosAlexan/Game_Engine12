@@ -21,7 +21,7 @@ namespace ECS
 
 	RenderingManager::~RenderingManager()
 	{
-		m_textureUAV.reset();
+		m_reflectionsTexture.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
@@ -51,15 +51,15 @@ namespace ECS
 		m_brdfMap = std::make_unique<RenderTargetTexture>(1);
 		m_brdfMap->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, formats, 1);
 
-
-		m_textureUAV = std::make_unique<Texture12>();
+		// Ray traced reflections UAV texture initialization
+		m_reflectionsTexture = std::make_unique<Texture12>();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		textDesc.width = width;
 		textDesc.height = height;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-		m_textureUAV->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
+		m_reflectionsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
 	}
 
 	void RenderingManager::InitializeShadowTextures(Scene* scene)
@@ -141,7 +141,7 @@ namespace ECS
 		}
 	}
 
-	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, Camera& camera,
+	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity,
 		TransformComponent& transformComponent, RenderComponent& renderComponent)
 	{
 		if (!scene)
@@ -151,11 +151,11 @@ namespace ECS
 		CB_VS_AnimationShader skinningCB = {};
 		CB_PS_SimpleShader psCB = {};
 		CB_PS_Material psMaterialCB = {};
-		CB_PS_Camera psCameraCB = {};
+		CB_Shader_Camera psCameraCB = {};
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_Gbuffer.Get());
-		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
-		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetProjectionMatrix()));
+		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetViewMatrix()));
 		vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
 
 		auto& cpuMesh = renderComponent.mesh->cpuMesh;
@@ -185,7 +185,7 @@ namespace ECS
 		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
 		psMaterialCB.padding = 0.0f;
 		
-		psCameraCB.cameraPos = camera.pos;
+		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
 
 		if (GetDX12().GetCmdList())
@@ -264,21 +264,17 @@ namespace ECS
 		m_brdfMap->TransitionToSRV(GetDX12().GetCmdList());
 	}
 
-	void RenderingManager::DispatchRays(Scene* scene)
+	void RenderingManager::RayTracedShadows(Scene* scene)
 	{
 		CB_SHADER_LIGHTS lights_data = {};
-
-		RefitBLAS(scene);
-		BuildTLAS(scene);
-
-		GetDX12().CreateSBT(scene->blas_total);
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
 		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
-		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().rtpso.Get());
+		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedShadowsResources().rtpso.Get());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
@@ -299,6 +295,49 @@ namespace ECS
 
 		// Transition to shader resource
 		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+
+	void RenderingManager::RayTracedReflections(Scene* scene)
+	{
+		CB_Shader_Camera psCameraCB = {};
+
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources());
+
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		// Transition back to unorder access
+		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		
+		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
+		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedReflectionsResources().rtpso.Get());
+		
+		psCameraCB.cameraPos = scene->GetCamera().pos;
+		psCameraCB.padding1 = 0.0f;
+
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_reflectionsTexture->GetGPUHandleUAV());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
+
+		if (GetDX12().dynamicCB)
+		{
+			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psCameraCB));
+		}
+	
+		GetDX12().DispatchRaytracing();
+
+		// Transition to shader resource
+		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+
+	void RenderingManager::DispatchRays(Scene* scene)
+	{
+		RefitBLAS(scene);
+		BuildTLAS(scene);
+
+		// Ray traced shadows
+		RayTracedShadows(scene);
+		// Ray traced reflections
+		RayTracedReflections(scene);
 	}
 
 	void RenderingManager::RenderLightPass(Scene* scene)
@@ -360,6 +399,7 @@ namespace ECS
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsTexture->GetGPUHandle());
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(21, m_reflectionsTexture->GetGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
@@ -383,17 +423,17 @@ namespace ECS
 		m_computeSkinning.Compute(scene);
 	}
 
-	void RenderingManager::UpdatePBR(Scene* scene, Camera& camera)
+	void RenderingManager::UpdatePBR(Scene* scene)
 	{
 		// Render cube maps, irradiance, prefilter and brdf maps
-		RenderPbrMaps(camera);
+		RenderPbrMaps(scene->GetCamera());
 		// Render light pass
 		RenderLightPass(scene);
 	}
 
-	void RenderingManager::DebugDraw(Scene* scene, Camera& camera)
+	void RenderingManager::DebugDraw(Scene* scene)
 	{
-		scene->GetPhysicsManager()->GetDebugDraw()->DebugDraw(GetDX12(), camera);
+		scene->GetPhysicsManager()->GetDebugDraw()->DebugDraw(GetDX12(), scene->GetCamera());
 	}
 
 	void RenderingManager::SetGbufferRenderTarget()
