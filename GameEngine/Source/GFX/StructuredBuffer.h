@@ -105,8 +105,6 @@ public:
 	}
 
 private:
-	//Microsoft::WRL::ComPtr<ID3D12Resource> m_gpuBuffer;
-	//Microsoft::WRL::ComPtr<ID3D12Resource> m_uploadBuffer;
 	ResourceWrapper* m_gpuBuffer = nullptr;
 	ResourceWrapper* m_uploadBuffer = nullptr;
 

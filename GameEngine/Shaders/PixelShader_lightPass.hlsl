@@ -35,7 +35,8 @@ Texture2D worldPosDepthTexture : register(t3, space0);
 TextureCube prefilterTexture : register(t0, space4);
 TextureCube irradianceTexture : register(t1, space4);
 Texture2D brdfTexture : register(t2, space4);
-Texture2DArray<float> raytracingShadowTexture : register(t3, space4);
+Texture2DArray<float> raytracedShadowTexture : register(t3, space4);
+Texture2D<float4> raytracedReflectionsTexture : register(t4, space4);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -56,15 +57,14 @@ float4 Main(PSInput input) : SV_TARGET
     if(mask == 0.0f)
         return float4(albedo.rgb, 1.0f);
     
-    float3 normal = normalize(normalTexture.Sample(gSampler, input.uv)).xyz;
+    float3 normal = normalTexture.Sample(gSampler, input.uv).xyz;
     float3 worldPos = worldPosDepthTexture.Sample(gSampler, input.uv).xyz;
     float metalness = metalRoughnessMaskTexture.Sample(gSampler, input.uv).g;
     float roughness = metalRoughnessMaskTexture.Sample(gSampler, input.uv).r;
     float depth = worldPosDepthTexture.Sample(gSampler, input.uv).w; // w is depth
    
     float3 V = normalize(cameraPos.xyz - worldPos.xyz);
-
-    normal = normalize(normal.xyz);
+    
     float3 F0 = float3(0.04f, 0.04f, 0.04f);
     F0 = lerp(F0, albedo.rgb, metalness);
     float3 Lo = float3(0, 0, 0);
@@ -103,7 +103,7 @@ float4 Main(PSInput input) : SV_TARGET
         {
             for (int y = -g_Shadows[i].pcfRange; y <= g_Shadows[i].pcfRange; ++y)
             {
-                shadow += raytracingShadowTexture.Sample(gSampler, float3(input.uv + float2(x, y) * texelSize, i)).r;
+                shadow += raytracedShadowTexture.Sample(gSampler, float3(input.uv + float2(x, y) * texelSize, i)).r;
             }
         }
         shadow /= 9.0;
@@ -139,8 +139,9 @@ float4 Main(PSInput input) : SV_TARGET
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
     float3 specular = prefilteredColor * (F * brdf.x + brdf.y);
     
+    float3 rtReflections = raytracedReflectionsTexture.Sample(gSampler, input.uv).xyz;
     float3 ambient = (kD * diffuse + specular) * ambientStrength;
-    float3 color = ambient + Lo;
+    float3 color = ambient + Lo + rtReflections;
 
     color = ReinhardToneMapping(color, exposure);
     

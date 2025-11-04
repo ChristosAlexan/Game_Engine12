@@ -11,6 +11,7 @@
 #include "AppTimer.h"
 #include "GFXGui.h"
 #include "RenderTargetTexture.h"
+#include "RayTraceData.h"
 
 class DX12
 {
@@ -36,8 +37,8 @@ public:
 		const UINT num_renderTargets, const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode = D3D12_CULL_MODE_BACK, D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	void CreateComputePSO(IDxcBlob* computeBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline);
 	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
-	void CreateRTPSO(IDxcBlob* rayTracingBlob);
-	void CreateSBT(UINT numHitGroups);
+	void CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12StateObject>& rtpso);
+	void CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources);
 	void CreateDepthStencilBuffer(int& width, int& height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
@@ -63,6 +64,9 @@ public:
 	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetComputeRootSignature() const;
 	void DispatchRaytracing();
+
+	ECS::rayTracingResources& GetRayTracedShadowsResources();
+	ECS::rayTracingResources& GetRayTracedReflectionsResources();
 public:
 	DXCShaderCompiler shaderCompiler;
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
@@ -73,13 +77,15 @@ public:
 	UINT rtvDescriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer, pipelineState_debug,
 		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget, pipelineState_compute;
-	Microsoft::WRL::ComPtr<ID3D12StateObject> rtpso; // Ray tracing state object
+	//Microsoft::WRL::ComPtr<ID3D12StateObject> m_shadowsRtpso, m_reflectionsRtpso; // Ray tracing state object
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue = 0;
 	HANDLE fenceEvent = nullptr;
 
 	uint32_t m_vsync;
+
+
 private:
 	uint32_t m_screenWidth, m_screenHeight;
 
@@ -100,13 +106,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
 	CD3DX12_RESOURCE_BARRIER m_barrier;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_sbtBuffer, m_sbtUploadBuffer;
 	// SAMPLE DESCS
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
 	//Ray tracing descs
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc;
 	AppTimer timer;
 
+	ECS::rayTracingResources m_rayTracedShadows, m_rayTracedReflections;
 	const wchar_t* c_hitGroupName = L"MyHitGroup";
 	const wchar_t* c_raygenShaderName = L"MyRaygenShader";
 	const wchar_t* c_closestHitShaderName = L"MyClosestHitShader";

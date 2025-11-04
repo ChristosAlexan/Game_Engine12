@@ -25,10 +25,10 @@ public:
 private:
 	void InitializeSceneManager();
 	void InitializeDirectX12();
-	void CreateScenes(Camera& camera, int& width, int& height);
+	void CreateScenes(int& width, int& height);
 private:
 	AppTimer timer;
-	Camera camera;
+	//Camera camera;
 	int width, height;
 	std::unique_ptr<ECS::SceneManager> m_sceneManager;
 	GameWindow game_window;

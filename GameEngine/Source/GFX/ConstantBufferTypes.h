@@ -35,7 +35,7 @@ struct CB_PS_Material
 	float padding; // 4 bytes
 };
 
-struct CB_PS_Camera
+struct CB_Shader_Camera
 {
 	DirectX::XMFLOAT3 cameraPos;
 	float padding1;
@@ -60,4 +60,13 @@ struct CB_CS_AnimationShader
 	DirectX::XMFLOAT4X4 skinningMatrix[100];
 	uint32_t vertexCount;
 	uint32_t padding[3] = { 0,0,0 };
+};
+
+/************ RAYTRACING SHADERS *******************/
+struct CB_RT_MeshData
+{
+	uint32_t totalVertices;
+	uint32_t totalIndices;
+	uint32_t totalEntities;
+	float padding = 0.0f;
 };

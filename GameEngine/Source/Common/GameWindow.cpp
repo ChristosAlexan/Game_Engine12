@@ -14,7 +14,7 @@ bool GameWindow::Initialize(int window_width, int window_height)
     m_window = SDL_CreateWindow(
         "SDL window",
         window_width, window_height,
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY //| SDL_WINDOW_BORDERLESS
     );
 
     void* hwnd = SDL_GetPointerProperty(SDL_GetWindowProperties(m_window), "SDL.window.win32.hwnd", nullptr);

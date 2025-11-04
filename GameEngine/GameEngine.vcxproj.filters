@@ -76,15 +76,6 @@
     <Filter Include="Math">
       <UniqueIdentifier>{9cfe27c5-c40f-4c34-af57-4214f3803f20}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDL">
-      <UniqueIdentifier>{42409853-5403-450e-be48-4902ff629426}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDL\Header">
-      <UniqueIdentifier>{103343e1-7a9b-4b66-b340-d4c8240e8f7e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDL\Source">
-      <UniqueIdentifier>{2731b9a4-ab8a-4bf0-8291-3ee928328550}</UniqueIdentifier>
-    </Filter>
     <Filter Include="TINYGLTF">
       <UniqueIdentifier>{d6c31adb-1f0f-4302-869d-baadd7a199ff}</UniqueIdentifier>
     </Filter>
@@ -129,6 +120,15 @@
     </Filter>
     <Filter Include="Common\Source">
       <UniqueIdentifier>{00a83013-508b-41bc-a930-a582fc9b47a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\SDL">
+      <UniqueIdentifier>{42409853-5403-450e-be48-4902ff629426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\SDL\Header">
+      <UniqueIdentifier>{103343e1-7a9b-4b66-b340-d4c8240e8f7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\SDL\Source">
+      <UniqueIdentifier>{2731b9a4-ab8a-4bf0-8291-3ee928328550}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -288,14 +288,14 @@
     <ClCompile Include="Source\GFX\Model.cpp">
       <Filter>GFX\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Common\GameWindow.cpp">
-      <Filter>Common\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GFX\mikktspace.c">
       <Filter>GFX\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Common\SaveLoadSystem.cpp">
       <Filter>Common\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Common\GameWindow.cpp">
+      <Filter>Common\SDL\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -527,9 +527,6 @@
     <ClInclude Include="Source\GFX\Model.h">
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Common\GameWindow.h">
-      <Filter>Common\Header</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GFX\mikktspace.h">
       <Filter>GFX\Header Files</Filter>
     </ClInclude>
@@ -538,6 +535,9 @@
     </ClInclude>
     <ClInclude Include="Source\Common\Metrics.h">
       <Filter>Common\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Common\GameWindow.h">
+      <Filter>Common\SDL\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -598,11 +598,14 @@
     <FxCompile Include="Shaders\GbufferVS.hlsl">
       <Filter>Shaders\Vertex Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\RayTracingShader.hlsl">
+    <FxCompile Include="Shaders\RayTracedShadowsShader.hlsl">
       <Filter>Shaders\Raytracing shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ComputeShader.hlsl">
       <Filter>Shaders\Compute shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\RayTracedReflectionsShader.hlsl">
+      <Filter>Shaders\Raytracing shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
