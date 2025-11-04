@@ -14,8 +14,8 @@ namespace ECS
 {
 	RenderingManager::RenderingManager()
 	{
-		m_ambientColor = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f);
-		m_exposure = 0.5f;
+		m_ambientColor = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+		m_exposure = 1.0f;
 		m_gamma = 2.2f;
 	}
 
@@ -43,7 +43,7 @@ namespace ECS
 
 	void RenderingManager::InitializeRenderTargets(int& width, int& height)
 	{
-		hdr_map1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), "Data/HDR/warm_restaurant_night_2k.hdr");
+		hdr_map1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), "Data/HDR/qwantani_dusk_2_puresky_2k.hdr");
 
 		m_gBuffer.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), width, height);
 		m_cubeMap1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512);

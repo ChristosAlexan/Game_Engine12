@@ -49,20 +49,20 @@
             "strength": 100000.0,
             "transform": {
                 "position": [
-                    -7.889825820922852,
-                    3.083613157272339,
-                    2.464796543121338
+                    -0.9833001494407654,
+                    4.019284725189209,
+                    -14.692635536193848
                 ],
                 "rotation": [
-                    0.15805849432945251,
-                    0.7930204272270203,
-                    -0.3151887059211731,
-                    0.4967817962169647
+                    0.6820933222770691,
+                    0.15999847650527954,
+                    0.27565956115722656,
+                    0.6581497192382813
                 ],
                 "scale": [
-                    0.10007605701684952,
-                    0.10000195354223251,
-                    0.10002005845308304
+                    0.10007616132497787,
+                    0.1000019907951355,
+                    0.10001980513334274
                 ]
             }
         },
@@ -82,9 +82,9 @@
             "strength": 1000.0,
             "transform": {
                 "position": [
-                    -0.8214328289031982,
-                    1.8135074377059937,
-                    -5.699761390686035
+                    -5.349801063537598,
+                    3.431393623352051,
+                    -8.531241416931152
                 ],
                 "rotation": [
                     0.0008684361237101257,
@@ -93,7 +93,7 @@
                     -0.033116478472948074
                 ],
                 "scale": [
-                    0.10048090666532516,
+                    0.1004890576004982,
                     0.0999997928738594,
                     0.10003823786973953
                 ]
@@ -115,9 +115,9 @@
             "strength": 1000.0,
             "transform": {
                 "position": [
-                    2.365149736404419,
-                    2.8061766624450684,
-                    -4.394359111785889
+                    -5.179317474365234,
+                    1.9850131273269653,
+                    -3.936861753463745
                 ],
                 "rotation": [
                     0.0008684361237101257,
@@ -126,7 +126,7 @@
                     -0.033116478472948074
                 ],
                 "scale": [
-                    0.10048584640026093,
+                    0.10049237310886383,
                     0.0999997928738594,
                     0.10003823786973953
                 ]
@@ -198,9 +198,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    1.2595610618591309,
-                    7.747858047485352,
-                    -2.3709921836853027
+                    -0.47223424911499023,
+                    3.3787965774536133,
+                    -4.0426506996154785
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -241,9 +241,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    2.6180169582366943,
-                    10.620759963989258,
-                    -1.0688762664794922
+                    3.052342176437378,
+                    9.903497695922852,
+                    4.1528167724609375
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -327,9 +327,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    0.09699728339910507,
-                    9.462697982788086,
-                    0.02496340125799179
+                    -2.9452996253967285,
+                    3.1954870223999023,
+                    -6.027169227600098
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -370,9 +370,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    2.2905168533325195,
-                    9.806397438049316,
-                    -3.0812911987304688
+                    -0.8696637153625488,
+                    5.879209041595459,
+                    0.6868598461151123
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -413,9 +413,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    4.920836925506592,
-                    10.337127685546875,
-                    -2.170339822769165
+                    7.2799973487854,
+                    3.2858693599700928,
+                    -5.544979572296143
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -456,9 +456,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    0.8486666083335876,
-                    12.49586296081543,
-                    -2.143200635910034
+                    0.2663978934288025,
+                    12.307628631591797,
+                    7.741089820861816
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -499,9 +499,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    1.2887111902236938,
-                    10.214824676513672,
-                    -2.084852933883667
+                    2.335543155670166,
+                    3.5372862815856934,
+                    -10.448673248291016
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -542,9 +542,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.0649476051330566,
-                    9.586357116699219,
-                    -2.039158582687378
+                    -5.488426208496094,
+                    7.242806434631348,
+                    5.457376003265381
                 ],
                 "rotation": [
                     0.6940165758132935,
@@ -564,7 +564,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -574,7 +574,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -607,7 +607,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -617,7 +617,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -650,7 +650,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -660,7 +660,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -693,7 +693,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -703,7 +703,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -736,7 +736,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -746,7 +746,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -779,7 +779,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -789,7 +789,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -822,7 +822,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -832,7 +832,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -843,9 +843,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    7.848050594329834,
-                    8.182842254638672,
-                    -3.162449598312378
+                    9.780221939086914,
+                    4.554252624511719,
+                    10.993322372436523
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -865,7 +865,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -875,7 +875,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -908,7 +908,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -918,7 +918,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -929,9 +929,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    2.919935703277588,
-                    7.947299003601074,
-                    -4.546972274780273
+                    -4.7894158363342285,
+                    2.6528091430664063,
+                    11.914895057678223
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -951,7 +951,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -961,7 +961,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -994,7 +994,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1004,7 +1004,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1037,7 +1037,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1047,7 +1047,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1080,7 +1080,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1090,7 +1090,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1123,7 +1123,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1133,7 +1133,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1166,7 +1166,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1176,7 +1176,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1187,9 +1187,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    4.557184219360352,
-                    7.788751602172852,
-                    -3.539132595062256
+                    3.0788192749023438,
+                    7.184288024902344,
+                    7.388776779174805
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1209,7 +1209,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1219,7 +1219,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1230,9 +1230,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    1.2938265800476074,
-                    8.635818481445313,
-                    -5.280860424041748
+                    -3.1005496978759766,
+                    2.4848570823669434,
+                    -4.697561264038086
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1251,21 +1251,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -1273,20 +1273,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -2.2436766624450684,
-                    8.619874954223633,
-                    -5.155628204345703
+                    -1.2429139614105225,
+                    2.405423164367676,
+                    -14.021915435791016
                 ],
                 "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
+                    0.18000000715255737,
+                    2.299999952316284,
+                    7.015669345855713
                 ]
             },
             "useAlbedoMap": true,
@@ -1295,7 +1295,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1305,7 +1305,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1338,7 +1338,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1348,7 +1348,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1381,7 +1381,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1391,7 +1391,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1424,7 +1424,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1434,7 +1434,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1445,9 +1445,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    9.059417724609375,
-                    9.064064979553223,
-                    -2.094728946685791
+                    13.493799209594727,
+                    4.221435070037842,
+                    4.0853753089904785
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1467,7 +1467,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1477,7 +1477,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1510,7 +1510,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1520,7 +1520,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1553,7 +1553,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1563,7 +1563,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1574,9 +1574,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -2.123591899871826,
-                    10.184803009033203,
-                    -3.7424426078796387
+                    -6.7265801429748535,
+                    6.082148551940918,
+                    2.0747034549713135
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1596,7 +1596,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1606,7 +1606,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1639,7 +1639,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1649,7 +1649,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1660,9 +1660,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    3.726559638977051,
-                    7.851032257080078,
-                    -2.643437623977661
+                    2.094693183898926,
+                    6.849437713623047,
+                    5.9765305519104
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1682,7 +1682,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1692,7 +1692,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1725,7 +1725,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1735,7 +1735,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1746,9 +1746,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -3.7164454460144043,
-                    11.033424377441406,
-                    -3.7888684272766113
+                    -6.000881195068359,
+                    7.030873775482178,
+                    4.086562156677246
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -1768,7 +1768,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1778,7 +1778,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1811,7 +1811,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1821,7 +1821,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1853,21 +1853,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -1875,20 +1875,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -6.617239475250244,
-                    8.623950958251953,
-                    5.219619274139404
+                    -18.61040687561035,
+                    2.606088876724243,
+                    -1.026468276977539
                 ],
                 "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
+                    0.1518908441066742,
+                    2.299999952316284,
+                    20.2359676361084
                 ]
             },
             "useAlbedoMap": true,
@@ -1897,7 +1897,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1907,7 +1907,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1940,7 +1940,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1950,7 +1950,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -1983,7 +1983,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -1993,7 +1993,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2026,7 +2026,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2036,7 +2036,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2069,7 +2069,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2079,7 +2079,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2112,7 +2112,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2122,7 +2122,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2155,7 +2155,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2165,7 +2165,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2198,7 +2198,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2208,7 +2208,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2241,7 +2241,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2251,7 +2251,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2284,7 +2284,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2294,7 +2294,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2327,7 +2327,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2337,7 +2337,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2369,8 +2369,51 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "density": 1.0,
+            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
+            "hasAnimation": false,
+            "hasPhysics": true,
+            "hasTextures": true,
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
+            "meshType": 2,
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
+            "metalness": 0.0,
+            "name": "Cube",
+            "normalTextureName": "cubeNormal1",
+            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
+            "pxRadius": 0.5,
+            "pxShapeType": 0,
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    21.172670364379883,
+                    2.583245277404785,
+                    -0.5092079639434814
+                ],
+                "rotation": [
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
+                ],
+                "scale": [
+                    0.04141465574502945,
+                    2.299999952316284,
+                    21.68967628479004
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "cubeAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2380,7 +2423,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2391,9 +2434,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    10.169600486755371,
-                    7.243427276611328,
-                    -3.086866855621338
+                    -4.285082817077637,
+                    2.7853844165802,
+                    -7.643917560577393
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -2412,21 +2455,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -2434,20 +2477,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    8.720880508422852,
-                    8.12893009185791,
-                    -5.235808372497559
+                    2.5425827503204346,
+                    4.531092166900635,
+                    -13.431029319763184
                 ],
                 "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
+                    22.783933639526367,
+                    0.14846660196781158,
+                    11.661154747009277
                 ]
             },
             "useAlbedoMap": true,
@@ -2456,7 +2499,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2466,50 +2509,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
-            "metalness": 0.0,
-            "name": "Cube",
-            "normalTextureName": "cubeNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
-            "pxRadius": 0.5,
-            "pxShapeType": 0,
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    -5.6430158615112305,
-                    5.522566795349121,
-                    -4.271018028259277
-                ],
-                "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
-                ],
-                "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
-            "density": 1.0,
-            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
-            "hasAnimation": false,
-            "hasPhysics": true,
-            "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
-            "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2542,7 +2542,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2552,7 +2552,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2585,7 +2585,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2595,7 +2595,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2628,7 +2628,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2638,7 +2638,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2671,7 +2671,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2681,7 +2681,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2714,7 +2714,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2724,7 +2724,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2756,21 +2756,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -2778,20 +2778,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -7.512436866760254,
-                    7.4372429847717285,
-                    -5.547508716583252
+                    1.7125245332717896,
+                    2.4174790382385254,
+                    -20.633390426635742
                 ],
                 "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
+                    20.377994537353516,
+                    2.299999952316284,
+                    0.09729553014039993
                 ]
             },
             "useAlbedoMap": true,
@@ -2800,7 +2800,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2810,7 +2810,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2843,7 +2843,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2853,7 +2853,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2886,7 +2886,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2896,7 +2896,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2929,7 +2929,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2939,7 +2939,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -2972,7 +2972,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -2982,7 +2982,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3015,7 +3015,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3025,7 +3025,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3058,7 +3058,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3068,7 +3068,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3101,7 +3101,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3111,7 +3111,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3144,7 +3144,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3154,7 +3154,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3187,7 +3187,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3197,7 +3197,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3230,7 +3230,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3240,7 +3240,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3272,8 +3272,94 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "density": 1.0,
+            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
+            "hasAnimation": false,
+            "hasPhysics": true,
+            "hasTextures": true,
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
+            "meshType": 2,
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
+            "metalness": 0.0,
+            "name": "Cube",
+            "normalTextureName": "cubeNormal1",
+            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
+            "pxRadius": 0.5,
+            "pxShapeType": 0,
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    1.8084173202514648,
+                    2.617823600769043,
+                    19.20768165588379
+                ],
+                "rotation": [
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
+                ],
+                "scale": [
+                    21.0064697265625,
+                    2.299999952316284,
+                    0.0734887421131134
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "cubeAlbedo1",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "density": 1.0,
+            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
+            "hasAnimation": false,
+            "hasPhysics": true,
+            "hasTextures": true,
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
+            "meshType": 2,
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
+            "metalness": 0.0,
+            "name": "Cube",
+            "normalTextureName": "cubeNormal1",
+            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
+            "pxRadius": 0.5,
+            "pxShapeType": 0,
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    11.460066795349121,
+                    2.560832977294922,
+                    -6.983102798461914
+                ],
+                "rotation": [
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
+                ],
+                "scale": [
+                    9.73105239868164,
+                    2.299999952316284,
+                    0.050999999046325684
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "albedoTextureName": "cubeAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3283,7 +3369,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3294,9 +3380,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    10.47401237487793,
-                    8.134285926818848,
-                    -6.486081600189209
+                    -1.2006745338439941,
+                    10.247464179992676,
+                    5.753480434417725
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -3316,7 +3402,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3326,7 +3412,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3337,9 +3423,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    2.9000637531280518,
-                    9.465262413024902,
-                    -7.3607988357543945
+                    -7.489027500152588,
+                    11.085099220275879,
+                    0.051826030015945435
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -3359,7 +3445,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3369,7 +3455,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3380,9 +3466,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -4.6688737869262695,
-                    11.577554702758789,
-                    -6.714460849761963
+                    -6.6070661544799805,
+                    10.313497543334961,
+                    5.183769702911377
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -3401,21 +3487,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -3423,20 +3509,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -5.638357639312744,
-                    14.485539436340332,
-                    -4.393722057342529
+                    -6.059676647186279,
+                    2.38563871383667,
+                    -11.543987274169922
                 ],
                 "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
+                    0.1062282845377922,
+                    2.299999952316284,
+                    9.215503692626953
                 ]
             },
             "useAlbedoMap": true,
@@ -3445,7 +3531,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3455,93 +3541,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
-            "metalness": 0.0,
-            "name": "Cube",
-            "normalTextureName": "cubeNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
-            "pxRadius": 0.5,
-            "pxShapeType": 0,
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    -5.484142303466797,
-                    12.818025588989258,
-                    -6.088351726531982
-                ],
-                "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
-                ],
-                "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
-            "density": 1.0,
-            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
-            "hasAnimation": false,
-            "hasPhysics": true,
-            "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
-            "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
-            "metalness": 0.0,
-            "name": "Cube",
-            "normalTextureName": "cubeNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
-            "pxRadius": 0.5,
-            "pxShapeType": 0,
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    -1.4292221069335938,
-                    7.896904945373535,
-                    -7.828890323638916
-                ],
-                "rotation": [
-                    0.6040524840354919,
-                    -0.06656839698553085,
-                    0.24011382460594177,
-                    0.7569905519485474
-                ],
-                "scale": [
-                    0.4799993336200714,
-                    0.48003336787223816,
-                    0.4800223708152771
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
-            "density": 1.0,
-            "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
-            "hasAnimation": false,
-            "hasPhysics": true,
-            "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
-            "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3574,7 +3574,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3584,7 +3584,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3617,7 +3617,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3627,7 +3627,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3660,7 +3660,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3670,7 +3670,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3703,7 +3703,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3713,7 +3713,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3746,7 +3746,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3756,7 +3756,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3789,7 +3789,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3799,7 +3799,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3831,21 +3831,21 @@
             "useNormalMap": true
         },
         {
-            "albedoTextureName": "cubeAlbedo",
+            "albedoTextureName": "cubeAlbedo1",
             "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
             "hasPhysics": true,
             "hasTextures": true,
-            "mass": 1.0,
-            "materialName": "cubeMaterial",
+            "mass": 0.0,
+            "materialName": "cubeMaterial1",
             "meshType": 2,
-            "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTextureName": "cubeMetalRougness1",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
-            "normalTextureName": "cubeNormal",
+            "normalTextureName": "cubeNormal1",
             "normalTexturePath": ".//Data/Assets/Test Scene/cube/sky_normal.jpg",
             "pxRadius": 0.5,
             "pxShapeType": 0,
@@ -3853,20 +3853,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.571563184261322,
-                    4.618330478668213,
-                    -0.009599508717656136
+                    4.496277809143066,
+                    2.390815019607544,
+                    -2.3906822204589844
                 ],
                 "rotation": [
-                    0.5151717662811279,
-                    0.14334282279014587,
-                    0.39639902114868164,
-                    0.7462698817253113
+                    -0.0,
+                    0.0,
+                    -0.0,
+                    1.0
                 ],
                 "scale": [
-                    0.479999303817749,
-                    0.4800332486629486,
-                    0.4800224304199219
+                    10.574689865112305,
+                    2.299999952316284,
+                    0.05081288889050484
                 ]
             },
             "useAlbedoMap": true,
@@ -3875,7 +3875,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3885,7 +3885,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3918,7 +3918,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3928,7 +3928,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -3961,7 +3961,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -3971,7 +3971,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4004,7 +4004,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4014,7 +4014,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4047,7 +4047,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4057,7 +4057,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4090,7 +4090,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4100,7 +4100,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4133,7 +4133,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4143,7 +4143,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4154,20 +4154,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    5.3101091384887695,
-                    6.385141849517822,
-                    -2.6871137619018555
+                    2.8292531967163086,
+                    4.4530558586120605,
+                    6.20228910446167
                 ],
                 "rotation": [
-                    0.6449857354164124,
-                    -0.25446251034736633,
-                    0.08079157024621964,
-                    0.7160411477088928
+                    0.6449856758117676,
+                    -0.25446242094039917,
+                    0.08079180866479874,
+                    0.7160412073135376
                 ],
                 "scale": [
-                    0.479999303817749,
-                    0.4800332188606262,
-                    0.4800224304199219
+                    0.4799993336200714,
+                    0.4800322651863098,
+                    0.48002102971076965
                 ]
             },
             "useAlbedoMap": true,
@@ -4176,7 +4176,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4186,7 +4186,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4219,7 +4219,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4229,7 +4229,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4262,7 +4262,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4272,7 +4272,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4305,7 +4305,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4315,7 +4315,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4348,7 +4348,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4358,7 +4358,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4391,7 +4391,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4401,7 +4401,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4412,20 +4412,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.8939753770828247,
-                    8.209980010986328,
-                    -3.511709451675415
+                    -3.3935232162475586,
+                    5.6831865310668945,
+                    14.366593360900879
                 ],
                 "rotation": [
                     0.6495919227600098,
                     -0.36607345938682556,
-                    -0.02376173809170723,
-                    0.6659247875213623
+                    -0.02376173995435238,
+                    0.6659248471260071
                 ],
                 "scale": [
-                    0.479999303817749,
+                    0.47999927401542664,
                     0.48003318905830383,
-                    0.480022668838501
+                    0.4800226390361786
                 ]
             },
             "useAlbedoMap": true,
@@ -4434,7 +4434,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4444,7 +4444,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4477,7 +4477,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4487,7 +4487,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4520,7 +4520,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4530,7 +4530,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4563,7 +4563,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4573,7 +4573,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4606,7 +4606,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4616,7 +4616,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4627,20 +4627,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    0.9904887080192566,
-                    6.410948753356934,
-                    -2.260040521621704
+                    7.665865898132324,
+                    5.519777297973633,
+                    5.4442644119262695
                 ],
                 "rotation": [
                     0.6492578387260437,
                     -0.3080880045890808,
-                    0.0315929614007473,
+                    0.03159298375248909,
                     0.6946566700935364
                 ],
                 "scale": [
                     0.47999927401542664,
                     0.4800335466861725,
-                    0.4800221621990204
+                    0.480022132396698
                 ]
             },
             "useAlbedoMap": true,
@@ -4649,7 +4649,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4659,7 +4659,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4670,9 +4670,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -2.955996513366699,
-                    5.806394100189209,
-                    -1.760130763053894
+                    -2.782884120941162,
+                    5.556402683258057,
+                    0.9727989435195923
                 ],
                 "rotation": [
                     0.6040524840354919,
@@ -4692,7 +4692,7 @@
         },
         {
             "albedoTextureName": "cubeAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/albedo.png",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/cube/green.png",
             "density": 1.0,
             "filePath": ".//Data/Assets/Test Scene/cube/cube.glb",
             "hasAnimation": false,
@@ -4702,7 +4702,7 @@
             "materialName": "cubeMaterial",
             "meshType": 2,
             "metalRoughnessTextureName": "cubeMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/sky_metallic-sky_smoothness.png",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/cube/smooth_metal.dds",
             "metalness": 0.0,
             "name": "Cube",
             "normalTextureName": "cubeNormal",
@@ -4752,9 +4752,9 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    2.0150604248046875,
-                    1.0551756620407104,
-                    -2.3935163021087646
+                    3.464607000350952,
+                    1.2549536228179932,
+                    -5.515726089477539
                 ],
                 "rotation": [
                     0.42910391092300415,
@@ -4796,14 +4796,14 @@
             "transform": {
                 "position": [
                     1.2455813884735107,
-                    0.14985257387161255,
+                    0.4000000059604645,
                     -0.7138487100601196
                 ],
                 "rotation": [
                     0.0,
                     0.0,
-                    0.7110748887062073,
-                    0.7031162977218628
+                    0.7051646113395691,
+                    0.7090435028076172
                 ],
                 "scale": [
                     0.009999999776482582,
@@ -4836,9 +4836,173 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -1.4748706817626953,
-                    0.162887841463089,
-                    -8.884184837341309
+                    -2.093827486038208,
+                    0.4237537384033203,
+                    -8.829391479492188
+                ],
+                "rotation": [
+                    0.00016098587366286665,
+                    0.9994392991065979,
+                    0.004856797866523266,
+                    -0.033127881586551666
+                ],
+                "scale": [
+                    2.521097183227539,
+                    2.519998788833618,
+                    2.52036452293396
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasPhysics": false,
+            "hasTextures": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    1.043141484260559,
+                    0.40417155623435974,
+                    -0.6628780961036682
+                ],
+                "rotation": [
+                    0.005511494353413582,
+                    -0.13017132878303528,
+                    -0.0077835312113165855,
+                    0.9914456009864807
+                ],
+                "scale": [
+                    2.52101731300354,
+                    2.5199990272521973,
+                    2.520364999771118
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasPhysics": false,
+            "hasTextures": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -4.45089054107666,
+                    0.4442777633666992,
+                    -4.160221576690674
+                ],
+                "rotation": [
+                    0.002195503329858184,
+                    0.9997543096542358,
+                    -0.003945152275264263,
+                    -0.021702388301491737
+                ],
+                "scale": [
+                    2.5210494995117188,
+                    2.520015239715576,
+                    2.520368814468384
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasPhysics": false,
+            "hasTextures": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    -1.2396669387817383,
+                    0.44556179642677307,
+                    -3.7294583320617676
+                ],
+                "rotation": [
+                    0.030137917026877403,
+                    0.9989157915115356,
+                    -0.00993210356682539,
+                    -0.03406241536140442
+                ],
+                "scale": [
+                    2.5211400985717773,
+                    2.5199999809265137,
+                    2.520322799682617
+                ]
+            },
+            "useAlbedoMap": true,
+            "useMetalRoughnessMap": true,
+            "useNormalMap": true
+        },
+        {
+            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
+            "AnimSize": 1,
+            "albedoTextureName": "roboAlbedo",
+            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
+            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
+            "hasAnimation": true,
+            "hasPhysics": false,
+            "hasTextures": true,
+            "materialName": "RoboMaterial",
+            "meshType": 3,
+            "metalRoughnessTextureName": "roboMetalRougness",
+            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
+            "metalness": 0.0,
+            "name": "Robo",
+            "normalTextureName": "roboNormal",
+            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
+            "roughness": 0.5,
+            "tex_format": 0,
+            "transform": {
+                "position": [
+                    4.135290622711182,
+                    0.387107789516449,
+                    -10.299991607666016
                 ],
                 "rotation": [
                     0.0008683946216478944,
@@ -4847,7 +5011,7 @@
                     -0.0331168957054615
                 ],
                 "scale": [
-                    2.521019220352173,
+                    2.521066188812256,
                     2.5199995040893555,
                     2.5203652381896973
                 ]
@@ -4877,20 +5041,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    1.1539136171340942,
-                    0.18727928400039673,
-                    1.031520128250122
+                    -8.490111351013184,
+                    0.4633711576461792,
+                    1.686073899269104
                 ],
                 "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
+                    -0.00024363762349821627,
+                    0.9994240999221802,
+                    -0.00735033955425024,
+                    -0.033127374947071075
                 ],
                 "scale": [
-                    2.5209813117980957,
-                    2.5199995040893555,
-                    2.5203652381896973
+                    2.5210320949554443,
+                    2.520000457763672,
+                    2.520364999771118
                 ]
             },
             "useAlbedoMap": true,
@@ -4918,20 +5082,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -4.586656093597412,
-                    0.08193939924240112,
-                    -6.191882610321045
+                    7.59538459777832,
+                    0.36589279770851135,
+                    15.528759002685547
                 ],
                 "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
+                    -0.026290137320756912,
+                    0.9990065097808838,
+                    0.016223257407546043,
+                    -0.03211821988224983
                 ],
                 "scale": [
-                    2.520989418029785,
-                    2.5199995040893555,
-                    2.5203652381896973
+                    2.5211522579193115,
+                    2.51999831199646,
+                    2.52036452293396
                 ]
             },
             "useAlbedoMap": true,
@@ -4959,20 +5123,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    -0.6110913753509521,
-                    0.14405213296413422,
-                    5.34635591506958
+                    6.179952144622803,
+                    0.3765399754047394,
+                    -16.17884063720703
                 ],
                 "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
+                    -0.003860216587781906,
+                    -0.13960354030132294,
+                    -0.009542731568217278,
+                    0.990153968334198
                 ],
                 "scale": [
-                    2.520953893661499,
-                    2.5199995040893555,
-                    2.5203652381896973
+                    2.521179676055908,
+                    2.5199990272521973,
+                    2.520368814468384
                 ]
             },
             "useAlbedoMap": true,
@@ -5000,184 +5164,20 @@
             "tex_format": 0,
             "transform": {
                 "position": [
-                    4.134515285491943,
-                    0.16372787952423096,
-                    -10.311685562133789
+                    6.143219470977783,
+                    0.38557523488998413,
+                    -4.121183395385742
                 ],
                 "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
+                    -5.0801143515855074e-05,
+                    0.9994499683380127,
+                    -0.0015326241264119744,
+                    -0.03312823176383972
                 ],
                 "scale": [
-                    2.5210235118865967,
+                    2.5209968090057373,
                     2.5199995040893555,
-                    2.5203652381896973
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
-            "AnimSize": 1,
-            "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
-            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
-            "hasAnimation": true,
-            "hasPhysics": false,
-            "hasTextures": true,
-            "materialName": "RoboMaterial",
-            "meshType": 3,
-            "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
-            "metalness": 0.0,
-            "name": "Robo",
-            "normalTextureName": "roboNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    -8.491375923156738,
-                    0.0974213033914566,
-                    1.6669121980667114
-                ],
-                "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
-                ],
-                "scale": [
-                    2.5209786891937256,
-                    2.5199995040893555,
-                    2.5203652381896973
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
-            "AnimSize": 1,
-            "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
-            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
-            "hasAnimation": true,
-            "hasPhysics": false,
-            "hasTextures": true,
-            "materialName": "RoboMaterial",
-            "meshType": 3,
-            "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
-            "metalness": 0.0,
-            "name": "Robo",
-            "normalTextureName": "roboNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    6.609457015991211,
-                    0.25205519795417786,
-                    0.6728647351264954
-                ],
-                "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
-                ],
-                "scale": [
-                    2.5209803581237793,
-                    2.5199995040893555,
-                    2.5203652381896973
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
-            "AnimSize": 1,
-            "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
-            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
-            "hasAnimation": true,
-            "hasPhysics": false,
-            "hasTextures": true,
-            "materialName": "RoboMaterial",
-            "meshType": 3,
-            "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
-            "metalness": 0.0,
-            "name": "Robo",
-            "normalTextureName": "roboNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    -4.214122295379639,
-                    0.20013678073883057,
-                    -0.5784816741943359
-                ],
-                "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
-                ],
-                "scale": [
-                    2.5209639072418213,
-                    2.5199995040893555,
-                    2.5203652381896973
-                ]
-            },
-            "useAlbedoMap": true,
-            "useMetalRoughnessMap": true,
-            "useNormalMap": true
-        },
-        {
-            "AnimFiles0": ".//Data/Assets/Test Scene/Robo model/walk.glb",
-            "AnimSize": 1,
-            "albedoTextureName": "roboAlbedo",
-            "albedoTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_albedo.dds",
-            "filePath": ".//Data/Assets/Test Scene/Robo model/idle.glb",
-            "hasAnimation": true,
-            "hasPhysics": false,
-            "hasTextures": true,
-            "materialName": "RoboMaterial",
-            "meshType": 3,
-            "metalRoughnessTextureName": "roboMetalRougness",
-            "metalRoughnessTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_metalness-robo_roughness.dds",
-            "metalness": 0.0,
-            "name": "Robo",
-            "normalTextureName": "roboNormal",
-            "normalTexturePath": ".//Data/Assets/Test Scene/Robo model/robo_normal.dds",
-            "roughness": 0.5,
-            "tex_format": 0,
-            "transform": {
-                "position": [
-                    6.256353378295898,
-                    0.3127804398536682,
-                    -2.4165234565734863
-                ],
-                "rotation": [
-                    0.0008683946216478944,
-                    0.9991077184677124,
-                    0.026198701933026314,
-                    -0.0331168957054615
-                ],
-                "scale": [
-                    2.5209553241729736,
-                    2.5199995040893555,
-                    2.5203652381896973
+                    2.520364999771118
                 ]
             },
             "useAlbedoMap": true,

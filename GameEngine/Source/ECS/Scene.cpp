@@ -26,6 +26,8 @@ namespace ECS
 		m_lightManager = std::make_unique<LightManager>();
 		m_transformManager = std::make_unique<TransformManager>();
 		m_animationManager = std::make_unique<AnimationManager>();
+
+		GetCamera().SetPosition(-4.0f, 1.0f, -17.2f);
 	}
 
 	Scene::~Scene() = default;
