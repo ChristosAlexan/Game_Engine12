@@ -14,7 +14,7 @@ struct Attributes
 
 Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
-Texture2D metalRoughnessMaskTexture : register(t2, space0);
+Texture2D roughMetalMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
 RWTexture2DArray<float> gShadowOutput : register(u0, space5);
 RaytracingAccelerationStructure SceneBVH : register(t0, space6);

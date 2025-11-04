@@ -30,7 +30,7 @@ float3 BlinnPhongPointLight(float3 albedo, float3 normal, float3 worldPos, uint 
 
 Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
-Texture2D metalRoughnessMaskTexture : register(t2, space0);
+Texture2D roughMetalMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
 TextureCube prefilterTexture : register(t0, space4);
 TextureCube irradianceTexture : register(t1, space4);
@@ -52,15 +52,15 @@ float4 Main(PSInput input) : SV_TARGET
     float3 ambientStrength = ambientColor;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
-    float mask = metalRoughnessMaskTexture.Sample(gSampler, input.uv).b;
+    float mask = roughMetalMaskTexture.Sample(gSampler, input.uv).b;
 
     if(mask == 0.0f)
         return float4(albedo.rgb, 1.0f);
     
     float3 normal = normalTexture.Sample(gSampler, input.uv).xyz;
     float3 worldPos = worldPosDepthTexture.Sample(gSampler, input.uv).xyz;
-    float metalness = metalRoughnessMaskTexture.Sample(gSampler, input.uv).g;
-    float roughness = metalRoughnessMaskTexture.Sample(gSampler, input.uv).r;
+    float metalness = roughMetalMaskTexture.Sample(gSampler, input.uv).g;
+    float roughness = roughMetalMaskTexture.Sample(gSampler, input.uv).r;
     float depth = worldPosDepthTexture.Sample(gSampler, input.uv).w; // w is depth
    
     float3 V = normalize(cameraPos.xyz - worldPos.xyz);
@@ -137,11 +137,18 @@ float4 Main(PSInput input) : SV_TARGET
     float3 R = reflect(-V, normal);
     float3 prefilteredColor = prefilterTexture.SampleLevel(gSampler, R, roughness * MAX_REF_LOD).rgb;
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
-    float3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-    
+
     float3 rtReflections = raytracedReflectionsTexture.Sample(gSampler, input.uv).xyz;
+    float3 finalReflections = float3(0.0f,0.0f,0.0f);
+    if (rtReflections.r == 0.0f && rtReflections.g == 0.0f && rtReflections.b == 0.0f)
+        finalReflections = prefilteredColor;
+    else
+        finalReflections = rtReflections;
+    
+    float3 specular = finalReflections * (F * brdf.x + brdf.y);
+    
     float3 ambient = (kD * diffuse + specular) * ambientStrength;
-    float3 color = ambient + Lo + rtReflections;
+    float3 color = ambient + Lo;
 
     color = ReinhardToneMapping(color, exposure);
     

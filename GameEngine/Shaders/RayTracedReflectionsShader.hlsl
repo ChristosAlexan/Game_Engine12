@@ -46,7 +46,7 @@ struct RTMeshDataOffsets
 
 Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
-Texture2D metalRoughnessMaskTexture : register(t2, space0);
+Texture2D roughMetalMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
 RWTexture2D<float4> gReflectionOutput : register(u0, space5);
 Texture2D albedoTextures[] : register(t0, space10);
@@ -60,7 +60,14 @@ RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
- 
+    
+    float roughness = roughMetalMaskTexture.Load(int3(launchIndex, 0)).r;
+    if(roughness > 0.6f)
+    {
+        gReflectionOutput[launchIndex] = float4(0.0f, 0.0f, 0.0f, 1.0f);
+        return;
+    }
+   
     float3 diffuseColor = albedoTexture.Load(int3(launchIndex, 0)).xyz;
     float3 worldPos = worldPosDepthTexture.Load(int3(launchIndex, 0)).xyz;
     float3 normal = normalTexture.Load(int3(launchIndex, 0)).xyz;
