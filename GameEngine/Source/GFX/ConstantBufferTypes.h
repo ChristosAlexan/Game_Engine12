@@ -61,3 +61,12 @@ struct CB_CS_AnimationShader
 	uint32_t vertexCount;
 	uint32_t padding[3] = { 0,0,0 };
 };
+
+/************ RAYTRACING SHADERS *******************/
+struct CB_RT_MeshData
+{
+	uint32_t totalVertices;
+	uint32_t totalIndices;
+	uint32_t totalEntities;
+	float padding = 0.0f;
+};

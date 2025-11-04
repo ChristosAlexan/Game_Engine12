@@ -21,19 +21,22 @@ namespace ECS
 
 	RenderingManager::~RenderingManager()
 	{
+		GetDX12().WaitForGPU(GetDX12().GetCommandQueue(), GetDX12().fence.Get(), GetDX12().fenceEvent, GetDX12().fenceValue);
 		m_reflectionsTexture.reset();
+		m_bindlessAlbedoTextures.reset();
+		m_rtEntityHandle.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
 	{
-	
+
 		GetDX12().Initialize(game_window.GetWindow(), width, height);
 		if (!m_gui.Initialize(game_window.GetSDLWindow(), GetDX12().GetDevice(), GetDX12().GetCommandQueue(), GetDX12().GetRtvHeap(), GetDX12().GetDescriptorAllocator()))
 		{
 			ErrorLogger::Log("Failed to initialize ImGui!");
 			return false;
 		}
-		
+
 		m_computeSkinning.Initialize();
 		return true;
 	}
@@ -67,7 +70,7 @@ namespace ECS
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
-		
+
 		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexturePtr();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R16_FLOAT;
@@ -76,6 +79,86 @@ namespace ECS
 		textDesc.slices = (UINT16)totalLights;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 		m_shadowsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
+	}
+
+	// Populate ray tracing data such as vertex/index buffers, mesh data offsets and bindless textures
+	void RenderingManager::PopulateRayTracingData(Scene* scene)
+	{
+		m_bindlessAlbedoTextures = std::make_unique<Texture12>();
+		m_rtEntityHandle = std::make_unique <RTEntityHandle>();
+		m_textureMapping = std::make_unique<std::map<uint32_t, std::shared_ptr<Texture12>>>();
+
+		UINT id = 0;
+		uint32_t vertexSize = 0;
+		uint32_t indicesSize = 0;
+
+		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
+		for (auto [entity, transformComponent, renderComponent] : group.each())
+		{
+			if (renderComponent.meshType != ECS::STATIC_MESH && renderComponent.meshType != ECS::MESH_TYPE::SKELETAL_MESH)
+				continue;
+
+			auto albedoTexture = renderComponent.material->albedoTexture;
+			m_textureMapping->emplace(id, albedoTexture); // emplace the textures for each entity participating in ray tracing
+
+			ECS::RTMeshDataOffsets dataOffets;
+			dataOffets.vertexOffset = vertexSize;
+			dataOffets.indexOffset = indicesSize;
+			vertexSize += renderComponent.mesh->cpuMesh->vertices.size();
+			indicesSize += renderComponent.mesh->cpuMesh->indices.size();
+			dataOffets.padding = DirectX::XMFLOAT2(0.0f, 0.0f);
+			rt_meshDataOffsests.push_back(dataOffets);
+
+			for (size_t i = 0; i < renderComponent.mesh->cpuMesh->vertices.size(); ++i)
+			{
+				ECS::RTVertexData data;
+				data.position = renderComponent.mesh->cpuMesh->vertices[i].pos;
+				data.uv = renderComponent.mesh->cpuMesh->vertices[i].texCoord;
+				data.padding1 = 1.0f;
+				data.padding2 = DirectX::XMFLOAT2(1.0f, 1.0f);
+				rt_vertexData.push_back(data);
+			}
+			for (size_t i = 0; i < renderComponent.mesh->cpuMesh->indices.size(); ++i)
+			{
+				ECS::RTIndexData data;
+				data.indices = renderComponent.mesh->cpuMesh->indices[i];
+				rt_indexData.push_back(data);
+			}
+			id++;
+	
+		}
+		m_totalEntities = id;
+
+		if (!m_textureMapping->empty())
+		{
+			m_bindlessAlbedoTextures->CreateBindlessTexture(GetDX12().GetDevice(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), m_textureMapping.get());
+
+			m_rtEntityHandle->rtVertexGpuData.Initialize(GetDX12().GetDevice(), rt_vertexData.size());
+			auto allocator = GetDX12().GetDescriptorAllocator()->Allocate();
+			m_rtEntityHandle->cpuVertexHandle = allocator.cpuHandle;
+			m_rtEntityHandle->gpuVertexHandle = allocator.gpuHandle;
+			m_rtEntityHandle->rtVertexGpuData.CreateSRV(GetDX12().GetDevice(), m_rtEntityHandle->cpuVertexHandle);
+
+			m_rtEntityHandle->rtIndexGpuData.Initialize(GetDX12().GetDevice(), rt_indexData.size());
+			allocator = GetDX12().GetDescriptorAllocator()->Allocate();
+			m_rtEntityHandle->cpuIndexHandle = allocator.cpuHandle;
+			m_rtEntityHandle->gpuIndexHandle = allocator.gpuHandle;
+			m_rtEntityHandle->rtIndexGpuData.CreateSRV(GetDX12().GetDevice(), m_rtEntityHandle->cpuIndexHandle);
+
+			m_rtEntityHandle->rtMeshDataOffsets.Initialize(GetDX12().GetDevice(), m_totalEntities);
+			allocator = GetDX12().GetDescriptorAllocator()->Allocate();
+			m_rtEntityHandle->cpuOffsetsHandle = allocator.cpuHandle;
+			m_rtEntityHandle->gpuOffsetsHandle = allocator.gpuHandle;
+			m_rtEntityHandle->rtMeshDataOffsets.CreateSRV(GetDX12().GetDevice(), m_rtEntityHandle->cpuOffsetsHandle);
+
+			m_rtEntityHandle->rtVertexGpuData.UploadData(GetDX12().GetCmdList(), rt_vertexData);
+			m_rtEntityHandle->rtIndexGpuData.UploadData(GetDX12().GetCmdList(), rt_indexData);
+			m_rtEntityHandle->rtMeshDataOffsets.UploadData(GetDX12().GetCmdList(), rt_meshDataOffsests);
+
+			m_rtEntityHandle->rtVertexGpuData.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			m_rtEntityHandle->rtIndexGpuData.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			m_rtEntityHandle->rtMeshDataOffsets.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		}
 	}
 
 	void RenderingManager::BuildTLAS(Scene* scene)
@@ -184,7 +267,7 @@ namespace ECS
 		psMaterialCB.useNormals = renderComponent.material->useNormalMap;
 		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
 		psMaterialCB.padding = 0.0f;
-		
+
 		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
 
@@ -207,7 +290,7 @@ namespace ECS
 				}
 			}
 
-			if(renderComponent.hasTextures)
+			if (renderComponent.hasTextures)
 				scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), GetDX12().GetCmdList(), 2);
 			renderComponent.mesh->DrawIndexed(GetDX12().GetCmdList());
 		}
@@ -244,7 +327,7 @@ namespace ECS
 
 
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
-		
+
 		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_brdfMap->m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		GetDX12().GetCmdList()->ClearRenderTargetView(m_brdfMap->m_rtvHandles[0], clearColor, 0, nullptr);
@@ -256,7 +339,7 @@ namespace ECS
 			0,
 			nullptr
 		);
-	
+
 		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
@@ -300,18 +383,20 @@ namespace ECS
 	void RenderingManager::RayTracedReflections(Scene* scene)
 	{
 		CB_Shader_Camera psCameraCB = {};
+		CB_RT_MeshData rtMeshData = {};
 
 		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
 		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		
+
 		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
 		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedReflectionsResources().rtpso.Get());
-		
+
 		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
+
 
 		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
@@ -322,7 +407,21 @@ namespace ECS
 		{
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psCameraCB));
 		}
-	
+
+		rtMeshData.totalVertices = rt_vertexData.size();
+		rtMeshData.totalIndices = rt_indexData.size();
+		rtMeshData.totalEntities = m_totalEntities;
+
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(6, m_bindlessAlbedoTextures->GetGPUHandle());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(7, m_rtEntityHandle->gpuVertexHandle);
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(8, m_rtEntityHandle->gpuIndexHandle);
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(9, m_rtEntityHandle->gpuOffsetsHandle);
+
+		if (GetDX12().dynamicCB)
+		{
+			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(rtMeshData));
+		}
+
 		GetDX12().DispatchRaytracing();
 
 		// Transition to shader resource

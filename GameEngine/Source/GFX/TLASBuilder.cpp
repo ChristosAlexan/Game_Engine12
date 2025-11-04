@@ -13,6 +13,7 @@ void TLASBuilder::Build(ECS::Scene* scene)
 {
 	m_instanceDescs.clear();
 	m_instanceBuffer.Reset();
+	UINT id = 0;
 
 	auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 	for (auto [entity, transformComponent, renderComponent] : group.each())
@@ -31,7 +32,7 @@ void TLASBuilder::Build(ECS::Scene* scene)
 
 		D3D12_RAYTRACING_INSTANCE_DESC instance = {};
 		instance.AccelerationStructure = blas->result->GetGPUVirtualAddress();
-		instance.InstanceID = static_cast<UINT>(entity);
+		instance.InstanceID = id;
 		instance.InstanceMask = 0xFF;
 		instance.InstanceContributionToHitGroupIndex = m_instanceDescs.size();
 		instance.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
@@ -42,6 +43,7 @@ void TLASBuilder::Build(ECS::Scene* scene)
 		memcpy(instance.Transform, &m34, sizeof(m34));
 		
 		m_instanceDescs.push_back(instance);
+		id++;
 	}
 
 	BuildRAS(scene->GetRenderingManager()->GetDX12(), bUpdate);

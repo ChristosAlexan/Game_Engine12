@@ -26,6 +26,7 @@ namespace ECS
 		bool Initialize(GameWindow& game_window, int width, int height);
 		void InitializeRenderTargets(int& width, int& height);
 		void InitializeShadowTextures(Scene* scene);
+		void PopulateRayTracingData(Scene* scene);
 		void BuildTLAS(Scene* scene);
 		void RefitBLAS(Scene* scene);
 		DX12& GetDX12();
@@ -57,7 +58,10 @@ namespace ECS
 		GBuffer m_gBuffer;
 		Texture12* m_shadowsTexture = nullptr; // Ray traced shadows output
 		std::unique_ptr<Texture12> m_reflectionsTexture; // Ray traced reflections output
+		std::unique_ptr<Texture12> m_bindlessAlbedoTextures; // Bindless albedo textures for rt reflections
 		std::unique_ptr<RenderTargetTexture> m_brdfMap;
+		std::unique_ptr<RTEntityHandle> m_rtEntityHandle;
+
 		HDR_IMAGE hdr_map1;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
 		TLASBuilder m_tlasBuilder;
@@ -65,7 +69,14 @@ namespace ECS
 		bool bRenderPbrPass = true;
 
 		ComputeSkinning m_computeSkinning;
- 	public:
+
+		// Ray Tracing data
+		UINT m_totalEntities = 0;
+		std::unique_ptr<std::map<uint32_t, std::shared_ptr<Texture12>>> m_textureMapping;
+		std::vector<ECS::RTVertexData> rt_vertexData;
+		std::vector<ECS::RTIndexData> rt_indexData;
+		std::vector<ECS::RTMeshDataOffsets> rt_meshDataOffsests;
+	public:
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;
 		float m_gamma;

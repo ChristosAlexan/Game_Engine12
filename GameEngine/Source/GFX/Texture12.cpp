@@ -239,6 +239,11 @@ void Texture12::LoadFromFileHDR(const std::string& filename, ID3D12Device* devic
 	device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE Texture12::GetCPUHandle() const
+{
+	return m_cpuHandle;
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE Texture12::GetGPUHandle() const
 {
 	return m_gpuHandle;
@@ -285,7 +290,7 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* desc
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.Format = texDesc.Format;
 
-	if (textureDesc.viewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY || textureDesc.slices > 1) 
+	if (textureDesc.viewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY || textureDesc.slices > 1)
 	{
 		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 		uavDesc.Texture2DArray.MipSlice = 0;
@@ -293,7 +298,7 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* desc
 		uavDesc.Texture2DArray.ArraySize = textureDesc.slices;
 		uavDesc.Texture2DArray.PlaneSlice = 0;
 	}
-	else 
+	else
 	{
 		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		uavDesc.Texture2D.MipSlice = 0;
@@ -313,7 +318,7 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* desc
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Format = textureDesc.format;
 
-	if (uavDesc.ViewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY) 
+	if (uavDesc.ViewDimension == D3D12_UAV_DIMENSION_TEXTURE2DARRAY)
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
 		srvDesc.Texture2DArray.MostDetailedMip = 0;
@@ -323,7 +328,7 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* desc
 		srvDesc.Texture2DArray.PlaneSlice = 0;
 		srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
 	}
-	else 
+	else
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MostDetailedMip = 0;
@@ -338,6 +343,31 @@ void Texture12::CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* desc
 		m_cpuHandle = handle.cpuHandle;
 		m_gpuHandle = handle.gpuHandle;
 		device->CreateShaderResourceView(m_resource->GetResource(), &srvDesc, m_cpuHandle);
+	}
+}
+
+void Texture12::CreateBindlessTexture(ID3D12Device* device, ID3D12DescriptorHeap* sharedSrvHeap, DescriptorAllocator* descriptorAllocator, std::map<uint32_t, std::shared_ptr<Texture12>>* textureMapping)
+{
+
+	UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuStart(sharedSrvHeap->GetCPUDescriptorHandleForHeapStart());
+
+	UINT startIndex = descriptorAllocator->AllocateContiguous(textureMapping->size());
+	m_gpuHandle = descriptorAllocator->GetGPUHandle(startIndex);
+
+	for (const auto& [index, texture] : *textureMapping)
+	{
+		UINT descriptorIndex = startIndex + index;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = descriptorAllocator->GetCPUHandle(descriptorIndex);
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = texture->GetResource()->GetResource()->GetDesc().Format;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Texture2D.MipLevels = texture->GetResource()->GetResource()->GetDesc().MipLevels;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+
+		device->CreateShaderResourceView(texture->GetResource()->GetResource(), &srvDesc, cpuHandle);
 	}
 }
 

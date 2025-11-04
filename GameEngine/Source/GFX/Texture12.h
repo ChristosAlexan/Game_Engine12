@@ -3,6 +3,7 @@
 #include <DirectXTex.h>
 #include "DescriptorAllocator.h"
 #include "ResourceWrapper.h"
+#include <map>
 
 struct TextureDesc
 {
@@ -24,7 +25,7 @@ public:
 		DDS_FILE = 2
 	};
 
-	
+
 	Texture12();
 	~Texture12();
 	void LoadFromFileWIC(const std::string& filename,
@@ -33,11 +34,13 @@ public:
 		ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 	void LoadFromFileHDR(const std::string& filename, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, DescriptorAllocator* descriptorAllocator);
 
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandleUAV() const;
 	void TransitionToRTV(ID3D12GraphicsCommandList* cmdList);
 	void TransitionToSRV(ID3D12GraphicsCommandList* cmdList);
 	void CreateTextureUAV(ID3D12Device* device, DescriptorAllocator* descriptorAllocator, const TextureDesc& textureDesc);
+	void CreateBindlessTexture(ID3D12Device* device, ID3D12DescriptorHeap* sharedSrvHeap, DescriptorAllocator* descriptorAllocator, std::map<uint32_t, std::shared_ptr<Texture12>>* textureMapping);
 	void Reset(ID3D12GraphicsCommandList* cmdList);
 
 	ResourceWrapper* GetResource() const;

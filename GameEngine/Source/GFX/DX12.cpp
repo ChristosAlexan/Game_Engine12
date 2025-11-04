@@ -373,20 +373,20 @@ void DX12::CreateDeviceAndFactory()
         DXGI_ADAPTER_DESC1 desc;
         adapter->GetDesc1(&desc);
 
-        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) 
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
         {
             continue; // skip software adapters
         }
 
         hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device));
-            break;
+        break;
     }
     COM_ERROR_IF_FAILED(hr, "Failed to create device");
 
     // Check for ray tracing compatibility
     D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureSupportData = {};
     device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureSupportData, sizeof(featureSupportData));
-    if (featureSupportData.RaytracingTier < D3D12_RAYTRACING_TIER_1_0) 
+    if (featureSupportData.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
     {
         throw std::runtime_error("Raytracing not supported on this device.");
     }
@@ -403,7 +403,7 @@ void DX12::CreateCommandObjects()
 
     HRESULT hr = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&commandQueue));
     COM_ERROR_IF_FAILED(hr, "Failed to create command queue");
- 
+
     // --- Create Command Allocator ---
     hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
     COM_ERROR_IF_FAILED(hr, "Failed to create command allocator");
@@ -411,7 +411,7 @@ void DX12::CreateCommandObjects()
     // --- Create Command List ---
     hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
     COM_ERROR_IF_FAILED(hr, "Failed to create command list");
-   
+
     commandList->Close();
 }
 
@@ -422,10 +422,10 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     rtvHeapDesc.NumDescriptors = 2;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    
+
     HRESULT hr = device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
     COM_ERROR_IF_FAILED(hr, "Failed to create RTV descriptor heap");
-  
+
     rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
     // --- Create Swap Chain ---
@@ -559,7 +559,7 @@ void DX12::InitializeShaders()
         };
         UINT layoutSize = _countof(inputLayout);
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT);
-        
+
         // Create Gbuffer pipelineState
         DXGI_FORMAT formats[GBUFFER_TEXTURES_NUM];
         formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::ALBEDO] = FORMAT_ALBEDO;
@@ -670,7 +670,7 @@ void DX12::InitializeShaders()
     {
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/RaytracingPS.hlsl", L"Main", L"ps_6_8");
-   
+
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -697,11 +697,11 @@ void DX12::InitializeShaders()
     }
 }
 
-void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets, 
+void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets,
     const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode, D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 {
     HRESULT hr;
-    
+
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputLayout, size };
     psoDesc.pRootSignature = m_rasterRootSignature.Get();
@@ -715,7 +715,7 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = topology;
     psoDesc.NumRenderTargets = num_renderTargets;
-    for(UINT i = 0; i < psoDesc.NumRenderTargets; ++i)
+    for (UINT i = 0; i < psoDesc.NumRenderTargets; ++i)
         psoDesc.RTVFormats[i] = formats[i];
     psoDesc.SampleDesc.Count = 1;
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
@@ -951,7 +951,7 @@ void DX12::InitializeBuffers()
     raytracedReflectionsLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 4); // t4 space4 raytraced reflections lightpass input
 
     CD3DX12_ROOT_PARAMETER1 rootParams[22];
-    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE , D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
+    rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
     rootParams[3].InitAsConstantBufferView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // b1 VS : skinning data
@@ -983,13 +983,27 @@ void DX12::InitializeBuffers()
 
 
     // Ray tracing root signatures
-    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[6];
+    CD3DX12_DESCRIPTOR_RANGE1 bindlessAbledoTextures;
+    bindlessAbledoTextures.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 0, 10); // t0 space10 bindless albedo textures
+    CD3DX12_DESCRIPTOR_RANGE1 srvRtVertexStructuredBuffer;
+    srvRtVertexStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 11); // t1 space10 vertex data SRV for rt reflections
+    CD3DX12_DESCRIPTOR_RANGE1 srvRtIndexStructuredBuffer;
+    srvRtIndexStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 11); // t2 space10 index data SRV for rt reflections
+    CD3DX12_DESCRIPTOR_RANGE1 srvRtMeshDataOffsetsStructuredBuffer;
+    srvRtMeshDataOffsetsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 11); // t3 space10 mesh data offsets SRV for rt reflections
+
+    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[11];
     globalRaytracingRootParams[0].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     globalRaytracingRootParams[1].InitAsShaderResourceView(0, 6, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     globalRaytracingRootParams[2].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
     globalRaytracingRootParams[3].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space2: light's structure buffer in
     globalRaytracingRootParams[4].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b4 space0: light's data constant buffer
     globalRaytracingRootParams[5].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b0 space0: camera data
+    globalRaytracingRootParams[6].InitAsDescriptorTable(1, &bindlessAbledoTextures, D3D12_SHADER_VISIBILITY_ALL); // t0 space10 bindless albedo textures
+    globalRaytracingRootParams[7].InitAsDescriptorTable(1, &srvRtVertexStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t1 space10 vertex data SRV for rt reflections
+    globalRaytracingRootParams[8].InitAsDescriptorTable(1, &srvRtIndexStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t2 space10 index data SRV for rt reflections
+    globalRaytracingRootParams[9].InitAsDescriptorTable(1, &srvRtMeshDataOffsetsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t3 space10 mesh data offsets SRV for rt reflections
+    globalRaytracingRootParams[10].InitAsConstantBufferView(5, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b5 space0 mesh data rt reflections
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC globalRaytracingRootSigDesc;
     globalRaytracingRootSigDesc.Init_1_1(_countof(globalRaytracingRootParams), globalRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);
@@ -1069,7 +1083,7 @@ void DX12::StartRenderFrame(GFXGui& gui, Camera& camera, int width, int height, 
     ID3D12DescriptorHeap* heaps[] = { sharedSrvHeap.Get() };
     commandList->SetDescriptorHeaps(1, heaps);
 
-    if(GetRasterRootSignature())
+    if (GetRasterRootSignature())
         commandList->SetGraphicsRootSignature(GetRasterRootSignature());
     commandList->SetPipelineState(pipelineState.Get());
 
@@ -1077,7 +1091,7 @@ void DX12::StartRenderFrame(GFXGui& gui, Camera& camera, int width, int height, 
     D3D12_RECT scissorRect = { 0, 0, width, height };
     commandList->RSSetViewports(1, &viewport);
     commandList->RSSetScissorRects(1, &scissorRect);
- 
+
 
     SetRenderTargetToBackBuffer();
 }
