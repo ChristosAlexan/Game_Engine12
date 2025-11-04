@@ -12,7 +12,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Skeletal animation support with skinned mesh loading via [tinygltf](https://github.com/syoyo/tinygltf)  
 - JSON-based scene save/load system
 - Compute shader skinning
-- Ray traced shadows for static and skinned meshes using DirectX Raytracing (DXR)
+- Ray traced shadows and ray traced reflections for static and skinned meshes using DirectX Raytracing (DXR)
 - BLAS refit for animated entities
 - GUI using ImGUi for object manipulation
 - Physics using [Nvidia PhysX](https://github.com/NVIDIA-Omniverse/PhysX)
@@ -20,7 +20,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 ---
 
 ## Roadmap / Work in Progress
-- Ray traced reflections and global illumination (RTXGI)  
+- global illumination (RTXGI)  
 - Hybrid lighting pipeline (deferred + ray tracing)  
 - Advanced physics simulation (PhysX integration)  
 - Scene graph for hierarchical transformations  
