@@ -47,7 +47,7 @@ Multiple light types with ray traced shadows
 https://github.com/user-attachments/assets/c56da566-f1b1-4c77-a806-4428bbaf84f7
 
 
-Ray-traced reflections
+Ray traced reflections
 
 
 
