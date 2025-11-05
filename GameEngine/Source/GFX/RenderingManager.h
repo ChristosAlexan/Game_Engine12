@@ -63,7 +63,7 @@ namespace ECS
 		std::unique_ptr<RTEntityHandle> m_rtEntityHandle;
 
 		HDR_IMAGE hdr_map1;
-		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
+		
 		TLASBuilder m_tlasBuilder;
 		ECS::TLAS m_tlas;
 		bool bRenderPbrPass = true;
@@ -81,6 +81,7 @@ namespace ECS
 		float m_exposure;
 		float m_gamma;
 		bool m_bEnableDebugDraw = false;
+		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
 	};
 }
 

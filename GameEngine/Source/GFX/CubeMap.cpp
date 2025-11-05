@@ -264,3 +264,26 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 
 	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 }
+
+void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera)
+{
+	CB_VS_SimpleShader vsCB = {};
+
+	DirectX::XMFLOAT3 pos = camera.pos;
+	DirectX::XMFLOAT3 scale = DirectX::XMFLOAT3(600, 600, 600);
+	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_CubemapDebug.Get());
+	vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
+	vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetViewMatrix()));
+	vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(worldMatrix));
+
+	if (dx12.GetCmdList())
+	{
+		if (dx12.dynamicCB)
+		{
+			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
+		}
+	}
+	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(9, m_cubemapTexture->GetSrvGpuHandle(0));
+	m_cubeShape.Draw(dx12.GetCmdList());
+}
