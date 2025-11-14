@@ -14,7 +14,7 @@ namespace ECS
 {
 	RenderingManager::RenderingManager()
 	{
-		m_ambientColor = DirectX::XMFLOAT3(0.1f, 0.1f, 0.1f);
+		m_ambientColor = DirectX::XMFLOAT3(0.3f, 0.3f, 0.3f);
 		m_exposure = 1.0f;
 		m_gamma = 2.2f;
 	}

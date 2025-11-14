@@ -270,7 +270,7 @@ void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera)
 	CB_VS_SimpleShader vsCB = {};
 
 	DirectX::XMFLOAT3 pos = camera.pos;
-	DirectX::XMFLOAT3 scale = DirectX::XMFLOAT3(600, 600, 600);
+	DirectX::XMFLOAT3 scale = DirectX::XMFLOAT3(500, 500, 500);
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 	dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_CubemapDebug.Get());
 	vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));

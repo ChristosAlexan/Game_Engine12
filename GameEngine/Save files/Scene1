@@ -11,7 +11,7 @@
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "DirectionalLight",
-            "pcfRange": 2,
+            "pcfRange": 1,
             "radius": 1.0,
             "strength": 4.0,
             "transform": {

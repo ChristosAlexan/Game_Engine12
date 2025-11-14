@@ -77,7 +77,6 @@ public:
 	UINT rtvDescriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer, pipelineState_debug,
 		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget, pipelineState_compute;
-	//Microsoft::WRL::ComPtr<ID3D12StateObject> m_shadowsRtpso, m_reflectionsRtpso; // Ray tracing state object
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue = 0;
