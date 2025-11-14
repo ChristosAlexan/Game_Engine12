@@ -20,9 +20,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 ---
 
 ## Roadmap / Work in Progress
-- global illumination (RTXGI)  
-- Hybrid lighting pipeline (deferred + ray tracing)  
-- Advanced physics simulation (PhysX integration)  
+- global illumination (RTXGI)   
 - Scene graph for hierarchical transformations  
 - Post-processing effects: Bloom, SSR, SSAO  
 
@@ -39,7 +37,13 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 ## Showcase
 
 
-https://github.com/user-attachments/assets/3c459a6c-e453-4362-a343-adf7d1030168
+https://github.com/user-attachments/assets/594bed25-847d-4d6b-9798-8e68b22c6c61
+
+
+
+
+
+https://github.com/user-attachments/assets/6e91a4ea-0161-452a-8148-3c3259c7cda5
 
 
 
