@@ -13,6 +13,9 @@
     "utfcpp",
     "zlib",
 	"tinygltf",
-	"d3d12-memory-allocator"
+	"d3d12-memory-allocator",
+	"directxtex",
+    "directx-dxc",
+    "directxtk12"
   ]
 }

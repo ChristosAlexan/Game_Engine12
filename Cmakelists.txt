@@ -1,0 +1,357 @@
+cmake_minimum_required(VERSION 3.20)
+
+# Set vcpkg toolchain file BEFORE project()
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+
+project(GameEngine)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Collect all source files from GameEngine/Source directory
+file(GLOB_RECURSE SOURCES 
+    "GameEngine/Source/Common/*.cpp"
+    "GameEngine/Source/Compute/*.cpp"
+    "GameEngine/Source/ECS/*.cpp"
+    "GameEngine/Source/GFX/*.cpp"
+    "GameEngine/Source/ImGui/*.cpp"
+    "GameEngine/Source/Physics/*.cpp"
+
+    "GameEngine/Source/Common/*.c"
+    "GameEngine/Source/Compute/*.c"
+    "GameEngine/Source/ECS/*.c"
+    "GameEngine/Source/GFX/*.c"
+    "GameEngine/Source/ImGui/*.c"
+    "GameEngine/Source/Physics/*.c"
+)
+
+file(GLOB_RECURSE HEADERS 
+    "GameEngine/Source/Common/*.h"
+    "GameEngine/Source/Compute/*.h"
+    "GameEngine/Source/ECS/*.h"
+    "GameEngine/Source/GFX/*.h"
+    "GameEngine/Source/ImGui/*.h"
+    "GameEngine/Source/Physics/*.h"
+
+    "GameEngine/Source/Common/*.hpp"
+    "GameEngine/Source/Compute/*.hpp"
+    "GameEngine/Source/ECS/*.hpp"
+    "GameEngine/Source/GFX/*.hpp"
+    "GameEngine/Source/ImGui/*.hpp"
+    "GameEngine/Source/Physics/*.hpp"
+)
+
+# Create executable
+add_executable(GameEngine WIN32 ${SOURCES} ${HEADERS})
+# The target name is: GameEngine
+
+# 1. Target the 'GameEngine' directory relative to the source root
+# Define the source code directory
+set(ASSET_ROOT_DIR "${CMAKE_SOURCE_DIR}/GameEngine")
+
+# 2. Set the property on your executable target
+set_target_properties(GameEngine PROPERTIES 
+                        
+    # Use the variable defined above to set the working directory for the VS debugger
+    VS_DEBUGGER_WORKING_DIRECTORY "${ASSET_ROOT_DIR}"
+)
+
+# Include directories
+target_include_directories(GameEngine PRIVATE
+    # Source directories
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/Common
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/Compute
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/ECS
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/GFX
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/ImGui
+    ${CMAKE_SOURCE_DIR}/GameEngine/Source/Physics
+    
+    # External includes
+    ${CMAKE_SOURCE_DIR}/Includes
+    ${CMAKE_SOURCE_DIR}/Includes/entt
+    ${CMAKE_SOURCE_DIR}/Includes/PhysX
+    
+    # vcpkg DirectX includes
+    ${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-windows/include/directx
+)
+
+# Compile definitions
+target_compile_definitions(GameEngine PRIVATE
+    _CRT_SECURE_NO_WARNINGS
+    DX12_API
+    _SILENCE_CXX20_CISO646_REMOVED_WARNING
+    PIX
+    ENABLE_GPU_BASED_VALIDATION
+    _CONSOLE
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+    UNICODE
+    _UNICODE
+)
+
+# Find and link vcpkg packages
+
+# DirectX packages
+find_package(directxtex CONFIG QUIET)
+if(TARGET Microsoft::DirectXTex)
+    target_link_libraries(GameEngine PRIVATE Microsoft::DirectXTex)
+    message(STATUS "Found DirectXTex")
+endif()
+
+find_package(directxtk12 CONFIG QUIET)
+if(TARGET Microsoft::DirectXTK12)
+    target_link_libraries(GameEngine PRIVATE Microsoft::DirectXTK12)
+    message(STATUS "Found DirectXTK12")
+endif()
+
+find_package(directx-dxc CONFIG QUIET)
+if(TARGET Microsoft::DirectXShaderCompiler)
+    target_link_libraries(GameEngine PRIVATE Microsoft::DirectXShaderCompiler)
+    message(STATUS "Found DirectX Shader Compiler")
+endif()
+
+find_package(D3D12MemoryAllocator CONFIG QUIET)
+if(TARGET GPUOpen::D3D12MemoryAllocator)
+    target_link_libraries(GameEngine PRIVATE GPUOpen::D3D12MemoryAllocator)
+    message(STATUS "Found D3D12MemoryAllocator")
+elseif(TARGET D3D12MemoryAllocator)
+    target_link_libraries(GameEngine PRIVATE D3D12MemoryAllocator)
+    message(STATUS "Found D3D12MemoryAllocator")
+endif()
+
+find_package(directx-headers CONFIG QUIET)
+if(TARGET Microsoft::DirectX-Headers)
+    target_link_libraries(GameEngine PRIVATE Microsoft::DirectX-Headers)
+    message(STATUS "Found DirectX Headers")
+endif()
+if(TARGET Microsoft::DirectX-Guids)
+    target_link_libraries(GameEngine PRIVATE Microsoft::DirectX-Guids)
+    message(STATUS "Found DirectX Guids")
+endif()
+
+# JSON library
+find_package(nlohmann_json CONFIG QUIET)
+if(TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(GameEngine PRIVATE nlohmann_json::nlohmann_json)
+    message(STATUS "Found nlohmann_json")
+endif()
+
+# Compression libraries
+find_package(unofficial-minizip CONFIG QUIET)
+if(TARGET unofficial::minizip::minizip)
+    target_link_libraries(GameEngine PRIVATE unofficial::minizip::minizip)
+    message(STATUS "Found minizip")
+endif()
+
+find_package(kubazip CONFIG QUIET)
+if(TARGET kubazip::kubazip)
+    target_link_libraries(GameEngine PRIVATE kubazip::kubazip)
+    message(STATUS "Found kubazip")
+endif()
+
+find_package(ZLIB QUIET)
+if(TARGET ZLIB::ZLIB)
+    target_link_libraries(GameEngine PRIVATE ZLIB::ZLIB)
+    message(STATUS "Found zlib")
+endif()
+
+# XML library
+find_package(pugixml CONFIG QUIET)
+if(TARGET pugixml::pugixml)
+    target_link_libraries(GameEngine PRIVATE pugixml::pugixml)
+    message(STATUS "Found pugixml")
+elseif(TARGET pugixml)
+    target_link_libraries(GameEngine PRIVATE pugixml)
+    message(STATUS "Found pugixml")
+endif()
+
+# SDL3
+find_package(SDL3 CONFIG QUIET)
+if(TARGET SDL3::SDL3)
+    target_link_libraries(GameEngine PRIVATE SDL3::SDL3)
+    message(STATUS "Found SDL3")
+elseif(TARGET SDL3::SDL3-shared)
+    target_link_libraries(GameEngine PRIVATE SDL3::SDL3-shared)
+    message(STATUS "Found SDL3 (shared)")
+endif()
+
+# UTF8 library
+find_package(utf8cpp CONFIG QUIET)
+if(TARGET utf8cpp)
+    target_link_libraries(GameEngine PRIVATE utf8cpp)
+    message(STATUS "Found utf8cpp")
+endif()
+
+# Geometry libraries
+find_package(polyclipping CONFIG QUIET)
+if(TARGET polyclipping::polyclipping)
+    target_link_libraries(GameEngine PRIVATE polyclipping::polyclipping)
+    message(STATUS "Found polyclipping")
+endif()
+
+find_package(poly2tri CONFIG QUIET)
+if(TARGET poly2tri::poly2tri)
+    target_link_libraries(GameEngine PRIVATE poly2tri::poly2tri)
+    message(STATUS "Found poly2tri")
+endif()
+
+find_package(draco CONFIG QUIET)
+if(TARGET draco::draco)
+    target_link_libraries(GameEngine PRIVATE draco::draco)
+    message(STATUS "Found draco")
+endif()
+
+# Header-only libraries
+find_path(STB_INCLUDE_DIR stb_image.h PATH_SUFFIXES stb)
+if(STB_INCLUDE_DIR)
+    target_include_directories(GameEngine PRIVATE ${STB_INCLUDE_DIR})
+    message(STATUS "Found stb at ${STB_INCLUDE_DIR}")
+endif()
+
+find_path(TINYGLTF_INCLUDE_DIR tiny_gltf.h)
+if(TINYGLTF_INCLUDE_DIR)
+    target_include_directories(GameEngine PRIVATE ${TINYGLTF_INCLUDE_DIR})
+    message(STATUS "Found tinygltf at ${TINYGLTF_INCLUDE_DIR}")
+endif()
+
+# Link Windows system libraries
+target_link_libraries(GameEngine PRIVATE
+    d3d12.lib
+    dxgi.lib
+    d3dcompiler.lib
+    kernel32.lib
+    user32.lib
+    gdi32.lib
+    winspool.lib
+    shell32.lib
+    ole32.lib
+    oleaut32.lib
+    uuid.lib
+    comdlg32.lib
+    advapi32.lib
+)
+
+# PhysX libraries - Debug configuration (all static libraries)
+target_link_libraries(GameEngine PRIVATE
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysX_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXCommon_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXCooking_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXFoundation_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXExtensions_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXCharacterKinematic_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXPvdSDK_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXTask_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PhysXVehicle2_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/PVDRuntime_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/LowLevel_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/LowLevelAABB_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/LowLevelDynamics_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/SceneQuery_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/SimulationController_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/SnippetRender_static_64.lib>
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/Libraries/physX_debug/SnippetUtils_static_64.lib>
+)
+
+# PhysX libraries - Release configuration
+target_link_libraries(GameEngine PRIVATE
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysX_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCommon_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCooking_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXFoundation_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXExtensions_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCharacterKinematic_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXPvdSDK_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXTask_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXVehicle2_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PVDRuntime_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevel_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevelAABB_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevelDynamics_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SceneQuery_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SimulationController_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SnippetRender_static_64.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SnippetUtils_static_64.lib>
+)
+
+# PhysX libraries - RelWithDebInfo configuration (use release libs)
+target_link_libraries(GameEngine PRIVATE
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysX_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCommon_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCooking_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXFoundation_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXExtensions_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXCharacterKinematic_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXPvdSDK_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXTask_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PhysXVehicle2_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/PVDRuntime_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevel_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevelAABB_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/LowLevelDynamics_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SceneQuery_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SimulationController_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SnippetRender_static_64.lib>
+    $<$<CONFIG:RelWithDebInfo>:${CMAKE_SOURCE_DIR}/Libraries/physX_checked/SnippetUtils_static_64.lib>
+)
+
+# MSVC settings
+if(MSVC)
+    target_compile_options(GameEngine PRIVATE 
+        /W3                 # Warning level 3
+        /MP                 # Multi-processor compilation
+        /permissive-        # Standards conformance
+        /Zc:__cplusplus     # Enable correct __cplusplus macro
+    )
+    
+    # Debug-specific flags
+    target_compile_options(GameEngine PRIVATE 
+        $<$<CONFIG:Debug>:/Od /Zi /RTC1>
+    )
+    
+    # Release-specific flags
+    target_compile_options(GameEngine PRIVATE 
+        $<$<CONFIG:Release>:/O2 /GL>
+    )
+    
+    # Link-time code generation for Release
+    target_link_options(GameEngine PRIVATE
+        $<$<CONFIG:Release>:/LTCG>
+    )
+endif()
+
+# Copy DLLs after build
+add_custom_command(TARGET GameEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/GameEngine/PhysX_64.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/PhysXCommon_64.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/PhysXCooking_64.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/PhysXFoundation_64.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/PVDRuntime_64.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/dxcompiler.dll"
+        "${CMAKE_SOURCE_DIR}/GameEngine/dxil.dll"
+        $<TARGET_FILE_DIR:GameEngine>
+)
+
+# Copy Data and Shaders folders
+add_custom_command(TARGET GameEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/GameEngine/Data"
+        "$<TARGET_FILE_DIR:GameEngine>/Data"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/GameEngine/Shaders"
+        "$<TARGET_FILE_DIR:GameEngine>/Shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/GameEngine/Save files"
+        "$<TARGET_FILE_DIR:GameEngine>/Save files"
+)
+
+# Visual Studio source organization
+source_group(TREE "${CMAKE_SOURCE_DIR}/GameEngine/Source" PREFIX "Source Files" FILES ${SOURCES})
+source_group(TREE "${CMAKE_SOURCE_DIR}/GameEngine/Source" PREFIX "Header Files" FILES ${HEADERS})
+
+# Set GameEngine as startup project in Visual Studio
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GameEngine)
+
+message(STATUS "CMake configuration complete!")
+message(STATUS "Build configurations: Debug, Release, RelWithDebInfo")
