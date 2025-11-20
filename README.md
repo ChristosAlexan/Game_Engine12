@@ -50,5 +50,5 @@ https://github.com/user-attachments/assets/6e91a4ea-0161-452a-8148-3c3259c7cda5
 ## Build Instructions
 1. Clone the repository
 2. Run install_deps.bat to download necessary dependencies
-3. Open the project in Visual Studio 2026  
+3. Use CMake to generate the project files. The path must be [ProjectPath]/build
 4. Build in x64 Debug/Release   
