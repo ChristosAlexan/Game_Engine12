@@ -41,9 +41,28 @@ file(GLOB_RECURSE HEADERS
     "GameEngine/Source/Physics/*.hpp"
 )
 
+file(GLOB_RECURSE SHADERS 
+    "GameEngine/Shaders/*.hlsl"
+    "GameEngine/Shaders/*.hlsli"
+)
+
 # Create executable
-add_executable(GameEngine WIN32 ${SOURCES} ${HEADERS})
+add_executable(GameEngine WIN32 ${SOURCES} ${HEADERS} ${SHADERS})
 # The target name is: GameEngine
+
+# Loop through all collected shader files
+foreach(shader_file IN ITEMS ${SHADERS})
+    set_source_files_properties(
+        "${shader_file}"
+        PROPERTIES
+            # This property makes the file appear in the Solution Explorer
+            # but tells the VS compiler to exclude it from the main C++ build.
+            HEADER_FILE_ONLY TRUE 
+            
+            # Set the desired Shader Model property for editing/IDE organization
+            VS_SHADER_MODEL "6.8" 
+    )
+endforeach()
 
 # 1. Target the 'GameEngine' directory relative to the source root
 # Define the source code directory
@@ -56,6 +75,11 @@ set_target_properties(GameEngine PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${ASSET_ROOT_DIR}"
 )
 
+
+set_target_properties(GameEngine PROPERTIES
+    VS_SHADER_MODEL "6.8"
+)
+
 # Include directories
 target_include_directories(GameEngine PRIVATE
     # Source directories
@@ -66,6 +90,7 @@ target_include_directories(GameEngine PRIVATE
     ${CMAKE_SOURCE_DIR}/GameEngine/Source/GFX
     ${CMAKE_SOURCE_DIR}/GameEngine/Source/ImGui
     ${CMAKE_SOURCE_DIR}/GameEngine/Source/Physics
+	  ${CMAKE_SOURCE_DIR}/GameEngine/Shaders
     
     # External includes
     ${CMAKE_SOURCE_DIR}/Includes
@@ -349,7 +374,7 @@ add_custom_command(TARGET GameEngine POST_BUILD
 # Visual Studio source organization
 source_group(TREE "${CMAKE_SOURCE_DIR}/GameEngine/Source" PREFIX "Source Files" FILES ${SOURCES})
 source_group(TREE "${CMAKE_SOURCE_DIR}/GameEngine/Source" PREFIX "Header Files" FILES ${HEADERS})
-
+source_group(TREE "${CMAKE_SOURCE_DIR}/GameEngine/" PREFIX "Shaders" FILES ${SHADERS})
 # Set GameEngine as startup project in Visual Studio
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GameEngine)
 
