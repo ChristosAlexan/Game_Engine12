@@ -11,21 +11,20 @@ Engine::Engine()
 {
 }
 
-bool Engine::Initialize(int width, int height)
+bool Engine::Initialize()
 {
-	this->width = width;
-	this->height = height;
-
 	timer.Start();
 
-	if (!game_window.Initialize(width, height))
+	if (!game_window.Initialize())
 		return false;
 
+	this->width = game_window.GetScreenResoulution().x;
+	this->height = game_window.GetScreenResoulution().y;
 
 	InitializeSceneManager();
 	InitializeDirectX12();
 	// Load scenes from .json files
-	CreateScenes(width, height);
+	CreateScenes();
 
 	return true;
 }
@@ -35,7 +34,7 @@ bool Engine::StopEngine()
 	return bStopEngine;
 }
 
-void Engine::Update(int width, int height)
+void Engine::Update()
 {
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
@@ -180,7 +179,7 @@ void Engine::InitializeDirectX12()
 	m_sceneManager->AllocateRenderingManager();
 	m_sceneManager->GetRenderingManager()->Initialize(game_window, width, height);
 }
-void Engine::CreateScenes(int& width, int& height)
+void Engine::CreateScenes()
 {
 	m_sceneManager->InitializeManagers(game_window, width, height, m_sceneManager->GetRenderingManager()->GetDX12().GetDevice(),
 		m_sceneManager->GetRenderingManager()->GetDX12().GetCmdList(), m_sceneManager->GetRenderingManager()->GetDX12().GetDescriptorAllocator());

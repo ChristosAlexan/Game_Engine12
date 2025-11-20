@@ -32,14 +32,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return -1;
 	}
 
-	const int w = 1600;
-	const int h = 900;
 	Engine engine;
-	if (engine.Initialize(w, h))
+	if (engine.Initialize())
 	{
 		while (engine.StopEngine() != true)
 		{
-			engine.Update(w, h);
+			engine.Update();
 		}
 	}
 	ClipCursor(NULL);

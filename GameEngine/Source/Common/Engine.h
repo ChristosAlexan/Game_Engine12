@@ -18,14 +18,14 @@ class Engine
 public:
 	Engine();
 
-	bool Initialize(int width, int height);
+	bool Initialize();
 	bool StopEngine();
-	void Update(int width, int height);
+	void Update();
 
 private:
 	void InitializeSceneManager();
 	void InitializeDirectX12();
-	void CreateScenes(int& width, int& height);
+	void CreateScenes();
 private:
 	AppTimer timer;
 	//Camera camera;
