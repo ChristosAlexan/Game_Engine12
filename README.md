@@ -22,7 +22,6 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 ## Roadmap / Work in Progress
 - global illumination (RTXGI)   
 - Scene graph for hierarchical transformations  
-- Post-processing effects: Bloom, SSR, SSAO  
 
 ---
 
