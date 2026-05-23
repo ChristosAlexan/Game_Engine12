@@ -24,7 +24,7 @@ namespace ECS
 		RenderingManager();
 		~RenderingManager();
 		bool Initialize(GameWindow& game_window, int width, int height);
-		void InitializeRenderTargets(int& width, int& height);
+		void InitializeRenderTargets();
 		void InitializeShadowTextures(Scene* scene);
 		void PopulateRayTracingData(Scene* scene);
 		void BuildTLAS(Scene* scene);
@@ -49,15 +49,18 @@ namespace ECS
 	private:
 		void RayTracedShadows(Scene* scene);
 		void RayTracedReflections(Scene* scene);
+		void RayTracedAO(Scene* scene);
 		void RenderLightPass(Scene* scene);
 
 
 	private:
+		int m_screenWidth, m_screenHeight;
 		DX12 m_dx12;
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
 		Texture12* m_shadowsTexture = nullptr; // Ray traced shadows output
 		std::unique_ptr<Texture12> m_reflectionsTexture; // Ray traced reflections output
+		std::unique_ptr<Texture12> m_AOTexture; // Ray traced ambient occlusion output
 		std::unique_ptr<Texture12> m_bindlessAlbedoTextures; // Bindless albedo textures for rt reflections
 		std::unique_ptr<RenderTargetTexture> m_brdfMap;
 		std::unique_ptr<RTEntityHandle> m_rtEntityHandle;
@@ -82,6 +85,7 @@ namespace ECS
 		float m_gamma;
 		bool m_bEnableDebugDraw = false;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
+		CB_AO_Data aoData;
 	};
 }
 

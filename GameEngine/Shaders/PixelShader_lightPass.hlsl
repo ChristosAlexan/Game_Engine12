@@ -28,6 +28,9 @@ float3 dirLight(float3 albedo, float3 normal, float metallic, float roughness, f
 
 float3 BlinnPhongPointLight(float3 albedo, float3 normal, float3 worldPos, uint index);
 
+float BlurShadowBilateral(uint lightIndex, float2 uv, int range, float3 centerWorldPos, float3 centerNormal);
+float BlurAOBilateral(float2 uv, int range, float3 centerWorldPos, float3 centerNormal);
+
 Texture2D albedoTexture : register(t0, space0);
 Texture2D normalTexture : register(t1, space0);
 Texture2D roughMetalMaskTexture : register(t2, space0);
@@ -37,6 +40,7 @@ TextureCube irradianceTexture : register(t1, space4);
 Texture2D brdfTexture : register(t2, space4);
 Texture2DArray<float> raytracedShadowTexture : register(t3, space4);
 Texture2D<float4> raytracedReflectionsTexture : register(t4, space4);
+Texture2D<float4> raytracedAOTexture : register(t5, space4);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -94,19 +98,7 @@ float4 Main(PSInput input) : SV_TARGET
         float att = baseAtt * fade;
         
         
-        // PCF
-        float shadow = 0.0;
-        float2 shadowRes = g_Shadows[i].shadowResolution;
-        float2 texelSize = 1.0 / shadowRes;
-        
-        for (int x = -g_Shadows[i].pcfRange; x <= g_Shadows[i].pcfRange; ++x)
-        {
-            for (int y = -g_Shadows[i].pcfRange; y <= g_Shadows[i].pcfRange; ++y)
-            {
-                shadow += raytracedShadowTexture.Sample(gSampler, float3(input.uv + float2(x, y) * texelSize, i)).r;
-            }
-        }
-        shadow /= 9.0;
+        float shadow = BlurShadowBilateral(i, input.uv, 2, worldPos, normal);
         
         switch (g_Lights[i].lighType)
         {
@@ -139,6 +131,7 @@ float4 Main(PSInput input) : SV_TARGET
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
 
     float3 rtReflections = raytracedReflectionsTexture.Sample(gSampler, input.uv).xyz;
+    float rtAO = BlurAOBilateral(input.uv, 2, worldPos, normal);
     float3 finalReflections = float3(0.0f,0.0f,0.0f);
     if (rtReflections.r == 0.0f && rtReflections.g == 0.0f && rtReflections.b == 0.0f)
         finalReflections = prefilteredColor;
@@ -149,7 +142,7 @@ float4 Main(PSInput input) : SV_TARGET
     
     float3 ambient = (kD * diffuse + specular) * ambientStrength;
     float3 color = ambient + Lo;
-
+    color *= rtAO;
     color = ReinhardToneMapping(color, exposure);
     
     return float4(color, 1.0);
@@ -304,4 +297,88 @@ float3 BlinnPhongPointLight(float3 albedo, float3 normal, float3 worldPos, uint 
     float3 specular = pow(NdotH, specularPower) * specularStrength;
 
     return (diffuse + specular) * g_Lights[index].color * g_Lights[index].strength;
+}
+
+float BlurShadowBilateral(uint lightIndex, float2 uv, int range, float3 centerWorldPos, float3 centerNormal)
+{
+    float2 shadowRes = g_Shadows[lightIndex].shadowResolution;
+    float2 texelSize = 1.0f / shadowRes;
+
+    float sum = 0.0f;
+    float weightSum = 0.0f;
+
+    for (int x = -range; x <= range; ++x)
+    {
+        for (int y = -range; y <= range; ++y)
+        {
+            float2 sampleUV = uv + float2(x, y) * texelSize;
+
+            float shadowSample = raytracedShadowTexture.Sample(gSampler, float3(sampleUV, lightIndex)).r;
+
+            float3 sampleWorldPos = worldPosDepthTexture.Sample(gSampler, sampleUV).xyz;
+            float3 sampleNormal = normalize(normalTexture.Sample(gSampler, sampleUV).xyz);
+
+            float normalWeight = saturate(dot(centerNormal, sampleNormal));
+
+            float positionDistance = length(sampleWorldPos - centerWorldPos);
+            
+            float positionWeight = saturate(1.0f - positionDistance / 0.15f);
+
+            // Reject different surfaces
+            if (normalWeight < 0.75f)
+                continue;
+
+            if (positionDistance > 0.25f)
+                continue;
+
+            float spatialWeight = 1.0f / (1.0f + abs(x) + abs(y));
+
+            float weight = normalWeight * positionWeight * spatialWeight;
+
+            sum += shadowSample * weight;
+            weightSum += weight;
+        }
+    }
+
+    return sum / max(weightSum, 0.0001f);
+}
+
+float BlurAOBilateral(float2 uv, int range, float3 centerWorldPos, float3 centerNormal)
+{
+    float2 texelSize = 1.0f / screenSize.xy;
+
+    float sum = 0.0f;
+    float weightSum = 0.0f;
+
+    for (int x = -range; x <= range; ++x)
+    {
+        for (int y = -range; y <= range; ++y)
+        {
+            float2 sampleUV = uv + float2(x, y) * texelSize;
+
+            float aoSample = raytracedAOTexture.Sample(gSampler, sampleUV).r;
+
+            float3 sampleWorldPos = worldPosDepthTexture.Sample(gSampler, sampleUV).xyz;
+            float3 sampleNormal = normalize(normalTexture.Sample(gSampler, sampleUV).xyz);
+
+            float normalWeight = saturate(dot(centerNormal, sampleNormal));
+            float positionDistance = length(sampleWorldPos - centerWorldPos);
+
+            if (normalWeight < 0.75f)
+                continue;
+
+            if (positionDistance > 0.25f)
+                continue;
+
+            float positionWeight = saturate(1.0f - positionDistance / 0.15f);
+            float spatialWeight = 1.0f / (1.0f + abs(x) + abs(y));
+
+            float weight = normalWeight * positionWeight * spatialWeight;
+
+            sum += aoSample * weight;
+            weightSum += weight;
+        }
+    }
+
+    return sum / max(weightSum, 0.0001f);
 }

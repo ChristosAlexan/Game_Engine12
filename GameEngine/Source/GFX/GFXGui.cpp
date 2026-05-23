@@ -98,6 +98,14 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metric
 	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);
+	if (ImGui::TreeNode("AO Settings"))
+	{
+		ImGui::DragFloat("AO Radius", &scene->GetRenderingManager()->aoData.AORadius, 0.01f);
+		ImGui::DragFloat("Normal Bias", &scene->GetRenderingManager()->aoData.NormalBias, 0.01f);
+		ImGui::DragInt("Sample Count", &scene->GetRenderingManager()->aoData.SampleCount, 1, 1, 100);
+
+		ImGui::TreePop();
+	}
 	ImGui::End();
 
 	ImGui::Begin("Models");
@@ -203,8 +211,8 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 					ImGui::DragFloat(label.c_str(), &lightComponent.strength, 0.01, 0);
 					label = "Cutoff" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
 					ImGui::DragFloat(label.c_str(), &lightComponent.cutoff, 0.01, 0);
-					label = "PcfRange" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
-					ImGui::DragInt(label.c_str(), &lightComponent.pcfRange, 1, 0);
+					label = "ShadowSamples" + std::to_string(static_cast<uint32_t>(m_closestEntity)) + "##";
+					ImGui::DragInt(label.c_str(), &lightComponent.ShadowSamples, 1, 0);
 				}
 			}
 		}

@@ -14,13 +14,14 @@ public:
 	bool Initialize();
 	HWND& GetWindow();
 	SDL_Window* GetSDLWindow() const;
-	DirectX::XMFLOAT2 GetScreenResoulution() const;
+	int GetScreenWidth() const;
+	int GetScreenHeight() const;
 	int GetRefreshRate() const;
 	
 private:
 	SDL_Window* m_window;
 	HWND m_nativeHwnd;
-	DirectX::XMFLOAT2 m_screenResolution;
+	int m_screenWidth, m_screenHeight;
 	int m_refreshRate;
 };
 

@@ -24,10 +24,10 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRaytracingInstanceUploadBuffer(UINT64 size, const void* initData);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRayTracingBuffer(UINT64 size, D3D12_RESOURCE_STATES initialState);
 	void WaitForGPU(ID3D12CommandQueue* commandQueue, ID3D12Fence* fence, HANDLE fenceEvent, UINT64& fenceValue);
-	void Initialize(HWND hwnd, int& width, int& height);
+	void Initialize(HWND hwnd, const int width, const int height);
 	void CreateDeviceAndFactory();
 	void CreateCommandObjects();
-	void CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height);
+	void CreateSwapChainAndRTVs(HWND& hwnd, const int width, const int height);
 	void CreateFenceAndSyncObjects();
 	void CreateSamplerStates();
 	void CreateRootSignature(CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC& rootSigDesc, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
@@ -39,13 +39,13 @@ public:
 	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
 	void CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12StateObject>& rtpso);
 	void CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources);
-	void CreateDepthStencilBuffer(int& width, int& height);
+	void CreateDepthStencilBuffer(const int width, const int height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
 	void TransitionBackBufferToPresent();
 	void SetRenderTargetToBackBuffer();
-	void StartRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt);
-	void EndRenderFrame(GFXGui& gui, Camera& camera, int width, int height, float& dt);
+	void StartRenderFrame(GFXGui& gui, Camera& camera, const int width, const int height, float& dt);
+	void EndRenderFrame(GFXGui& gui, Camera& camera, const int width, const int height, float& dt);
 
 	void ResetCommands();
 	void ResetCommandList();
@@ -67,6 +67,7 @@ public:
 
 	ECS::rayTracingResources& GetRayTracedShadowsResources();
 	ECS::rayTracingResources& GetRayTracedReflectionsResources();
+	ECS::rayTracingResources& GetRayTracedAOResources();
 public:
 	DXCShaderCompiler shaderCompiler;
 	std::unique_ptr<DynamicUploadBuffer> dynamicCB;
@@ -111,7 +112,7 @@ private:
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc;
 	AppTimer timer;
 
-	ECS::rayTracingResources m_rayTracedShadows, m_rayTracedReflections;
+	ECS::rayTracingResources m_rayTracedShadows, m_rayTracedReflections, m_rayTracedAO;
 	const wchar_t* c_hitGroupName = L"MyHitGroup";
 	const wchar_t* c_raygenShaderName = L"MyRaygenShader";
 	const wchar_t* c_closestHitShaderName = L"MyClosestHitShader";

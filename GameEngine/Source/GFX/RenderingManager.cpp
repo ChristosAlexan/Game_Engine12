@@ -23,14 +23,17 @@ namespace ECS
 	{
 		GetDX12().WaitForGPU(GetDX12().GetCommandQueue(), GetDX12().fence.Get(), GetDX12().fenceEvent, GetDX12().fenceValue);
 		m_reflectionsTexture.reset();
+		m_AOTexture.reset();
 		m_bindlessAlbedoTextures.reset();
 		m_rtEntityHandle.reset();
 	}
 
 	bool RenderingManager::Initialize(GameWindow& game_window, int width, int height)
 	{
+		m_screenWidth = game_window.GetScreenWidth();
+		m_screenHeight = game_window.GetScreenHeight();
 
-		GetDX12().Initialize(game_window.GetWindow(), width, height);
+		GetDX12().Initialize(game_window.GetWindow(), game_window.GetScreenWidth(), game_window.GetScreenHeight());
 		if (!m_gui.Initialize(game_window.GetSDLWindow(), GetDX12().GetDevice(), GetDX12().GetCommandQueue(), GetDX12().GetRtvHeap(), GetDX12().GetDescriptorAllocator()))
 		{
 			ErrorLogger::Log("Failed to initialize ImGui!");
@@ -41,11 +44,11 @@ namespace ECS
 		return true;
 	}
 
-	void RenderingManager::InitializeRenderTargets(int& width, int& height)
+	void RenderingManager::InitializeRenderTargets()
 	{
 		hdr_map1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), "Data/HDR/qwantani_dusk_2_puresky_2k.hdr");
 
-		m_gBuffer.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), width, height);
+		m_gBuffer.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), m_screenWidth, m_screenHeight);
 		m_cubeMap1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512);
 		m_irradianceMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 64, 64);
 		m_prefilterMap.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, 5);
@@ -58,11 +61,20 @@ namespace ECS
 		m_reflectionsTexture = std::make_unique<Texture12>();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = width;
-		textDesc.height = height;
+		textDesc.width = m_screenWidth;
+		textDesc.height = m_screenHeight;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_reflectionsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
+
+		// Ray traced ambient occlusion UAV texture initialization
+		m_AOTexture = std::make_unique<Texture12>();
+		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		textDesc.width = m_screenWidth;
+		textDesc.height = m_screenHeight;
+		textDesc.slices = 1;
+		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		m_AOTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
 	}
 
 	void RenderingManager::InitializeShadowTextures(Scene* scene)
@@ -428,6 +440,33 @@ namespace ECS
 		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
+	void RenderingManager::RayTracedAO(Scene* scene)
+	{
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedAOResources());
+
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		// Transition back to unorder access
+		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
+		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedAOResources().rtpso.Get());
+
+
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_AOTexture->GetGPUHandleUAV());
+
+		if (GetDX12().dynamicCB)
+		{
+			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(11, GetDX12().dynamicCB->Allocate(aoData));
+		}
+
+		GetDX12().DispatchRaytracing();
+
+		// Transition to shader resource
+		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+
 	void RenderingManager::DispatchRays(Scene* scene)
 	{
 		RefitBLAS(scene);
@@ -437,11 +476,14 @@ namespace ECS
 		RayTracedShadows(scene);
 		// Ray traced reflections
 		RayTracedReflections(scene);
+		// Ray traced ambient occlusion
+		RayTracedAO(scene);	
 	}
 
 	void RenderingManager::RenderLightPass(Scene* scene)
 	{
 		CB_PS_PBR cb_ps_pbr = {};
+		CB_Shader_Camera psCameraCB = {};
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		CB_SHADER_LIGHTS lights_data = {};
@@ -491,14 +533,21 @@ namespace ECS
 		cb_ps_pbr.ambientColor = GetAmbientColor();
 		cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(GetExposure(), GetGamma(), 0.0f, 0.0f);
 
+		psCameraCB.cameraPos = scene->GetCamera().pos;
+		psCameraCB.screenSize = DirectX::XMFLOAT2(static_cast<float>(GetDX12().GetScreenWidth()), static_cast<float>(GetDX12().GetScreenHeight()));
+		psCameraCB.padding1 = 0.0f;
+		psCameraCB.padding2 = 0.0f;
+
 		m_brdfMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsTexture->GetGPUHandle());
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
 		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(21, m_reflectionsTexture->GetGPUHandle());
+		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(22, m_AOTexture->GetGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();

@@ -91,7 +91,6 @@ namespace ECS
 			lightComponent.cutoff = entityDesc.lightComponent.cutoff;
 			lightComponent.color = entityDesc.lightComponent.color;
 			renderComponent.material->baseColor = DirectX::XMFLOAT4(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
-			lightComponent.pcfRange = entityDesc.lightComponent.pcfRange;
 
 			m_registry->emplace<LightComponent>(id, lightComponent);
 		}

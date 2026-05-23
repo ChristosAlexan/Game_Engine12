@@ -123,7 +123,7 @@ inline void PrintStateObjectDesc(const D3D12_STATE_OBJECT_DESC* desc)
 DX12::DX12()
 {
     timer.Start();
-    m_vsync = 1;
+    m_vsync = 0;
 }
 
 DX12::~DX12()
@@ -134,6 +134,7 @@ DX12::~DX12()
     m_rayTracedShadows.m_sbtUploadBuffer.Reset();
     m_rayTracedReflections.m_sbtBuffer.Reset();
     m_rayTracedReflections.m_sbtUploadBuffer.Reset();
+    m_rayTracedAO.m_sbtUploadBuffer.Reset();
     swapChain.Reset();
     commandQueue.Reset();
     fence.Reset();
@@ -322,7 +323,12 @@ ECS::rayTracingResources& DX12::GetRayTracedReflectionsResources()
     return m_rayTracedReflections;
 }
 
-void DX12::Initialize(HWND hwnd, int& width, int& height)
+ECS::rayTracingResources& DX12::GetRayTracedAOResources()
+{
+    return m_rayTracedAO;
+}
+
+void DX12::Initialize(HWND hwnd, const int width, const int height)
 {
     m_screenWidth = width;
     m_screenHeight = height;
@@ -415,7 +421,7 @@ void DX12::CreateCommandObjects()
     commandList->Close();
 }
 
-void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
+void DX12::CreateSwapChainAndRTVs(HWND& hwnd, const int width, const int height)
 {
     // --- Create RTV Descriptor Heap ---
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
@@ -437,6 +443,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, int& width, int& height)
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.SampleDesc.Count = 1;
+    swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain1> tempSwapChain;
     hr = factory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, &tempSwapChain);
@@ -689,6 +696,11 @@ void DX12::InitializeShaders()
         auto rayTraceBlob = compiler.CompileShader(L"Shaders/RayTracedReflectionsShader.hlsl", std::wstring{}, L"lib_6_8");
         CreateRTPSO(rayTraceBlob.Get(), m_rayTracedReflections.rtpso);
     }
+    // Ray tracing AO shader
+    {
+        auto rayTraceBlob = compiler.CompileShader(L"Shaders/RayTracedAOShader.hlsl", std::wstring{}, L"lib_6_8");
+        CreateRTPSO(rayTraceBlob.Get(), m_rayTracedAO.rtpso);
+    }
 
     // Compute shader
     {
@@ -877,7 +889,7 @@ void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources)
     dispatchDesc.HitGroupTable.SizeInBytes = numHitGroups * recordSize;
 }
 
-void DX12::CreateDepthStencilBuffer(int& width, int& height)
+void DX12::CreateDepthStencilBuffer(const int width, const int height)
 {
     HRESULT hr;
     DXGI_FORMAT depthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -949,8 +961,10 @@ void DX12::InitializeBuffers()
     srvSkinningStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 8); // u1 space8 test compute output
     CD3DX12_DESCRIPTOR_RANGE1 raytracedReflectionsLightPassSrvRange;
     raytracedReflectionsLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 4); // t4 space4 raytraced reflections lightpass input
+    CD3DX12_DESCRIPTOR_RANGE1 raytracedAOLightPassSrvRange;
+    raytracedAOLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 4); // t5 space4 raytraced ambient occlusion lightpass input
 
-    CD3DX12_ROOT_PARAMETER1 rootParams[22];
+    CD3DX12_ROOT_PARAMETER1 rootParams[23];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -976,6 +990,7 @@ void DX12::InitializeBuffers()
     rootParams[19].InitAsDescriptorTable(1, &srvSkinningStructuredBuffer, D3D12_SHADER_VISIBILITY_VERTEX); // u1 space8: UAV skinning structured buffer out
     rootParams[20].InitAsDescriptorTable(1, &srvShadowsStructuredBuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space2: shadows structured buffer SRV
     rootParams[21].InitAsDescriptorTable(1, &raytracedReflectionsLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t4 space4: PS raytraced reflections map
+    rootParams[22].InitAsDescriptorTable(1, &raytracedAOLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t5 space4: PS raytraced ambient occlusion map
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -992,7 +1007,7 @@ void DX12::InitializeBuffers()
     CD3DX12_DESCRIPTOR_RANGE1 srvRtMeshDataOffsetsStructuredBuffer;
     srvRtMeshDataOffsetsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 11); // t3 space10 mesh data offsets SRV for rt reflections
 
-    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[11];
+    CD3DX12_ROOT_PARAMETER1  globalRaytracingRootParams[12];
     globalRaytracingRootParams[0].InitAsDescriptorTable(1, &srvRangeGbuffer, D3D12_SHADER_VISIBILITY_ALL); // t0 space0: PS Gbuffer textures
     globalRaytracingRootParams[1].InitAsShaderResourceView(0, 6, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // t0 space 5: ray tracing TLAS buffer
     globalRaytracingRootParams[2].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL); // u0 space5: UAV raytracing UAV output
@@ -1004,6 +1019,7 @@ void DX12::InitializeBuffers()
     globalRaytracingRootParams[8].InitAsDescriptorTable(1, &srvRtIndexStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t2 space10 index data SRV for rt reflections
     globalRaytracingRootParams[9].InitAsDescriptorTable(1, &srvRtMeshDataOffsetsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL); // t3 space10 mesh data offsets SRV for rt reflections
     globalRaytracingRootParams[10].InitAsConstantBufferView(5, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b5 space0 mesh data rt reflections
+    globalRaytracingRootParams[11].InitAsConstantBufferView(5, 1, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); // b5 space1 rt AO params
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC globalRaytracingRootSigDesc;
     globalRaytracingRootSigDesc.Init_1_1(_countof(globalRaytracingRootParams), globalRaytracingRootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_NONE);
@@ -1103,8 +1119,19 @@ void DX12::EndRenderFrame(GFXGui& gui, Camera& camera, int width, int height, fl
 
     TransitionBackBufferToPresent();
     SubmitCommand();
-    // Present the frame
-    swapChain->Present(m_vsync, 0);
+    UINT syncInterval = m_vsync ? 1 : 0;
+    UINT presentFlags = 0;
+
+    if (!m_vsync)
+    {
+        presentFlags = DXGI_PRESENT_ALLOW_TEARING;
+    }
+
+    HRESULT hr = swapChain->Present(syncInterval, presentFlags);
+    if (FAILED(hr))
+    {
+        COM_ERROR_IF_FAILED(hr, "Failed to present swap chain");
+    }
     //Update frame index
     frameIndex = swapChain->GetCurrentBackBufferIndex();
 }

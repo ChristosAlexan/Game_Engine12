@@ -39,6 +39,8 @@ struct CB_Shader_Camera
 {
 	DirectX::XMFLOAT3 cameraPos;
 	float padding1;
+	DirectX::XMFLOAT2 screenSize;
+	float padding2;
 };
 
 struct CB_PS_PBR
@@ -69,4 +71,12 @@ struct CB_RT_MeshData
 	uint32_t totalIndices;
 	uint32_t totalEntities;
 	float padding = 0.0f;
+};
+
+struct CB_AO_Data
+{
+	float AORadius = 0.05f;
+	float NormalBias = 0.01f;
+	uint32_t OutputSlice = 0;
+	int32_t SampleCount = 12;
 };

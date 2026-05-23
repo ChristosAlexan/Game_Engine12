@@ -16,8 +16,8 @@ bool GameWindow::Initialize()
     auto displayMode = SDL_GetCurrentDisplayMode(primaryDisplay);
     if (displayMode)
     {
-        m_screenResolution.x = displayMode->w;
-        m_screenResolution.y = displayMode->h;
+        m_screenWidth = displayMode->w;
+        m_screenHeight = displayMode->h;
         m_refreshRate = displayMode->refresh_rate;
     }
     else
@@ -28,7 +28,7 @@ bool GameWindow::Initialize()
 
     m_window = SDL_CreateWindow(
         "SDL window",
-        m_screenResolution.x, m_screenResolution.y,
+        GetScreenWidth(), GetScreenHeight(),
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_BORDERLESS
     );
 
@@ -36,11 +36,6 @@ bool GameWindow::Initialize()
     m_nativeHwnd = reinterpret_cast<HWND>(hwnd);
 
     return true;
-}
-
-DirectX::XMFLOAT2 GameWindow::GetScreenResoulution() const
-{
-    return m_screenResolution;
 }
 
 int GameWindow::GetRefreshRate() const
@@ -56,4 +51,14 @@ HWND& GameWindow::GetWindow()
 SDL_Window* GameWindow::GetSDLWindow() const
 {
 	return m_window;
+}
+
+int GameWindow::GetScreenWidth() const
+{
+    return m_screenWidth;
+}
+
+int GameWindow::GetScreenHeight() const
+{
+    return m_screenHeight;
 }

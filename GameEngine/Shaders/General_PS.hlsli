@@ -14,6 +14,8 @@ cbuffer CB_PS_Camera : register(b2)
 {
     float3 cameraPos;
     float padding1;
+    float2 screenSize;
+    float padding2;
 };
 
 cbuffer CB_PS_PBR : register(b3)

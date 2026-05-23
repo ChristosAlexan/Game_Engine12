@@ -18,8 +18,8 @@ bool Engine::Initialize()
 	if (!game_window.Initialize())
 		return false;
 
-	this->width = game_window.GetScreenResoulution().x;
-	this->height = game_window.GetScreenResoulution().y;
+	this->width = game_window.GetScreenWidth();
+	this->height = game_window.GetScreenHeight();
 
 	InitializeSceneManager();
 	InitializeDirectX12();
@@ -189,7 +189,7 @@ void Engine::CreateScenes()
 	m_sceneManager->GetCurrentScene()->LoadAssets();
 	m_sceneManager->GetCurrentScene()->LoadPhysics();
 	m_sceneManager->SetupLights();
-	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(width, height);
+	m_sceneManager->GetRenderingManager()->InitializeRenderTargets();
 	m_sceneManager->GetRenderingManager()->PopulateRayTracingData(m_sceneManager->GetCurrentScene());
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 

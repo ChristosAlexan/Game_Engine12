@@ -17,7 +17,7 @@ namespace ECS
 		float strength;
 		float radius;
 		float cutoff;
-		int pcfRange = 1;
+		int ShadowSamples = 4;
 	};
 
 	struct GPULight
