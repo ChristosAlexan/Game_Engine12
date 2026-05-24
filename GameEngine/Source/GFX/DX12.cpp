@@ -439,7 +439,7 @@ void DX12::CreateSwapChainAndRTVs(HWND& hwnd, const int width, const int height)
     swapChainDesc.BufferCount = 2;
     swapChainDesc.Width = width;
     swapChainDesc.Height = height;
-    swapChainDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.SampleDesc.Count = 1;
@@ -493,7 +493,7 @@ void DX12::CreateSamplerStates()
     samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+    samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     samplerDesc.MipLODBias = 0.0f;
     samplerDesc.MinLOD = 0;
     samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
@@ -551,6 +551,7 @@ void DX12::InitializeShaders()
     DXCShaderCompiler compiler;
     DXGI_FORMAT default_format8_UNORM = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT default_format16_FLOAT = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    DXGI_FORMAT format32_FLOAT = DXGI_FORMAT_R32G32B32A32_FLOAT;
     {
         auto vsBlob = compiler.CompileShader(L"Shaders/GbufferVS.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/PixelShader12.hlsl", L"Main", L"ps_6_8");
@@ -672,6 +673,18 @@ void DX12::InitializeShaders()
         };
         UINT layoutSize = _countof(inputLayout);
         CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Brdf, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+    }
+
+    {
+        auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
+        auto psBlob = compiler.CompileShader(L"Shaders/FXAA_Shader.hlsl", L"Main", L"ps_6_8");
+
+        D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        };
+        UINT layoutSize = _countof(inputLayout);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_FXAA, inputLayout, layoutSize, 1, &default_format8_UNORM, D3D12_CULL_MODE_NONE);
     }
 
     {
@@ -963,8 +976,10 @@ void DX12::InitializeBuffers()
     raytracedReflectionsLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 4); // t4 space4 raytraced reflections lightpass input
     CD3DX12_DESCRIPTOR_RANGE1 raytracedAOLightPassSrvRange;
     raytracedAOLightPassSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 4); // t5 space4 raytraced ambient occlusion lightpass input
+    CD3DX12_DESCRIPTOR_RANGE1 lightPassRange;
+    lightPassRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0); // t5 space0 lightPassMap
 
-    CD3DX12_ROOT_PARAMETER1 rootParams[23];
+    CD3DX12_ROOT_PARAMETER1 rootParams[25];
     rootParams[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // b0: VS transform matrices
     rootParams[1].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b0: PS
     rootParams[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space1: PS textures
@@ -991,6 +1006,9 @@ void DX12::InitializeBuffers()
     rootParams[20].InitAsDescriptorTable(1, &srvShadowsStructuredBuffer, D3D12_SHADER_VISIBILITY_PIXEL); // t1 space2: shadows structured buffer SRV
     rootParams[21].InitAsDescriptorTable(1, &raytracedReflectionsLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t4 space4: PS raytraced reflections map
     rootParams[22].InitAsDescriptorTable(1, &raytracedAOLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // t5 space4: PS raytraced ambient occlusion map
+
+	rootParams[23].InitAsConstantBufferView(5, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);  // b5: PS FXXA params
+    rootParams[24].InitAsDescriptorTable(1, &lightPassRange, D3D12_SHADER_VISIBILITY_PIXEL); // t5 space0: PS light pass render target
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);

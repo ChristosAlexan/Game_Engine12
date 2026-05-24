@@ -106,6 +106,13 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metric
 
 		ImGui::TreePop();
 	}
+	if (ImGui::TreeNode("FXAA Settings"))
+	{
+		ImGui::DragFloat("blendStrength", &scene->GetRenderingManager()->fxaaCB.blendStrength, 0.01f);
+		ImGui::DragFloat("contrastThreshold", &scene->GetRenderingManager()->fxaaCB.contrastThreshold, 0.01f);
+
+		ImGui::TreePop();
+	}
 	ImGui::End();
 
 	ImGui::Begin("Models");

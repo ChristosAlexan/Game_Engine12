@@ -57,12 +57,17 @@ namespace ECS
 		m_brdfMap = std::make_unique<RenderTargetTexture>(1);
 		m_brdfMap->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 512, 512, formats, 1);
 
+		std::vector<DXGI_FORMAT> LightPassformats = { DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT };
+		m_lightPassRenderTarget = std::make_unique<RenderTargetTexture>(1);
+		m_lightPassRenderTarget->Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetCommandAllocator(), GetDX12().GetSharedSrvHeap(), GetDX12().GetDescriptorAllocator(), 
+			GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight(), LightPassformats, 1);
+
 		// Ray traced reflections UAV texture initialization
 		m_reflectionsTexture = std::make_unique<Texture12>();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = m_screenWidth/2;
-		textDesc.height = m_screenHeight/2;
+		textDesc.width = m_screenWidth;
+		textDesc.height = m_screenHeight;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_reflectionsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -86,8 +91,8 @@ namespace ECS
 		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexturePtr();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R16_FLOAT;
-		textDesc.width = GetDX12().GetScreenWidth() / 2;
-		textDesc.height = GetDX12().GetScreenHeight() / 2;
+		textDesc.width = GetDX12().GetScreenWidth();
+		textDesc.height = GetDX12().GetScreenHeight();
 		textDesc.slices = (UINT16)totalLights;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 		m_shadowsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -214,6 +219,7 @@ namespace ECS
 	{
 		m_gBuffer.ResetRenderTargets(GetDX12().GetCmdList());
 		m_brdfMap->Reset(GetDX12().GetCmdList());
+		m_lightPassRenderTarget->Reset(GetDX12().GetCmdList());
 	}
 
 	void RenderingManager::SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor)
@@ -362,7 +368,7 @@ namespace ECS
 	void RenderingManager::RayTracedShadows(Scene* scene)
 	{
 		CB_SHADER_LIGHTS lights_data = {};
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources(), GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -397,7 +403,7 @@ namespace ECS
 		CB_Shader_Camera psCameraCB = {};
 		CB_RT_MeshData rtMeshData = {};
 
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources(), GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -491,43 +497,10 @@ namespace ECS
 		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
 		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
 
-		float aspect = static_cast<float>(GetDX12().GetScreenWidth()) / static_cast<float>(GetDX12().GetScreenHeight());
-		float nearZ = 0.01f;
-		float farZ = 1000.0f;
-		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
-		DirectX::XMVECTOR position = DirectX::XMVectorZero();
-		D3D12_VIEWPORT viewport = {};
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(GetDX12().GetScreenWidth());
-		viewport.Height = static_cast<float>(GetDX12().GetScreenHeight());
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
 
-		D3D12_RECT scissorRect = {};
-		scissorRect.left = 0;
-		scissorRect.top = 0;
-		scissorRect.right = GetDX12().GetScreenWidth();
-		scissorRect.bottom = GetDX12().GetScreenHeight();
-
-		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
-		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
-
-
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(GetDX12().GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), GetDX12().frameIndex, GetDX12().rtvDescriptorSize);
-
-		GetDX12().GetCmdList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		GetDX12().GetCmdList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		GetDX12().GetCmdList()->ClearDepthStencilView(
-			dsvHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f,
-			0,
-			0,
-			nullptr
-		);
+		//D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		//CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(GetDX12().GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), GetDX12().frameIndex, GetDX12().rtvDescriptorSize);
+		
 
 		cb_ps_pbr.mip_roughness = 0.0f;
 		cb_ps_pbr.ambientColor = GetAmbientColor();
@@ -560,10 +533,52 @@ namespace ECS
 			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(14, GetDX12().dynamicCB->Allocate(lights_data));
 		}
 
+
+		float aspect = static_cast<float>(m_lightPassRenderTarget->m_width) / static_cast<float>(m_lightPassRenderTarget->m_height);
+		float nearZ = 0.01f;
+		float farZ = 1000.0f;
+		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
+		DirectX::XMVECTOR position = DirectX::XMVectorZero();
+		D3D12_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = static_cast<float>(m_lightPassRenderTarget->m_width);
+		viewport.Height = static_cast<float>(m_lightPassRenderTarget->m_height);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
+		scissorRect.top = 0;
+		scissorRect.right = m_lightPassRenderTarget->m_width;
+		scissorRect.bottom = m_lightPassRenderTarget->m_height;
+
+		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
+		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
+
+
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_lightPassRenderTarget->m_rtvHandles[0], FALSE, &dsvHandle);
+		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		GetDX12().GetCmdList()->ClearRenderTargetView(m_lightPassRenderTarget->m_rtvHandles[0], clearColor, 0, nullptr);
+		GetDX12().GetCmdList()->ClearDepthStencilView(
+			dsvHandle,
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f,
+			0,
+			0,
+			nullptr
+		);
+
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_2D.Get());
 		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
+
+		m_lightPassRenderTarget->TransitionToSRV(GetDX12().GetCmdList());
+
+		FXAA();
 	}
 
 	void RenderingManager::CalculateCompute(Scene* scene)
@@ -582,6 +597,54 @@ namespace ECS
 	void RenderingManager::DebugDraw(Scene* scene)
 	{
 		scene->GetPhysicsManager()->GetDebugDraw()->DebugDraw(GetDX12(), scene->GetCamera());
+	}
+
+	void RenderingManager::FXAA()
+	{
+		auto* cmdList = GetDX12().GetCmdList();
+
+		fxaaCB.invScreenSize = DirectX::XMFLOAT2(
+			1.0f / static_cast<float>(GetDX12().GetScreenWidth()),
+			1.0f / static_cast<float>(GetDX12().GetScreenHeight())
+		);
+
+		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
+		cmdList->SetDescriptorHeaps(1, heaps);
+
+		D3D12_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+		viewport.Width = static_cast<float>(GetDX12().GetScreenWidth());
+		viewport.Height = static_cast<float>(GetDX12().GetScreenHeight());
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
+		scissorRect.top = 0;
+		scissorRect.right = GetDX12().GetScreenWidth();
+		scissorRect.bottom = GetDX12().GetScreenHeight();
+
+		cmdList->RSSetViewports(1, &viewport);
+		cmdList->RSSetScissorRects(1, &scissorRect);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE backbufferRTV(
+			GetDX12().GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(),
+			GetDX12().frameIndex,
+			GetDX12().rtvDescriptorSize
+		);
+
+		cmdList->OMSetRenderTargets(1, &backbufferRTV, FALSE, nullptr);
+
+		cmdList->SetPipelineState(GetDX12().pipelineState_FXAA.Get());
+		cmdList->SetGraphicsRootDescriptorTable(24, m_lightPassRenderTarget->GetSrvGpuHandle(0));
+
+		if(GetDX12().dynamicCB)
+			cmdList->SetGraphicsRootConstantBufferView(23, GetDX12().dynamicCB->Allocate(fxaaCB));
+
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cmdList->IASetVertexBuffers(0, 0, nullptr);
+		cmdList->DrawInstanced(3, 1, 0, 0);
 	}
 
 	void RenderingManager::SetGbufferRenderTarget()

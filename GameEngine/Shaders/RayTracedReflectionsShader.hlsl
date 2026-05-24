@@ -60,13 +60,12 @@ RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
-    uint2 halfPixel = DispatchRaysIndex().xy;
-    uint2 fullPixel = halfPixel * 2;
+    uint2 fullPixel = DispatchRaysIndex().xy;
     
     float roughness = roughMetalMaskTexture.Load(int3(fullPixel, 0)).r;
     if(roughness > 0.6f)
     {
-        gReflectionOutput[launchIndex] = float4(0.0f, 0.0f, 0.0f, 1.0f);
+        gReflectionOutput[launchIndex] = float4(0.0f, 0.0f, 0.0f, 0.0f);
         return;
     }
    
@@ -88,7 +87,7 @@ void MyRaygenShader()
     
     TraceRay(SceneBVH, RAY_FLAG_NONE, ~0, 0, 1, 0, ray, rayPayload);
     
-    gReflectionOutput[launchIndex] = float4(rayPayload.color.rgb, 1.0f);
+    gReflectionOutput[launchIndex] = float4(rayPayload.color);
 }
 
 [shader("closesthit")]
@@ -125,5 +124,5 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
 [shader("miss")]
 void MyMissShader(inout RayPayload payload)
 {
-    payload.color = float4(0.0, 0.0, 0.0, 1.0);
+    payload.color = float4(0.0, 0.0, 0.0, 0.0);
 }

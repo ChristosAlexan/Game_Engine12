@@ -56,6 +56,13 @@ struct CB_SHADER_LIGHTS
 	DirectX::XMFLOAT3 padding3;
 };
 
+struct CB_SHADER_FXAA
+{
+	DirectX::XMFLOAT2 invScreenSize;
+	float contrastThreshold = 0.04f;
+	float blendStrength = 0.5f;
+};
+
 /************ COMPUTE SHADERS *******************/
 struct CB_CS_AnimationShader
 {

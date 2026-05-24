@@ -42,6 +42,7 @@ namespace ECS
 		void CalculateCompute(Scene* scene);
 		void UpdatePBR(Scene* scene);
 		void DebugDraw(Scene* scene);
+		void FXAA();
 		void SetGbufferRenderTarget();
 		DirectX::XMFLOAT3 GetAmbientColor() const;
 		float GetExposure() const;
@@ -59,6 +60,7 @@ namespace ECS
 		GFXGui m_gui;
 		GBuffer m_gBuffer;
 		Texture12* m_shadowsTexture = nullptr; // Ray traced shadows output
+		std::unique_ptr<RenderTargetTexture> m_lightPassRenderTarget; // Light pass output
 		std::unique_ptr<Texture12> m_reflectionsTexture; // Ray traced reflections output
 		std::unique_ptr<Texture12> m_AOTexture; // Ray traced ambient occlusion output
 		std::unique_ptr<Texture12> m_bindlessAlbedoTextures; // Bindless albedo textures for rt reflections
@@ -86,6 +88,8 @@ namespace ECS
 		bool m_bEnableDebugDraw = false;
 		CubeMap m_cubeMap1, m_irradianceMap, m_prefilterMap;
 		CB_AO_Data aoData;
+
+		CB_SHADER_FXAA fxaaCB;
 	};
 }
 

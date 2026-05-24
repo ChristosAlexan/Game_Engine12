@@ -77,7 +77,8 @@ public:
 	UINT frameIndex = 0;
 	UINT rtvDescriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState, pipelineState_2D, pipelineState_Gbuffer, pipelineState_debug,
-		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, pipelineState_raytracingRenderTarget, pipelineState_compute;
+		pipelineState_Cubemap, pipelineState_CubemapDebug, pipelineState_IrradianceConv, pipelineState_Prefilter, pipelineState_Brdf, 
+		pipelineState_raytracingRenderTarget, pipelineState_compute, pipelineState_FXAA;
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 	UINT64 fenceValue = 0;

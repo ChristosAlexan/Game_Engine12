@@ -46,8 +46,7 @@ float2 RandomDisk(float2 xi)
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
-    uint2 halfPixel = DispatchRaysIndex().xy;
-    uint2 fullPixel = halfPixel * 2;
+    uint2 fullPixel = DispatchRaysIndex().xy;
     
     float3 worldPos = worldPosDepthTexture.Load(int3(fullPixel, 0)).xyz;
     float3 normal = normalize(normalTexture.Load(int3(fullPixel, 0)).xyz);

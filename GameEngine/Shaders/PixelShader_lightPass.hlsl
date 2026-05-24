@@ -29,6 +29,7 @@ float3 dirLight(float3 albedo, float3 normal, float metallic, float roughness, f
 float3 BlinnPhongPointLight(float3 albedo, float3 normal, float3 worldPos, uint index);
 
 float BlurShadowBilateral(uint lightIndex, float2 uv, int range, float3 centerWorldPos, float3 centerNormal);
+
 float BlurAOBilateral(float2 uv, int range, float3 centerWorldPos, float3 centerNormal);
 
 Texture2D albedoTexture : register(t0, space0);
@@ -99,7 +100,7 @@ float4 Main(PSInput input) : SV_TARGET
         
         
         float shadow = BlurShadowBilateral(i, input.uv, 2, worldPos, normal);
-        
+
         switch (g_Lights[i].lighType)
         {
             case 0: // Directional
@@ -130,13 +131,12 @@ float4 Main(PSInput input) : SV_TARGET
     float3 prefilteredColor = prefilterTexture.SampleLevel(gSampler, R, roughness * MAX_REF_LOD).rgb;
     float2 brdf = brdfTexture.Sample(gSampler, float2(max(dot(normal, V), 0.0), roughness)).rg;
 
-    float3 rtReflections = raytracedReflectionsTexture.Sample(gSampler, input.uv).xyz;
+    float4 rtReflections = raytracedReflectionsTexture.Sample(gSampler, input.uv);
     float rtAO = BlurAOBilateral(input.uv, 2, worldPos, normal);
     float3 finalReflections = float3(0.0f,0.0f,0.0f);
-    if (rtReflections.r == 0.0f && rtReflections.g == 0.0f && rtReflections.b == 0.0f)
-        finalReflections = prefilteredColor;
-    else
-        finalReflections = rtReflections;
+    
+    finalReflections = lerp(prefilteredColor, rtReflections.rgb, rtReflections.a);
+
     
     float3 specular = finalReflections * (F * brdf.x + brdf.y);
     
@@ -144,6 +144,7 @@ float4 Main(PSInput input) : SV_TARGET
     float3 color = ambient + Lo;
     color *= rtAO;
     color = ReinhardToneMapping(color, exposure);
+    color = pow(color, 1.0f / gamma);
     
     return float4(color, 1.0);
 }
