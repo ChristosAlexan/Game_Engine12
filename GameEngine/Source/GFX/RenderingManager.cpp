@@ -61,8 +61,8 @@ namespace ECS
 		m_reflectionsTexture = std::make_unique<Texture12>();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = m_screenWidth;
-		textDesc.height = m_screenHeight;
+		textDesc.width = m_screenWidth/2;
+		textDesc.height = m_screenHeight/2;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_reflectionsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -70,8 +70,8 @@ namespace ECS
 		// Ray traced ambient occlusion UAV texture initialization
 		m_AOTexture = std::make_unique<Texture12>();
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = m_screenWidth;
-		textDesc.height = m_screenHeight;
+		textDesc.width = m_screenWidth/2;
+		textDesc.height = m_screenHeight/2;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_AOTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -86,8 +86,8 @@ namespace ECS
 		m_shadowsTexture = scene->GetLightManager()->GetShadowsTexturePtr();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R16_FLOAT;
-		textDesc.width = GetDX12().GetScreenWidth();
-		textDesc.height = GetDX12().GetScreenHeight();
+		textDesc.width = GetDX12().GetScreenWidth() / 2;
+		textDesc.height = GetDX12().GetScreenHeight() / 2;
 		textDesc.slices = (UINT16)totalLights;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 		m_shadowsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -362,7 +362,7 @@ namespace ECS
 	void RenderingManager::RayTracedShadows(Scene* scene)
 	{
 		CB_SHADER_LIGHTS lights_data = {};
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources());
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -397,7 +397,7 @@ namespace ECS
 		CB_Shader_Camera psCameraCB = {};
 		CB_RT_MeshData rtMeshData = {};
 
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources());
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -442,7 +442,7 @@ namespace ECS
 
 	void RenderingManager::RayTracedAO(Scene* scene)
 	{
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedAOResources());
+		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedAOResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access

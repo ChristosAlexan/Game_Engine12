@@ -809,7 +809,7 @@ void DX12::CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12St
     COM_ERROR_IF_FAILED(hr, "Failed to create raytracing state object!");
 }
 
-void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources)
+void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight)
 {
     rtResources.m_sbtBuffer.Reset();
     rtResources.m_sbtUploadBuffer.Reset();
@@ -873,8 +873,8 @@ void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources)
     commandList->CopyBufferRegion(rtResources.m_sbtBuffer.Get(), 0, rtResources.m_sbtUploadBuffer.Get(), 0, sbtSize);
 
     dispatchDesc = D3D12_DISPATCH_RAYS_DESC();
-    dispatchDesc.Width = GetScreenWidth();
-    dispatchDesc.Height = GetScreenHeight();
+    dispatchDesc.Width = screenWidth;
+    dispatchDesc.Height = screenHeight;
     dispatchDesc.Depth = 1;
 
     dispatchDesc.RayGenerationShaderRecord.StartAddress = rtResources.m_sbtUploadBuffer->GetGPUVirtualAddress();

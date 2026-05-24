@@ -60,17 +60,19 @@ RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
+    uint2 halfPixel = DispatchRaysIndex().xy;
+    uint2 fullPixel = halfPixel * 2;
     
-    float roughness = roughMetalMaskTexture.Load(int3(launchIndex, 0)).r;
+    float roughness = roughMetalMaskTexture.Load(int3(fullPixel, 0)).r;
     if(roughness > 0.6f)
     {
         gReflectionOutput[launchIndex] = float4(0.0f, 0.0f, 0.0f, 1.0f);
         return;
     }
    
-    float3 diffuseColor = albedoTexture.Load(int3(launchIndex, 0)).xyz;
-    float3 worldPos = worldPosDepthTexture.Load(int3(launchIndex, 0)).xyz;
-    float3 normal = normalTexture.Load(int3(launchIndex, 0)).xyz;
+    float3 diffuseColor = albedoTexture.Load(int3(fullPixel, 0)).xyz;
+    float3 worldPos = worldPosDepthTexture.Load(int3(fullPixel, 0)).xyz;
+    float3 normal = normalTexture.Load(int3(fullPixel, 0)).xyz;
     
     float3 V = normalize(cameraPos - worldPos);
     float3 R = reflect(-V, normal);

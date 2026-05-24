@@ -57,9 +57,11 @@ float3 CosineSampleHemisphere(float2 xi)
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
-
-    float3 worldPos = worldPosDepthTexture.Load(int3(launchIndex, 0)).xyz;
-    float3 normal = normalize(normalTexture.Load(int3(launchIndex, 0)).xyz);
+    uint2 halfPixel = DispatchRaysIndex().xy;
+    uint2 fullPixel = halfPixel * 2;
+    
+    float3 worldPos = worldPosDepthTexture.Load(int3(fullPixel, 0)).xyz;
+    float3 normal = normalize(normalTexture.Load(int3(fullPixel, 0)).xyz);
 
     float visibility = 0.0f;
 

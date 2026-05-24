@@ -11,6 +11,7 @@ bool GameWindow::Initialize()
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+
     auto primaryDisplay = SDL_GetPrimaryDisplay();
 
     auto displayMode = SDL_GetCurrentDisplayMode(primaryDisplay);
@@ -36,6 +37,12 @@ bool GameWindow::Initialize()
     m_nativeHwnd = reinterpret_cast<HWND>(hwnd);
 
     return true;
+}
+
+void GameWindow::SetScreenSize(int width, int height)
+{
+    m_screenWidth = width;
+    m_screenHeight = height;
 }
 
 int GameWindow::GetRefreshRate() const

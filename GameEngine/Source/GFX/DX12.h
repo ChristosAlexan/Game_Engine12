@@ -38,7 +38,7 @@ public:
 	void CreateComputePSO(IDxcBlob* computeBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline);
 	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
 	void CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12StateObject>& rtpso);
-	void CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources);
+	void CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight);
 	void CreateDepthStencilBuffer(const int width, const int height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();

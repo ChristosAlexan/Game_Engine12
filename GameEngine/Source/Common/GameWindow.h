@@ -12,6 +12,7 @@ public:
 	GameWindow();
 
 	bool Initialize();
+	void SetScreenSize(int width, int height);
 	HWND& GetWindow();
 	SDL_Window* GetSDLWindow() const;
 	int GetScreenWidth() const;
