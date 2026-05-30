@@ -30,7 +30,7 @@ bool GameWindow::Initialize()
     m_window = SDL_CreateWindow(
         "SDL window",
         GetScreenWidth(), GetScreenHeight(),
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_BORDERLESS
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN
     );
 
     void* hwnd = SDL_GetPointerProperty(SDL_GetWindowProperties(m_window), "SDL.window.win32.hwnd", nullptr);
@@ -43,6 +43,8 @@ void GameWindow::SetScreenSize(int width, int height)
 {
     m_screenWidth = width;
     m_screenHeight = height;
+
+    SDL_SetWindowSize(m_window, GetScreenWidth(), GetScreenHeight());
 }
 
 int GameWindow::GetRefreshRate() const

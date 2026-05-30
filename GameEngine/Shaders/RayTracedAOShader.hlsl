@@ -56,7 +56,6 @@ float3 CosineSampleHemisphere(float2 xi)
 [shader("raygeneration")]
 void MyRaygenShader()
 {
-    uint2 launchIndex = DispatchRaysIndex().xy;
     uint2 halfPixel = DispatchRaysIndex().xy;
     uint2 fullPixel = halfPixel * 2;
     
@@ -67,8 +66,8 @@ void MyRaygenShader()
 
     for (uint i = 0; i < SampleCount; ++i)
     {
-        float rnd0 = Hash12(float2(launchIndex) + i * 23.17f);
-        float rnd1 = Hash12(float2(launchIndex.yx) + i * 91.73f);
+        float rnd0 = Hash12(float2(halfPixel) + i * 23.17f);
+        float rnd1 = Hash12(float2(halfPixel.yx) + i * 91.73f);
 
         float3 localDir = CosineSampleHemisphere(float2(rnd0, rnd1));
 
@@ -106,7 +105,7 @@ void MyRaygenShader()
     }
 
     float ao = visibility / max(1.0f, (float) SampleCount);
-    gAOOutput[uint3(launchIndex, OutputSlice)] = ao;
+    gAOOutput[uint3(halfPixel, OutputSlice)] = ao;
 }
 
 [shader("closesthit")]

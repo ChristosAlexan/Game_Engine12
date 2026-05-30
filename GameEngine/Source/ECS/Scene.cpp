@@ -111,7 +111,6 @@ namespace ECS
 		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
 		
-		GetRenderingManager()->m_cubeMap1.RenderCubeMap(GetRenderingManager()->GetDX12(), GetCamera());
 		GetRenderingManager()->UpdatePBR(this);
 
 		// Advance physics simulation

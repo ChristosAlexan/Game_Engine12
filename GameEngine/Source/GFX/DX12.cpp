@@ -548,6 +548,12 @@ void DX12::CreateDescriptorHeaps()
 
 void DX12::InitializeShaders()
 {
+    D3D12_DEPTH_STENCIL_DESC depthStencilDesc;
+    depthStencilDesc.DepthEnable = TRUE;
+    depthStencilDesc.StencilEnable = FALSE;
+    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
     DXCShaderCompiler compiler;
     DXGI_FORMAT default_format8_UNORM = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT default_format16_FLOAT = DXGI_FORMAT_R16G16B16A16_FLOAT;
@@ -566,7 +572,7 @@ void DX12::InitializeShaders()
             { "BONEINDICES",   0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc);
 
         // Create Gbuffer pipelineState
         DXGI_FORMAT formats[GBUFFER_TEXTURES_NUM];
@@ -576,9 +582,9 @@ void DX12::InitializeShaders()
         formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::WORLDPOS_DEPTH] = FORMAT_WORLDPOS_DEPTH;
 
         psBlob = compiler.CompileShader(L"Shaders/GBufferPS.hlsl", L"Main", L"ps_6_8");
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, depthStencilDesc);
 
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_debug, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, D3D12_CULL_MODE_NONE, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_debug, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, depthStencilDesc, D3D12_CULL_MODE_NONE, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
     }
     {
         auto vsBlob = compiler.CompileShader(L"Shaders/GbufferVS.hlsl", L"Main", L"vs_6_8");
@@ -594,7 +600,7 @@ void DX12::InitializeShaders()
             { "BONEINDICES",   0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc);
 
         // Create Gbuffer pipelineState
         DXGI_FORMAT formats[GBUFFER_TEXTURES_NUM];
@@ -604,7 +610,7 @@ void DX12::InitializeShaders()
         formats[GBUFFER_RENDER_TARGETS_FORMAT_MAPPINGS::WORLDPOS_DEPTH] = FORMAT_WORLDPOS_DEPTH;
 
         psBlob = compiler.CompileShader(L"Shaders/GBufferPS.hlsl", L"Main", L"ps_6_8");
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, D3D12_CULL_MODE_BACK);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Gbuffer, inputLayout, layoutSize, GBUFFER_TEXTURES_NUM, formats, depthStencilDesc, D3D12_CULL_MODE_BACK);
     }
     {
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
@@ -615,7 +621,7 @@ void DX12::InitializeShaders()
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_2D, inputLayout, layoutSize, 1, &default_format16_FLOAT);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_2D, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc);
     }
 
     {
@@ -626,7 +632,7 @@ void DX12::InitializeShaders()
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Cubemap, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Cubemap, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
@@ -637,7 +643,7 @@ void DX12::InitializeShaders()
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_IrradianceConv, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_IrradianceConv, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
@@ -648,10 +654,14 @@ void DX12::InitializeShaders()
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Prefilter, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Prefilter, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
+        depthStencilDesc.DepthEnable = TRUE;
+        depthStencilDesc.StencilEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+        depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
         auto vsBlob = compiler.CompileShader(L"Shaders/CubemapDebug_VS.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/CubemapDebug_PS.hlsl", L"Main", L"ps_6_8");
 
@@ -659,11 +669,18 @@ void DX12::InitializeShaders()
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
+
+		depthStencilDesc.DepthEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_CubemapDebug, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_CubemapDebug, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
+        depthStencilDesc.DepthEnable = TRUE;
+        depthStencilDesc.StencilEnable = FALSE;
+        depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+        depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/BRDF_PS.hlsl", L"Main", L"ps_6_8");
 
@@ -671,11 +688,15 @@ void DX12::InitializeShaders()
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
+
+        depthStencilDesc.DepthEnable = TRUE;
+        depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Brdf, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_Brdf, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
+        depthStencilDesc.DepthEnable = FALSE;
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/FXAA_Shader.hlsl", L"Main", L"ps_6_8");
 
@@ -684,10 +705,11 @@ void DX12::InitializeShaders()
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_FXAA, inputLayout, layoutSize, 1, &default_format8_UNORM, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_FXAA, inputLayout, layoutSize, 1, &default_format8_UNORM, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     {
+        depthStencilDesc.DepthEnable = TRUE;
         auto vsBlob = compiler.CompileShader(L"Shaders/VertexShader_2D.hlsl", L"Main", L"vs_6_8");
         auto psBlob = compiler.CompileShader(L"Shaders/RaytracingPS.hlsl", L"Main", L"ps_6_8");
 
@@ -696,7 +718,7 @@ void DX12::InitializeShaders()
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
         };
         UINT layoutSize = _countof(inputLayout);
-        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_raytracingRenderTarget, inputLayout, layoutSize, 1, &default_format16_FLOAT, D3D12_CULL_MODE_NONE);
+        CreatePSO(vsBlob.Get(), psBlob.Get(), pipelineState_raytracingRenderTarget, inputLayout, layoutSize, 1, &default_format16_FLOAT, depthStencilDesc, D3D12_CULL_MODE_NONE);
     }
 
     // Ray tracing shadows shader
@@ -723,7 +745,7 @@ void DX12::InitializeShaders()
 }
 
 void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline, const D3D12_INPUT_ELEMENT_DESC* inputLayout, const UINT size, const UINT num_renderTargets,
-    const DXGI_FORMAT* formats, D3D12_CULL_MODE cull_mode, D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
+    const DXGI_FORMAT* formats, D3D12_DEPTH_STENCIL_DESC& depthStencilDesc, D3D12_CULL_MODE cull_mode, D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 {
     HRESULT hr;
 
@@ -733,18 +755,24 @@ void DX12::CreatePSO(IDxcBlob* vsBlob, IDxcBlob* psBlob, Microsoft::WRL::ComPtr<
     psoDesc.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
     psoDesc.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     psoDesc.RasterizerState.CullMode = cull_mode;
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState.DepthEnable = TRUE;
-    psoDesc.DepthStencilState.StencilEnable = FALSE;
+    psoDesc.DepthStencilState.DepthEnable = depthStencilDesc.DepthEnable;
+	psoDesc.DepthStencilState.DepthWriteMask = depthStencilDesc.DepthWriteMask;
+	psoDesc.DepthStencilState.DepthFunc = depthStencilDesc.DepthFunc;
+    psoDesc.DSVFormat = depthStencilDesc.DepthEnable ? DXGI_FORMAT_D24_UNORM_S8_UINT : DXGI_FORMAT_UNKNOWN;
+    psoDesc.DepthStencilState.StencilEnable = depthStencilDesc.StencilEnable;
+    //psoDesc.DepthStencilState.DepthWriteMask = useDepth ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+    //psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    //psoDesc.DSVFormat = useDepth ? DXGI_FORMAT_D24_UNORM_S8_UINT : DXGI_FORMAT_UNKNOWN;
+
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = topology;
     psoDesc.NumRenderTargets = num_renderTargets;
     for (UINT i = 0; i < psoDesc.NumRenderTargets; ++i)
         psoDesc.RTVFormats[i] = formats[i];
     psoDesc.SampleDesc.Count = 1;
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
     hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO_pipeline));
     COM_ERROR_IF_FAILED(hr, "Failed to create pipeline state");

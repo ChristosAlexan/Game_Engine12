@@ -42,7 +42,7 @@ GBufferOutput Main(PSInput input)
     
     float metalness = metalRougnessMaskTexture.Sample(gSampler, input.uv).b;
     float roughness = metalRougnessMaskTexture.Sample(gSampler, input.uv).g;
-    float depth = input.position.z / input.position.w;
+    float depth = input.position.z;
     
     if(hasTextures)
     {

@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "DX12.h"
 #include "MathHelpers.h"
+#include "GBuffer.h"
 
 CubeMap::CubeMap()
 {
@@ -265,8 +266,9 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 }
 
-void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera)
+void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera, GBuffer& gBuffer)
 {
+	m_cubemapTexture->TransitionToSRV(dx12.GetCmdList());
 	CB_VS_SimpleShader vsCB = {};
 
 	DirectX::XMFLOAT3 pos = camera.pos;
@@ -284,6 +286,8 @@ void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera)
 			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
 		}
 	}
+
+	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(4, gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
 	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(9, m_cubemapTexture->GetSrvGpuHandle(0));
 	m_cubeShape.Draw(dx12.GetCmdList());
 }

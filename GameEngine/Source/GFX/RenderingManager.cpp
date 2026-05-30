@@ -498,10 +498,6 @@ namespace ECS
 		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
 
 
-		//D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
-		//CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(GetDX12().GetRtvHeap()->GetCPUDescriptorHandleForHeapStart(), GetDX12().frameIndex, GetDX12().rtvDescriptorSize);
-		
-
 		cb_ps_pbr.mip_roughness = 0.0f;
 		cb_ps_pbr.ambientColor = GetAmbientColor();
 		cb_ps_pbr.exposureGamma = DirectX::XMFLOAT4(GetExposure(), GetGamma(), 0.0f, 0.0f);
@@ -562,23 +558,21 @@ namespace ECS
 		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_lightPassRenderTarget->m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		GetDX12().GetCmdList()->ClearRenderTargetView(m_lightPassRenderTarget->m_rtvHandles[0], clearColor, 0, nullptr);
-		GetDX12().GetCmdList()->ClearDepthStencilView(
-			dsvHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f,
-			0,
-			0,
-			nullptr
-		);
+		GetDX12().GetCmdList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
 
 		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_2D.Get());
 		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
 		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
 
+		m_cubeMap1.RenderCubeMap(GetDX12(), scene->GetCamera(), m_gBuffer);
+
 		m_lightPassRenderTarget->TransitionToSRV(GetDX12().GetCmdList());
 
+
 		FXAA();
+
 	}
 
 	void RenderingManager::CalculateCompute(Scene* scene)
@@ -590,6 +584,7 @@ namespace ECS
 	{
 		// Render cube maps, irradiance, prefilter and brdf maps
 		RenderPbrMaps(scene->GetCamera());
+
 		// Render light pass
 		RenderLightPass(scene);
 	}

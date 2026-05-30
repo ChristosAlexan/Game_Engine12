@@ -18,6 +18,7 @@ PSInput Main(VSInput input)
     float4 worldPos = float4(input.position.xyz, 1.0f);
     
     output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMatrix, float4(worldPos.xyz, 1.0f))));
+    output.position.z = output.position.w;
     output.worldDir = input.position.xyz;
     output.uv = input.uv;
     return output;

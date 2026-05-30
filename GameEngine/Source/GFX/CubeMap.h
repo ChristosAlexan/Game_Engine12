@@ -17,7 +17,7 @@ public:
 	void RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex);
 	void Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle);
 	void RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineState, const UINT rootParameterIndex, const D3D12_GPU_DESCRIPTOR_HANDLE& gpu_handle);
-	void RenderCubeMap(DX12& dx12, Camera& camera);
+	void RenderCubeMap(DX12& dx12, Camera& camera, class GBuffer& gBuffer);
 
 	CubeShape12 m_cubeShape;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;

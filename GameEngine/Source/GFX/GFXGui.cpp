@@ -34,7 +34,7 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	init_info.Device = device;
 	init_info.CommandQueue = cmdQueue;
 	init_info.NumFramesInFlight = 2;
-	init_info.RTVFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	init_info.SrvDescriptorHeap = descriptorHeap;
 
 	static auto handle = descAllocator->Allocate();
@@ -102,7 +102,7 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metric
 	{
 		ImGui::DragFloat("AO Radius", &scene->GetRenderingManager()->aoData.AORadius, 0.01f);
 		ImGui::DragFloat("Normal Bias", &scene->GetRenderingManager()->aoData.NormalBias, 0.01f);
-		ImGui::DragInt("Sample Count", &scene->GetRenderingManager()->aoData.SampleCount, 1, 1, 100);
+		ImGui::DragInt("Sample Count", &scene->GetRenderingManager()->aoData.SampleCount, 1, 1, 500);
 
 		ImGui::TreePop();
 	}
