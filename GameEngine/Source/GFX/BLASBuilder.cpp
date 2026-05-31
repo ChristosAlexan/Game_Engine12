@@ -93,7 +93,4 @@ void BLASBuilder::Refit(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdLi
 	desc.DestAccelerationStructureData = renderComponent.blas->result->GetGPUVirtualAddress();
 	desc.ScratchAccelerationStructureData = renderComponent.blas->scratch->GetGPUVirtualAddress();
 	cmdList->BuildRaytracingAccelerationStructure(&desc, 0, nullptr);
-	
-	auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(renderComponent.blas->result.Get());
-	cmdList->ResourceBarrier(1, &barrier);
 }

@@ -58,6 +58,7 @@ namespace ECS
         IndexBuffer12 indexBuffer;
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
+		std::shared_ptr<ECS::BLAS> blas;
         std::shared_ptr<MeshData> cpuMesh;
 
         void Upload(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) 
@@ -86,5 +87,48 @@ namespace ECS
             cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             cmdList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
         }
+
+        void DrawIndexedInstanced(ID3D12GraphicsCommandList* cmdList, UINT instanceCount)
+        {
+            cmdList->IASetVertexBuffers(0, 1, vertexBuffer.GetBufferViewPtr());
+            cmdList->IASetIndexBuffer(indexBuffer.GetBufferViewPtr());
+            cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+            cmdList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+        }
+    };
+
+    struct GBufferInstanceData
+    {
+        DirectX::XMFLOAT4X4 worldMatrix;
+    };
+
+    struct MaterialMeshBatchKey
+    {
+        ECS::Material* material = nullptr;
+        ECS::GpuMesh* mesh = nullptr;
+
+        bool operator==(const MaterialMeshBatchKey& other) const
+        {
+            return material == other.material &&
+                mesh == other.mesh;
+        }
+    };
+
+    struct MaterialMeshBatchKeyHash
+    {
+        std::size_t operator()(const MaterialMeshBatchKey& key) const
+        {
+            std::size_t h1 = std::hash<ECS::Material*>{}(key.material);
+            std::size_t h2 = std::hash<ECS::GpuMesh*>{}(key.mesh);
+            return h1 ^ (h2 << 1);
+        }
+    };
+
+    struct GBufferBatch
+    {
+        ECS::Material* material = nullptr;
+        ECS::GpuMesh* mesh = nullptr;
+        std::vector<GBufferInstanceData> instances;
     };
 }

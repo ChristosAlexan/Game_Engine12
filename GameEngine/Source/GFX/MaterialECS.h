@@ -56,5 +56,6 @@ namespace ECS
         bool useAlbedoMap = false;
         bool useNormalMap = false;
         bool useMetalRoughnessMap = false;
+		bool hasTextures = false;
     };
 }

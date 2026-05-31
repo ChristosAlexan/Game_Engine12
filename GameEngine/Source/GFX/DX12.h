@@ -38,7 +38,7 @@ public:
 	void CreateComputePSO(IDxcBlob* computeBlob, Microsoft::WRL::ComPtr<ID3D12PipelineState>& PSO_pipeline);
 	void CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline);
 	void CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12StateObject>& rtpso);
-	void CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight);
+	void CreateSBT(D3D12_DISPATCH_RAYS_DESC& dispatchDesc, UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight);
 	void CreateDepthStencilBuffer(const int width, const int height);
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
@@ -63,7 +63,7 @@ public:
 	ID3D12RootSignature* GetGlobalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetComputeRootSignature() const;
-	void DispatchRaytracing();
+	void DispatchRaytracing(D3D12_DISPATCH_RAYS_DESC& dispatchDesc);
 
 	ECS::rayTracingResources& GetRayTracedShadowsResources();
 	ECS::rayTracingResources& GetRayTracedReflectionsResources();
@@ -86,7 +86,10 @@ public:
 
 	uint32_t m_vsync;
 
-
+	//Ray tracing descs
+	D3D12_DISPATCH_RAYS_DESC rtShadows_dispatchDesc;
+	D3D12_DISPATCH_RAYS_DESC rtReflections_dispatchDesc;
+	D3D12_DISPATCH_RAYS_DESC rtAO_dispatchDesc;
 private:
 	uint32_t m_screenWidth, m_screenHeight;
 
@@ -109,8 +112,7 @@ private:
 
 	// SAMPLE DESCS
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc;
-	//Ray tracing descs
-	D3D12_DISPATCH_RAYS_DESC dispatchDesc;
+
 	AppTimer timer;
 
 	ECS::rayTracingResources m_rayTracedShadows, m_rayTracedReflections, m_rayTracedAO;

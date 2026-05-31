@@ -60,7 +60,7 @@ RaytracingAccelerationStructure SceneBVH : register(t0, space6);
 void MyRaygenShader()
 {
     uint2 launchIndex = DispatchRaysIndex().xy;
-    uint2 fullPixel = DispatchRaysIndex().xy;
+    uint2 fullPixel = DispatchRaysIndex().xy * 2;
     
     float roughness = roughMetalMaskTexture.Load(int3(fullPixel, 0)).r;
     if(roughness > 0.6f)

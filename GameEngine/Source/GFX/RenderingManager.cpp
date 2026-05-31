@@ -44,7 +44,7 @@ namespace ECS
 		return true;
 	}
 
-	void RenderingManager::InitializeRenderTargets()
+	void RenderingManager::InitializeRenderTargets(Scene* scene)
 	{
 		hdr_map1.Initialize(GetDX12().GetDevice(), GetDX12().GetCmdList(), GetDX12().GetDescriptorAllocator(), "Data/HDR/qwantani_dusk_2_puresky_2k.hdr");
 
@@ -66,17 +66,18 @@ namespace ECS
 		m_reflectionsTexture = std::make_unique<Texture12>();
 		TextureDesc textDesc;
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = m_screenWidth;
-		textDesc.height = m_screenHeight;
+		textDesc.width = m_screenWidth / 2;
+		textDesc.height = m_screenHeight / 2;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_reflectionsTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
 
+
 		// Ray traced ambient occlusion UAV texture initialization
 		m_AOTexture = std::make_unique<Texture12>();
 		textDesc.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textDesc.width = m_screenWidth/2;
-		textDesc.height = m_screenHeight/2;
+		textDesc.width = m_screenWidth / 2;
+		textDesc.height = m_screenHeight / 2;
 		textDesc.slices = 1;
 		textDesc.viewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		m_AOTexture->CreateTextureUAV(GetDX12().GetDevice(), GetDX12().GetDescriptorAllocator(), textDesc);
@@ -178,6 +179,13 @@ namespace ECS
 		}
 	}
 
+	void RenderingManager::CreateSBTs(Scene* scene)
+	{
+		GetDX12().CreateSBT(GetDX12().rtReflections_dispatchDesc, 1, GetDX12().GetRayTracedReflectionsResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
+		GetDX12().CreateSBT(GetDX12().rtAO_dispatchDesc, 1, GetDX12().GetRayTracedAOResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
+		GetDX12().CreateSBT(GetDX12().rtShadows_dispatchDesc, 1, GetDX12().GetRayTracedShadowsResources(), GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight());
+	}
+
 	void RenderingManager::BuildTLAS(Scene* scene)
 	{
 		// Build TLAS for raytracing
@@ -189,6 +197,7 @@ namespace ECS
 		BLASBuilder blas_builder;
 		auto group = scene->GetRegistry().group<>(entt::get<RenderComponent, AnimatorComponent>);
 
+		bool bAnyRefit = false;
 		for (auto entity : group)
 		{
 			auto& renderComponent = group.get<RenderComponent>(entity);
@@ -196,7 +205,13 @@ namespace ECS
 			if (renderComponent.meshType == SKELETAL_MESH)
 			{
 				blas_builder.Refit(GetDX12().GetDevice(), GetDX12().GetCmdList(), renderComponent);
+				bAnyRefit = true;
 			}
+		}
+		if (bAnyRefit)
+		{
+			auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(nullptr);
+			GetDX12().GetCmdList()->ResourceBarrier(1, &barrier);
 		}
 	}
 
@@ -229,7 +244,7 @@ namespace ECS
 
 	void RenderingManager::RenderPbrMaps(Camera& camera)
 	{
-		if (bRenderPbrPass)
+		if (bRenderPbrMaps)
 		{
 			m_cubeMap1.Render(GetDX12(), camera, GetDX12().pipelineState_Cubemap.Get(), 8, hdr_map1.GetHDRtexture()->GetGPUHandle());
 			// Render the irradiance map
@@ -238,7 +253,7 @@ namespace ECS
 			m_prefilterMap.RenderMips(GetDX12(), camera, GetDX12().pipelineState_Prefilter.Get(), 9, m_cubeMap1.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
 			// Render the brdf map
 			RenderBRDF();
-			bRenderPbrPass = false;
+			bRenderPbrMaps = false;
 		}
 	}
 
@@ -368,7 +383,6 @@ namespace ECS
 	void RenderingManager::RayTracedShadows(Scene* scene)
 	{
 		CB_SHADER_LIGHTS lights_data = {};
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedShadowsResources(), GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -392,7 +406,7 @@ namespace ECS
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(4, GetDX12().dynamicCB->Allocate(lights_data));
 		}
 
-		GetDX12().DispatchRaytracing();
+		GetDX12().DispatchRaytracing(GetDX12().rtShadows_dispatchDesc);
 
 		// Transition to shader resource
 		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -402,8 +416,6 @@ namespace ECS
 	{
 		CB_Shader_Camera psCameraCB = {};
 		CB_RT_MeshData rtMeshData = {};
-
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedReflectionsResources(), GetDX12().GetScreenWidth(), GetDX12().GetScreenHeight());
 
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
@@ -440,7 +452,7 @@ namespace ECS
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(rtMeshData));
 		}
 
-		GetDX12().DispatchRaytracing();
+		GetDX12().DispatchRaytracing(GetDX12().rtReflections_dispatchDesc);
 
 		// Transition to shader resource
 		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -448,8 +460,6 @@ namespace ECS
 
 	void RenderingManager::RayTracedAO(Scene* scene)
 	{
-		GetDX12().CreateSBT(scene->blas_total, GetDX12().GetRayTracedAOResources(), GetDX12().GetScreenWidth() / 2, GetDX12().GetScreenHeight() / 2);
-
 		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		// Transition back to unorder access
 		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -467,7 +477,7 @@ namespace ECS
 			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(11, GetDX12().dynamicCB->Allocate(aoData));
 		}
 
-		GetDX12().DispatchRaytracing();
+		GetDX12().DispatchRaytracing(GetDX12().rtAO_dispatchDesc);
 
 		// Transition to shader resource
 		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -478,11 +488,8 @@ namespace ECS
 		RefitBLAS(scene);
 		BuildTLAS(scene);
 
-		// Ray traced shadows
 		RayTracedShadows(scene);
-		// Ray traced reflections
 		RayTracedReflections(scene);
-		// Ray traced ambient occlusion
 		RayTracedAO(scene);	
 	}
 

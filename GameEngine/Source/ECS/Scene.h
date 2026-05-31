@@ -67,8 +67,6 @@ namespace ECS
 		SaveLoadSystem m_saveLoadSystem;
 
 		Camera m_camera;
-	public:
-		uint32_t blas_total = 0;
 	};
 }
 

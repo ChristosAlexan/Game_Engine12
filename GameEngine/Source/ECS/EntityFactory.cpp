@@ -46,7 +46,7 @@ namespace ECS
 				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.GetBufferView().StrideInBytes,
 				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
 				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE));
-
+			
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
@@ -74,10 +74,14 @@ namespace ECS
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-			renderComponent.blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
-				renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.GetBufferView().StrideInBytes,
-				renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
-				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
+			if (!renderComponent.mesh->blas)
+			{
+				renderComponent.mesh->blas = std::make_shared<BLAS>(blas_builder.Build(scene->GetRenderingManager()->GetDX12().GetDevice(), scene->GetRenderingManager()->GetDX12().GetCmdList(),
+					renderComponent.mesh->vertexBuffer.GetVertexBufferVirtualAddress(), renderComponent.mesh->vertexCount, renderComponent.mesh->vertexBuffer.GetBufferView().StrideInBytes,
+					renderComponent.mesh->indexBuffer.GetIndexBufferVirtualAddress(), renderComponent.mesh->indexCount, renderComponent.mesh->indexBuffer.GetBufferView().Format,
+					D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE));
+			}
+			renderComponent.blas = renderComponent.mesh->blas;
 
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
@@ -98,9 +102,6 @@ namespace ECS
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
 		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
-
-		if(renderComponent.blas)
-			scene->blas_total++;
 
 		if (entityDesc.hasAnimation)
 		{

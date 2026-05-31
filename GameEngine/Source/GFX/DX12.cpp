@@ -308,7 +308,7 @@ ID3D12RootSignature* DX12::GetComputeRootSignature() const
     return m_computeRootSignature.Get();
 }
 
-void DX12::DispatchRaytracing()
+void DX12::DispatchRaytracing(D3D12_DISPATCH_RAYS_DESC& dispatchDesc)
 {
     commandList->DispatchRays(&dispatchDesc);
 }
@@ -850,34 +850,20 @@ void DX12::CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12St
     COM_ERROR_IF_FAILED(hr, "Failed to create raytracing state object!");
 }
 
-void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight)
+void DX12::CreateSBT(D3D12_DISPATCH_RAYS_DESC& dispatchDesc, UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight)
 {
-    rtResources.m_sbtBuffer.Reset();
     rtResources.m_sbtUploadBuffer.Reset();
 
-    const UINT shaderIdSize = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-    const UINT recordSize = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-    const UINT alignedRecordSize = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
+    constexpr UINT shaderIdSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+    constexpr UINT shaderTableAlignment = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
 
-    //UINT numHitGroups = 2;
-    UINT sbtSize = alignedRecordSize * (1 + 1 + numHitGroups); // RayGen + Miss + HitGroup(s)
+    const UINT recordSize = shaderTableAlignment;
+    const UINT sbtSize = recordSize * (1 + 1 + numHitGroups);
 
-    // --- Create the DEFAULT (GPU) SBT buffer ---
-    CD3DX12_HEAP_PROPERTIES defaultHeapProps(D3D12_HEAP_TYPE_DEFAULT);
-    CD3DX12_RESOURCE_DESC sbtBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sbtSize, D3D12_RESOURCE_FLAG_NONE);
-    HRESULT hr = device->CreateCommittedResource(
-        &defaultHeapProps,
-        D3D12_HEAP_FLAG_NONE,
-        &sbtBufferDesc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
-        nullptr,
-        IID_PPV_ARGS(&rtResources.m_sbtBuffer)
-    );
-    COM_ERROR_IF_FAILED(hr, "failed to create SBT default heap commited resource!");
-
-    // Create the UPLOAD buffer
     CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
-    hr = device->CreateCommittedResource(
+    CD3DX12_RESOURCE_DESC sbtBufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sbtSize);
+
+    HRESULT hr = device->CreateCommittedResource(
         &uploadHeapProps,
         D3D12_HEAP_FLAG_NONE,
         &sbtBufferDesc,
@@ -885,47 +871,57 @@ void DX12::CreateSBT(UINT numHitGroups, ECS::rayTracingResources& rtResources, U
         nullptr,
         IID_PPV_ARGS(&rtResources.m_sbtUploadBuffer)
     );
-    COM_ERROR_IF_FAILED(hr, "failed to create SBT upload heap commited resource!");
+
+    COM_ERROR_IF_FAILED(hr, "failed to create SBT upload heap committed resource!");
 
     uint8_t* pData = nullptr;
-    rtResources.m_sbtUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&pData));
+    rtResources.m_sbtUploadBuffer->Map(
+        0,
+        nullptr,
+        reinterpret_cast<void**>(&pData)
+    );
 
     Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> stateObjectProps;
     rtResources.rtpso.As(&stateObjectProps);
 
-    // RayGen
     void* raygenID = stateObjectProps->GetShaderIdentifier(c_raygenShaderName);
-    memcpy(pData, raygenID, shaderIdSize);
-
-    // Miss
     void* missID = stateObjectProps->GetShaderIdentifier(c_missShaderName);
-    memcpy(pData + alignedRecordSize, missID, shaderIdSize);
+    void* hitID = stateObjectProps->GetShaderIdentifier(c_hitGroupName);
 
-    // HitGroups
+    if (!raygenID)
+        std::cerr << "RayGen shader ID is null!\n";
+
+    if (!missID)
+        std::cerr << "Miss shader ID is null!\n";
+
+    if (!hitID)
+        std::cerr << "Hit group shader ID is null!\n";
+
+    memcpy(pData, raygenID, shaderIdSize);
+    memcpy(pData + recordSize, missID, shaderIdSize);
+
     for (UINT i = 0; i < numHitGroups; ++i)
     {
-        void* hitID = stateObjectProps->GetShaderIdentifier(c_hitGroupName);
-        if (!hitID) std::cerr << "Hit group ID is null!\n";
-        memcpy(pData + alignedRecordSize * (2 + i), hitID, shaderIdSize);
+        memcpy(pData + recordSize * (2 + i), hitID, shaderIdSize);
     }
+
     rtResources.m_sbtUploadBuffer->Unmap(0, nullptr);
 
-    // Copy SBT upload buffer to GPU buffer
-    commandList->CopyBufferRegion(rtResources.m_sbtBuffer.Get(), 0, rtResources.m_sbtUploadBuffer.Get(), 0, sbtSize);
+    const D3D12_GPU_VIRTUAL_ADDRESS sbtAddress = rtResources.m_sbtUploadBuffer->GetGPUVirtualAddress();
 
     dispatchDesc = D3D12_DISPATCH_RAYS_DESC();
     dispatchDesc.Width = screenWidth;
     dispatchDesc.Height = screenHeight;
     dispatchDesc.Depth = 1;
 
-    dispatchDesc.RayGenerationShaderRecord.StartAddress = rtResources.m_sbtUploadBuffer->GetGPUVirtualAddress();
+    dispatchDesc.RayGenerationShaderRecord.StartAddress = sbtAddress;
     dispatchDesc.RayGenerationShaderRecord.SizeInBytes = recordSize;
 
-    dispatchDesc.MissShaderTable.StartAddress = rtResources.m_sbtUploadBuffer->GetGPUVirtualAddress() + alignedRecordSize;
+    dispatchDesc.MissShaderTable.StartAddress = sbtAddress + recordSize;
     dispatchDesc.MissShaderTable.StrideInBytes = recordSize;
     dispatchDesc.MissShaderTable.SizeInBytes = recordSize;
 
-    dispatchDesc.HitGroupTable.StartAddress = rtResources.m_sbtUploadBuffer->GetGPUVirtualAddress() + 2 * alignedRecordSize;
+    dispatchDesc.HitGroupTable.StartAddress = sbtAddress + 2 * recordSize;
     dispatchDesc.HitGroupTable.StrideInBytes = recordSize;
     dispatchDesc.HitGroupTable.SizeInBytes = numHitGroups * recordSize;
 }

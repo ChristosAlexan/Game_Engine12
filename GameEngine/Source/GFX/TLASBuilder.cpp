@@ -34,7 +34,7 @@ void TLASBuilder::Build(ECS::Scene* scene)
 		instance.AccelerationStructure = blas->result->GetGPUVirtualAddress();
 		instance.InstanceID = id;
 		instance.InstanceMask = 0xFF;
-		instance.InstanceContributionToHitGroupIndex = m_instanceDescs.size();
+		instance.InstanceContributionToHitGroupIndex = 0;
 		instance.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 
 		DirectX::XMMATRIX worldMatrix = transformComponent.worldMatrix;

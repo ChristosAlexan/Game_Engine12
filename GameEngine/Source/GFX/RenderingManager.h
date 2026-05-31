@@ -24,9 +24,10 @@ namespace ECS
 		RenderingManager();
 		~RenderingManager();
 		bool Initialize(GameWindow& game_window, int width, int height);
-		void InitializeRenderTargets();
+		void InitializeRenderTargets(Scene* scene);
 		void InitializeShadowTextures(Scene* scene);
 		void PopulateRayTracingData(Scene* scene);
+		void CreateSBTs(Scene* scene);
 		void BuildTLAS(Scene* scene);
 		void RefitBLAS(Scene* scene);
 		DX12& GetDX12();
@@ -35,8 +36,7 @@ namespace ECS
 		void ResetRenderTargets();
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderPbrMaps(Camera& camera);
-		void RenderGbuffer(Scene* scene, entt::entity& entity,
-			TransformComponent& transformComponent, RenderComponent& renderComponent);
+		void RenderGbuffer(Scene* scene, entt::entity& entity, TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
 		void CalculateCompute(Scene* scene);
@@ -71,7 +71,7 @@ namespace ECS
 		
 		TLASBuilder m_tlasBuilder;
 		ECS::TLAS m_tlas;
-		bool bRenderPbrPass = true;
+		bool bRenderPbrMaps = true;
 
 		ComputeSkinning m_computeSkinning;
 
@@ -81,6 +81,7 @@ namespace ECS
 		std::vector<ECS::RTVertexData> rt_vertexData;
 		std::vector<ECS::RTIndexData> rt_indexData;
 		std::vector<ECS::RTMeshDataOffsets> rt_meshDataOffsests;
+
 	public:
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;

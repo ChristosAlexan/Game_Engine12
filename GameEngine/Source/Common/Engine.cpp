@@ -189,10 +189,13 @@ void Engine::CreateScenes()
 	m_sceneManager->GetCurrentScene()->LoadAssets();
 	m_sceneManager->GetCurrentScene()->LoadPhysics();
 	m_sceneManager->SetupLights();
-	m_sceneManager->GetRenderingManager()->InitializeRenderTargets();
+	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(m_sceneManager->GetCurrentScene());
 	m_sceneManager->GetRenderingManager()->PopulateRayTracingData(m_sceneManager->GetCurrentScene());
+
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 
 	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	m_sceneManager->GetCurrentScene()->GetCamera().PerspectiveFov(75.0f, aspectRatio, 0.1f, 1000.0f);
+
+	m_sceneManager->GetRenderingManager()->CreateSBTs(m_sceneManager->GetCurrentScene());
 }
