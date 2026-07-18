@@ -57,6 +57,7 @@ float4 Main(PSInput input) : SV_TARGET
     float3 ambientStrength = ambientColor;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
+
     float mask = roughMetalMaskTexture.Sample(gSampler, input.uv).b;
 
     if(mask == 0.0f)

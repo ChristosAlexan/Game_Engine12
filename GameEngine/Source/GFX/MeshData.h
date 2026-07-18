@@ -7,6 +7,7 @@
 #include "MaterialECS.h"
 #include "RayTraceData.h"
 #include "StructuredBuffer.h"
+#include <entt.hpp>
 
 namespace ECS
 {
@@ -49,6 +50,21 @@ namespace ECS
         MESH_TYPE mesh_type;
         StructuredBuffer<GPUSkinningBufferVertexData> skinningVertexBuffer;
     };
+
+    struct InstanceData
+    {
+        DirectX::XMFLOAT4X4 worldMatrix;
+        DirectX::XMFLOAT4 baseColor;
+        float metalness;
+        float roughness;
+        uint32_t hasTextures;
+        uint32_t useAlbedo;
+        uint32_t useNormals;
+        uint32_t useRoughnessMetal;
+        uint32_t materialIndex; // For bindless textures
+        uint32_t padding[3];
+    };
+
 
     struct GpuMesh 
     {
@@ -115,20 +131,30 @@ namespace ECS
         }
     };
 
-    struct MaterialMeshBatchKeyHash
+    struct BatchKey
     {
-        std::size_t operator()(const MaterialMeshBatchKey& key) const
+        GpuMesh* mesh;
+        Material* mat;
+
+        bool operator==(const BatchKey& other) const
         {
-            std::size_t h1 = std::hash<ECS::Material*>{}(key.material);
-            std::size_t h2 = std::hash<ECS::GpuMesh*>{}(key.mesh);
-            return h1 ^ (h2 << 1);
+            return mesh == other.mesh && mat == other.mat;
         }
     };
 
-    struct GBufferBatch
+    struct BatchKeyHash
     {
-        ECS::Material* material = nullptr;
-        ECS::GpuMesh* mesh = nullptr;
-        std::vector<GBufferInstanceData> instances;
+        size_t operator()(const BatchKey& k) const
+        {
+            size_t h1 = std::hash<void*>()(k.mesh);
+            size_t h2 = std::hash<void*>()(k.mat);
+            return h1 ^ (h2 * 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
+        }
+    };
+
+    struct BatchEntry
+    {
+        entt::entity representative = entt::null;
+        std::vector<DirectX::XMFLOAT4X4> worldMatrices;
     };
 }

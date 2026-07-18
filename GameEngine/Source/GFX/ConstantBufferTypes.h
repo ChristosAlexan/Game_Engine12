@@ -8,11 +8,13 @@ struct CB_VS_SimpleShader
 	DirectX::XMFLOAT4X4 viewMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrix;
 };
-struct CB_VS_AnimationShader
+struct CB_VS_Per_Object_Shader
 {
+	DirectX::XMFLOAT4X4 worldMatrix;
 	uint32_t vertexCount;
-	DirectX::XMFLOAT3 padding;
 	bool HasAnim;
+	uint32_t padding0 = 0;
+	uint32_t padding1 = 0;
 };
 
 
@@ -82,7 +84,7 @@ struct CB_RT_MeshData
 
 struct CB_AO_Data
 {
-	float AORadius = 0.5f;
+	float AORadius = 1.25f;
 	float NormalBias = 0.0f;
 	uint32_t OutputSlice = 0;
 	int32_t SampleCount = 12;

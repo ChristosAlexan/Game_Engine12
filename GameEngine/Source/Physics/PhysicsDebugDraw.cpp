@@ -1,6 +1,7 @@
 #include "PhysicsDebugDraw.h"
 #include "MeshData.h"
 #include "MathHelpers.h"
+#include "DX12_Data.h"
 
 namespace PHYSICS
 {
@@ -19,7 +20,7 @@ namespace PHYSICS
 		dx12.GetCmdList()->SetPipelineState(dx12.pipelineState_debug.Get());
 
 		CB_VS_SimpleShader vsCB = {};
-		CB_VS_AnimationShader skinningCB = {};
+		CB_VS_Per_Object_Shader skinningCB = {};
 		CB_PS_Material psMaterialCB = {};
 
 		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(camera.GetProjectionMatrix()));
@@ -40,9 +41,9 @@ namespace PHYSICS
 		{
 			if (dx12.dynamicCB)
 			{
-				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
-				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(3, dx12.dynamicCB->Allocate(skinningCB));
-				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(5, dx12.dynamicCB->Allocate(psMaterialCB));
+				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dx12.dynamicCB->Allocate(vsCB));
+				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::SkinningInputVS), dx12.dynamicCB->Allocate(skinningCB));
+				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::MaterialBuffer), dx12.dynamicCB->Allocate(psMaterialCB));
 			}
 		}
 		const physx::PxRenderBuffer& rb = m_aScene->getRenderBuffer();

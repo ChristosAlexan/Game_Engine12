@@ -71,52 +71,43 @@ namespace ECS
 		GetRenderingManager()->InitializeShadowTextures(this);
 	}
 
-	void Scene::Update(float dt,float fps)
+	void Scene::Update(float dt, float fps)
 	{
-		// Reset all render targets before rendering
 		GetRenderingManager()->ResetRenderTargets();
 
-		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix()));
-
-		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), GetCamera());
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
-
-		// Update animations and transforms
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			GetAnimationManager()->Update(dt, this, entity, renderComponent);
 			GetTransformManager()->Update(this, entity, transformComponent);
 		}
 
+		GetLightManager()->UpdateVisibleLights(GetRenderingManager()->GetDX12().GetCmdList(), GetCamera());
 		GetPhysicsManager()->Update(this, GetCamera());
 
 		GetRenderingManager()->CalculateCompute(this);
-
 		GetRenderingManager()->SetGbufferRenderTarget();
-		// Present
-		for (auto [entity, transformComponent, renderComponent] : group.each())
+
+		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix()));
+
+		GetRenderingManager()->CullAndBucketEntities(this, frustum);
+
+		for (auto entity : GetRenderingManager()->individualDraws)
 		{
-			auto aabb = GetWorldAABB(&transformComponent, &renderComponent);
-
-			if (!IsAABBInFrustum(aabb, frustum))
-				continue;
-
+			auto& transformComponent = group.get<TransformComponent>(entity);
+			auto& renderComponent = group.get<RenderComponent>(entity);
 			GetRenderingManager()->RenderGbuffer(this, entity, transformComponent, renderComponent);
-
 		}
 
-		if(GetRenderingManager()->m_bEnableDebugDraw)
+		GetRenderingManager()->RenderGbufferInstanced(this, frustum);
+
+		if (GetRenderingManager()->m_bEnableDebugDraw)
 			GetRenderingManager()->DebugDraw(this);
 
-		// Dispatch rays
 		GetRenderingManager()->DispatchRays(this);
-		
 		GetRenderingManager()->UpdatePBR(this);
-
-		// Advance physics simulation
 		GetPhysicsManager()->Advance(dt, fps, GetCamera());
-
-	}	
+	}
 
 	const std::string Scene::GetName() const
 	{

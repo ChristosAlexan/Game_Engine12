@@ -27,6 +27,7 @@ bool GameWindow::Initialize()
         return SDL_APP_FAILURE;
     }
 
+	//SetScreenSize(1280, 720);
     m_window = SDL_CreateWindow(
         "SDL window",
         GetScreenWidth(), GetScreenHeight(),

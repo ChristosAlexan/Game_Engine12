@@ -8,13 +8,13 @@
 #include "AssetManager.h"
 #include "LightManager.h"
 #include "PhysicsManager.h"
-#include "MathHelpers.h"
+#include "DX12_Data.h"
 
 namespace ECS
 {
 	RenderingManager::RenderingManager()
 	{
-		m_ambientColor = DirectX::XMFLOAT3(0.3f, 0.3f, 0.3f);
+		m_ambientColor = DirectX::XMFLOAT3(0.05f, 0.05f, 0.05f);
 		m_exposure = 1.0f;
 		m_gamma = 2.2f;
 	}
@@ -257,15 +257,13 @@ namespace ECS
 		}
 	}
 
-	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity,
-		TransformComponent& transformComponent, RenderComponent& renderComponent)
+	void RenderingManager::RenderGbuffer(Scene* scene, entt::entity& entity, TransformComponent& transformComponent, RenderComponent& renderComponent)
 	{
 		if (!scene)
 			return;
 
 		CB_VS_SimpleShader vsCB = {};
-		CB_VS_AnimationShader skinningCB = {};
-		CB_PS_SimpleShader psCB = {};
+		CB_VS_Per_Object_Shader per_object_CB = {};
 		CB_PS_Material psMaterialCB = {};
 		CB_Shader_Camera psCameraCB = {};
 
@@ -276,12 +274,10 @@ namespace ECS
 
 		auto& cpuMesh = renderComponent.mesh->cpuMesh;
 		std::size_t vertexCount = cpuMesh->vertices.size();
-		skinningCB.vertexCount = vertexCount;
-		skinningCB.padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		skinningCB.HasAnim = renderComponent.hasAnimation;
+		per_object_CB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
+		per_object_CB.vertexCount = vertexCount;
+		per_object_CB.HasAnim = renderComponent.hasAnimation;
 
-		psCB.lightPos = DirectX::XMFLOAT4(3.0f, 5.0f, 1.0f, 1.0f);
-		psCB.color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 		if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
 		{
@@ -304,28 +300,132 @@ namespace ECS
 		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
 
-		if (GetDX12().GetCmdList())
+		if (GetDX12().dynamicCB)
 		{
-			if (GetDX12().dynamicCB)
-			{
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(0, GetDX12().dynamicCB->Allocate(vsCB));
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(1, GetDX12().dynamicCB->Allocate(psCB));
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(3, GetDX12().dynamicCB->Allocate(skinningCB));
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psMaterialCB));
-				GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
+			auto* cmdList = GetDX12().GetCmdList();
+			auto* dynamicCB = GetDX12().dynamicCB.get();
 
-				if (renderComponent.hasAnimation)
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dynamicCB->Allocate(vsCB));
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::SkinningInputVS), dynamicCB->Allocate(per_object_CB));
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::MaterialBuffer), dynamicCB->Allocate(psMaterialCB));
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraPS), dynamicCB->Allocate(psCameraCB));
+
+			if (renderComponent.hasAnimation)
+			{
+				cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::SkinningOutput), renderComponent.skinningOutData.skinningGpuSrvHandleFinalTransform);
+			}
+		}
+
+		if (renderComponent.hasTextures)
+		{
+			scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), GetDX12().GetCmdList(), static_cast<UINT>(RootSlot::Raster::MaterialTexPS));
+		}
+		renderComponent.mesh->DrawIndexed(GetDX12().GetCmdList());
+	}
+
+	void RenderingManager::CullAndBucketEntities(Scene* scene, const Frustum& frustum)
+	{
+		individualDraws.clear();
+
+		for (auto& [key, entry] : multiBatches)
+		{
+			entry.worldMatrices.clear();
+		}
+
+		auto group = scene->GetRegistry().group<TransformComponent, RenderComponent>();
+
+		for (auto [entity, transformComponent, renderComponent] : group.each())
+		{
+			auto aabb = GetWorldAABB(&transformComponent, &renderComponent);
+			if (!IsAABBInFrustum(aabb, frustum))
+				continue;
+
+			if (renderComponent.hasAnimation)
+			{
+				individualDraws.push_back(entity);
+				continue;
+			}
+
+			GpuMesh* meshPtr = renderComponent.mesh.get();
+			Material* matPtr = renderComponent.material.get();
+
+			BatchKey key{ meshPtr, matPtr };
+			auto& entry = multiBatches[key]; // Creates entry if new
+
+			if (entry.representative == entt::null)
+				entry.representative = entity;
+
+			DirectX::XMFLOAT4X4 transposed = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
+			entry.worldMatrices.push_back(transposed);
+		}
+	}
+
+	void RenderingManager::RenderGbufferInstanced(Scene* scene, const Frustum& frustum)
+	{
+		if (!scene) return;
+
+		auto* cmdList = GetDX12().GetCmdList();
+		auto* dynamicCB = GetDX12().dynamicCB.get();
+		if (!dynamicCB || !cmdList) return;
+
+		cmdList->SetGraphicsRootSignature(GetDX12().GetRasterRootSignature());
+		cmdList->SetPipelineState(GetDX12().pipelineState_instanced_Gbuffer.Get());
+
+		CB_VS_SimpleShader vsCB = {};
+		vsCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetProjectionMatrix()));
+		vsCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetViewMatrix()));
+
+		CB_Shader_Camera psCameraCB = {};
+		psCameraCB.cameraPos = scene->GetCamera().pos;
+		psCameraCB.padding1 = 0.0f;
+
+		CB_VS_Per_Object_Shader per_object_CB = {};
+		per_object_CB.HasAnim = FALSE;
+		per_object_CB.vertexCount = 0;
+
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dynamicCB->Allocate(vsCB));
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraPS), dynamicCB->Allocate(psCameraCB));
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::SkinningInputVS), dynamicCB->Allocate(per_object_CB));
+
+		auto group = scene->GetRegistry().group<TransformComponent, RenderComponent>();
+
+		for (auto& [key, entry] : multiBatches)
+		{
+			UINT instanceCount = static_cast<UINT>(entry.worldMatrices.size());
+			if (instanceCount == 0) continue;
+
+			auto& renderComponent = group.get<RenderComponent>(entry.representative);
+
+			CB_PS_Material psMaterialCB = {};
+			psMaterialCB.color = key.mat->baseColor;
+			psMaterialCB.hasTextures = renderComponent.hasTextures;
+			psMaterialCB.metalness = key.mat->metalness;
+			psMaterialCB.roughness = key.mat->roughness;
+			psMaterialCB.useAlbedo = key.mat->useAlbedoMap;
+			psMaterialCB.useNormals = key.mat->useNormalMap;
+			psMaterialCB.useRoughnessMetal = key.mat->useMetalRoughnessMap;
+			psMaterialCB.padding = 0.0f;
+
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::MaterialBuffer), dynamicCB->Allocate(psMaterialCB));
+
+			MaterialManager* materialMgr = scene->GetMaterialManager();
+			if (renderComponent.hasTextures && key.mat)
+			{
+				materialMgr->Bindtextures(key.mat, cmdList, static_cast<UINT>(RootSlot::Raster::MaterialTexPS));
+			}
+			else
+			{
+				auto defaultMat = materialMgr->GetMaterial("DefaultMaterial");
+				if (defaultMat)
 				{
-					GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(
-						19, // Root parameter skinning structured buffer output
-						renderComponent.skinningOutData.skinningGpuSrvHandleFinalTransform
-					);
+					materialMgr->Bindtextures(defaultMat.get(), cmdList, static_cast<UINT>(RootSlot::Raster::MaterialTexPS));
 				}
 			}
 
-			if (renderComponent.hasTextures)
-				scene->GetMaterialManager()->Bindtextures(renderComponent.material.get(), GetDX12().GetCmdList(), 2);
-			renderComponent.mesh->DrawIndexed(GetDX12().GetCmdList());
+			D3D12_GPU_VIRTUAL_ADDRESS matrixBufferGPU = dynamicCB->AllocateArray(entry.worldMatrices.data(), instanceCount);
+			cmdList->SetGraphicsRootShaderResourceView(static_cast<UINT>(RootSlot::Raster::InstanceDataBuffer), matrixBufferGPU);
+
+			key.mesh->DrawIndexedInstanced(cmdList, instanceCount);
 		}
 	}
 
@@ -384,32 +484,33 @@ namespace ECS
 	{
 		CB_SHADER_LIGHTS lights_data = {};
 
-		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-		// Transition back to unorder access
-		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		auto* cmdList = GetDX12().GetCmdList();
+		auto* dynamicCB = GetDX12().dynamicCB.get();
 
-		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
-		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedShadowsResources().rtpso.Get());
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_shadowsTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// Get all the light components in the scene
+		cmdList->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
+		cmdList->SetPipelineState1(GetDX12().GetRayTracedShadowsResources().rtpso.Get());
+
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
 		lights_data.totalLights = totalLights;
 		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
 
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_shadowsTexture->GetGPUHandleUAV());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
-		if (GetDX12().dynamicCB)
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::GbufferTex), m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetComputeRootShaderResourceView(static_cast<UINT>(RootSlot::RayTracing::TlasSRV), m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtUAVOutput), m_shadowsTexture->GetGPUHandleUAV());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::LightsStructuredBuffer), scene->GetLightManager()->GetGPUHandle());
+
+		if (dynamicCB)
 		{
-			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(4, GetDX12().dynamicCB->Allocate(lights_data));
+			cmdList->SetComputeRootConstantBufferView(static_cast<UINT>(RootSlot::RayTracing::GlobalLightData), dynamicCB->Allocate(lights_data));
 		}
 
 		GetDX12().DispatchRaytracing(GetDX12().rtShadows_dispatchDesc);
 
-		// Transition to shader resource
-		m_shadowsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_shadowsTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::RayTracedReflections(Scene* scene)
@@ -417,70 +518,70 @@ namespace ECS
 		CB_Shader_Camera psCameraCB = {};
 		CB_RT_MeshData rtMeshData = {};
 
-		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-		// Transition back to unorder access
-		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		auto* cmdList = GetDX12().GetCmdList();
+		auto* dynamicCB = GetDX12().dynamicCB.get();
 
-		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
-		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedReflectionsResources().rtpso.Get());
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_reflectionsTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		cmdList->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
+		cmdList->SetPipelineState1(GetDX12().GetRayTracedReflectionsResources().rtpso.Get());
 
 		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
 
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::GbufferTex), m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetComputeRootShaderResourceView(static_cast<UINT>(RootSlot::RayTracing::TlasSRV), m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtUAVOutput), m_reflectionsTexture->GetGPUHandleUAV());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::LightsStructuredBuffer), scene->GetLightManager()->GetGPUHandle());
 
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_reflectionsTexture->GetGPUHandleUAV());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(3, scene->GetLightManager()->GetGPUHandle());
-
-		if (GetDX12().dynamicCB)
+		if (dynamicCB)
 		{
-			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(5, GetDX12().dynamicCB->Allocate(psCameraCB));
+			cmdList->SetComputeRootConstantBufferView(static_cast<UINT>(RootSlot::RayTracing::CameraData), dynamicCB->Allocate(psCameraCB));
 		}
 
 		rtMeshData.totalVertices = rt_vertexData.size();
 		rtMeshData.totalIndices = rt_indexData.size();
 		rtMeshData.totalEntities = m_totalEntities;
 
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(6, m_bindlessAlbedoTextures->GetGPUHandle());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(7, m_rtEntityHandle->gpuVertexHandle);
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(8, m_rtEntityHandle->gpuIndexHandle);
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(9, m_rtEntityHandle->gpuOffsetsHandle);
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::BindlessAlbedoTextures), m_bindlessAlbedoTextures->GetGPUHandle());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtVertexData), m_rtEntityHandle->gpuVertexHandle);
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtIndexData), m_rtEntityHandle->gpuIndexHandle);
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtMeshDataOffsets), m_rtEntityHandle->gpuOffsetsHandle);
 
-		if (GetDX12().dynamicCB)
+		if (dynamicCB)
 		{
-			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(rtMeshData));
+			cmdList->SetComputeRootConstantBufferView(static_cast<UINT>(RootSlot::RayTracing::RtReflectionParams), dynamicCB->Allocate(rtMeshData));
 		}
 
 		GetDX12().DispatchRaytracing(GetDX12().rtReflections_dispatchDesc);
 
-		// Transition to shader resource
-		m_reflectionsTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_reflectionsTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::RayTracedAO(Scene* scene)
 	{
-		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-		// Transition back to unorder access
-		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		auto* cmdList = GetDX12().GetCmdList();
+		auto* dynamicCB = GetDX12().dynamicCB.get();
 
-		GetDX12().GetCmdList()->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
-		GetDX12().GetCmdList()->SetPipelineState1(GetDX12().GetRayTracedAOResources().rtpso.Get());
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_AOTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
+		cmdList->SetComputeRootSignature(GetDX12().GetGlobalRaytracingRootSignature());
+		cmdList->SetPipelineState1(GetDX12().GetRayTracedAOResources().rtpso.Get());
 
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(0, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetComputeRootShaderResourceView(1, m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
-		GetDX12().GetCmdList()->SetComputeRootDescriptorTable(2, m_AOTexture->GetGPUHandleUAV());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::GbufferTex), m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetComputeRootShaderResourceView(static_cast<UINT>(RootSlot::RayTracing::TlasSRV), m_tlasBuilder.m_tlasBuffer->GetGPUVirtualAddress());
+		cmdList->SetComputeRootDescriptorTable(static_cast<UINT>(RootSlot::RayTracing::RtUAVOutput), m_AOTexture->GetGPUHandleUAV());
 
-		if (GetDX12().dynamicCB)
+		if (dynamicCB)
 		{
-			GetDX12().GetCmdList()->SetComputeRootConstantBufferView(11, GetDX12().dynamicCB->Allocate(aoData));
+			cmdList->SetComputeRootConstantBufferView(static_cast<UINT>(RootSlot::RayTracing::RtAoParams), dynamicCB->Allocate(aoData));
 		}
 
 		GetDX12().DispatchRaytracing(GetDX12().rtAO_dispatchDesc);
 
-		// Transition to shader resource
-		m_AOTexture->GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_AOTexture->GetResource()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void RenderingManager::DispatchRays(Scene* scene)
@@ -498,12 +599,14 @@ namespace ECS
 		CB_PS_PBR cb_ps_pbr = {};
 		CB_Shader_Camera psCameraCB = {};
 
-		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		auto* cmdList = GetDX12().GetCmdList();
+		auto* dynamicCB = GetDX12().dynamicCB.get();
+
+		m_gBuffer.GetGbufferRenderTargetTexture()->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		CB_SHADER_LIGHTS lights_data = {};
 
 		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
-		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
-
+		cmdList->SetDescriptorHeaps(1, heaps);
 
 		cb_ps_pbr.mip_roughness = 0.0f;
 		cb_ps_pbr.ambientColor = GetAmbientColor();
@@ -514,34 +617,36 @@ namespace ECS
 		psCameraCB.padding1 = 0.0f;
 		psCameraCB.padding2 = 0.0f;
 
-		m_brdfMap->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(4, m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(6, GetDX12().dynamicCB->Allocate(psCameraCB));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(11, m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(12, m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(13, m_brdfMap->GetSrvGpuHandle(0));
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(18, m_shadowsTexture->GetGPUHandle());
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(20, scene->GetLightManager()->GetShadowsSrvGPUHandle());
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(21, m_reflectionsTexture->GetGPUHandle());
-		GetDX12().GetCmdList()->SetGraphicsRootDescriptorTable(22, m_AOTexture->GetGPUHandle());
+		m_brdfMap->TransitionState(cmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::GbufferTexPS), m_gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraPS), dynamicCB->Allocate(psCameraCB));
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::PrefilterMap), m_prefilterMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::IrradianceMap), m_irradianceMap.GetCubeMapRenderTargetTexture()->GetSrvGpuHandle(0));
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::BrdfLUT), m_brdfMap->GetSrvGpuHandle(0));
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::RtShadowsInput), m_shadowsTexture->GetGPUHandle());
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::ShadowsData), scene->GetLightManager()->GetShadowsSrvGPUHandle());
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::RtReflections), m_reflectionsTexture->GetGPUHandle());
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::RtAmbientOccl), m_AOTexture->GetGPUHandle());
 
 		// Get all the light components in the scene
 		auto lightsView = scene->GetRegistry().view<LightComponent>();
 		std::size_t totalLights = lightsView.size();
 		lights_data.totalLights = totalLights;
 		lights_data.padding3 = DirectX::XMFLOAT3(0, 0, 0);
-		if (GetDX12().dynamicCB)
-		{
-			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(10, GetDX12().dynamicCB->Allocate(cb_ps_pbr));
-			GetDX12().GetCmdList()->SetGraphicsRootConstantBufferView(14, GetDX12().dynamicCB->Allocate(lights_data));
-		}
 
+		if (dynamicCB)
+		{
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::PbrParamsPS), dynamicCB->Allocate(cb_ps_pbr));
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::GlobalLightData), dynamicCB->Allocate(lights_data));
+		}
 
 		float aspect = static_cast<float>(m_lightPassRenderTarget->m_width) / static_cast<float>(m_lightPassRenderTarget->m_height);
 		float nearZ = 0.01f;
 		float farZ = 1000.0f;
 		DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, aspect, nearZ, farZ);
 		DirectX::XMVECTOR position = DirectX::XMVectorZero();
+
 		D3D12_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
@@ -556,30 +661,26 @@ namespace ECS
 		scissorRect.right = m_lightPassRenderTarget->m_width;
 		scissorRect.bottom = m_lightPassRenderTarget->m_height;
 
-		GetDX12().GetCmdList()->RSSetViewports(1, &viewport);
-		GetDX12().GetCmdList()->RSSetScissorRects(1, &scissorRect);
-
+		cmdList->RSSetViewports(1, &viewport);
+		cmdList->RSSetScissorRects(1, &scissorRect);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDX12().dsvHeap->GetCPUDescriptorHandleForHeapStart();
 
-		GetDX12().GetCmdList()->OMSetRenderTargets(1, &m_lightPassRenderTarget->m_rtvHandles[0], FALSE, &dsvHandle);
+		cmdList->OMSetRenderTargets(1, &m_lightPassRenderTarget->m_rtvHandles[0], FALSE, &dsvHandle);
 		float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		GetDX12().GetCmdList()->ClearRenderTargetView(m_lightPassRenderTarget->m_rtvHandles[0], clearColor, 0, nullptr);
-		GetDX12().GetCmdList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		cmdList->ClearRenderTargetView(m_lightPassRenderTarget->m_rtvHandles[0], clearColor, 0, nullptr);
+		cmdList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
-		GetDX12().GetCmdList()->SetPipelineState(GetDX12().pipelineState_2D.Get());
-		GetDX12().GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		GetDX12().GetCmdList()->IASetVertexBuffers(0, 0, nullptr);
-		GetDX12().GetCmdList()->DrawInstanced(3, 1, 0, 0);
+		cmdList->SetPipelineState(GetDX12().pipelineState_2D.Get());
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cmdList->IASetVertexBuffers(0, 0, nullptr);
+		cmdList->DrawInstanced(3, 1, 0, 0);
 
 		m_cubeMap1.RenderCubeMap(GetDX12(), scene->GetCamera(), m_gBuffer);
 
-		m_lightPassRenderTarget->TransitionToSRV(GetDX12().GetCmdList());
-
+		m_lightPassRenderTarget->TransitionToSRV(cmdList);
 
 		FXAA();
-
 	}
 
 	void RenderingManager::CalculateCompute(Scene* scene)
@@ -639,10 +740,10 @@ namespace ECS
 		cmdList->OMSetRenderTargets(1, &backbufferRTV, FALSE, nullptr);
 
 		cmdList->SetPipelineState(GetDX12().pipelineState_FXAA.Get());
-		cmdList->SetGraphicsRootDescriptorTable(24, m_lightPassRenderTarget->GetSrvGpuHandle(0));
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::LightPassTexPS), m_lightPassRenderTarget->GetSrvGpuHandle(0));
 
 		if(GetDX12().dynamicCB)
-			cmdList->SetGraphicsRootConstantBufferView(23, GetDX12().dynamicCB->Allocate(fxaaCB));
+			cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::FxaaParamsPS), GetDX12().dynamicCB->Allocate(fxaaCB));
 
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		cmdList->IASetVertexBuffers(0, 0, nullptr);

@@ -4,6 +4,7 @@
 #include "DX12.h"
 #include "MathHelpers.h"
 #include "GBuffer.h"
+#include "DX12_Data.h"
 
 CubeMap::CubeMap()
 {
@@ -75,7 +76,7 @@ void CubeMap::RenderDebug(DX12& dx12, Camera& camera, UINT rootParameterIndex)
 	vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(worldMatrix));
 	if (dx12.dynamicCB)
 	{
-		dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
+		dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dx12.dynamicCB->Allocate(vsCB));
 	}
 
 	m_cubeShape.Draw(dx12.GetCmdList());
@@ -156,7 +157,7 @@ void CubeMap::Render(DX12& dx12, Camera& camera, ID3D12PipelineState* pipelineSt
 		vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixIdentity());
 		if (dx12.dynamicCB)
 		{
-			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
+			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dx12.dynamicCB->Allocate(vsCB));
 		}
 
 		m_cubeShape.Draw(dx12.GetCmdList());
@@ -254,8 +255,8 @@ void CubeMap::RenderMips(DX12& dx12, Camera& camera, ID3D12PipelineState* pipeli
 			vsCB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixIdentity());
 			if (dx12.dynamicCB)
 			{
-				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
-				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(10, dx12.dynamicCB->Allocate(cb_ps_pbr));
+				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dx12.dynamicCB->Allocate(vsCB));
+				dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::PbrParamsPS), dx12.dynamicCB->Allocate(cb_ps_pbr));
 			}
 
 			m_cubeShape.Draw(dx12.GetCmdList());
@@ -283,11 +284,11 @@ void CubeMap::RenderCubeMap(DX12& dx12, Camera& camera, GBuffer& gBuffer)
 	{
 		if (dx12.dynamicCB)
 		{
-			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(0, dx12.dynamicCB->Allocate(vsCB));
+			dx12.GetCmdList()->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dx12.dynamicCB->Allocate(vsCB));
 		}
 	}
 
-	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(4, gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
-	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(9, m_cubemapTexture->GetSrvGpuHandle(0));
+	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::GbufferTexPS), gBuffer.GetGbufferRenderTargetTexture()->GetSrvGpuHandle(0));
+	dx12.GetCmdList()->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::GbufferCubePS), m_cubemapTexture->GetSrvGpuHandle(0));
 	m_cubeShape.Draw(dx12.GetCmdList());
 }

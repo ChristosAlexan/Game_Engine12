@@ -16,7 +16,6 @@ DescriptorAllocator::DescriptorHandle DescriptorAllocator::Allocate()
 {
 	UINT index;
 
-	// Reuse freed index if available
 	if (!m_freeList.empty())
 	{
 		index = m_freeList.front();
@@ -25,8 +24,10 @@ DescriptorAllocator::DescriptorHandle DescriptorAllocator::Allocate()
 	else
 	{
 		if (m_currentIndex >= m_descriptorCount)
+		{
 			ErrorLogger::Log("Descriptor heap exhausted!");
-		
+			throw std::runtime_error("Descriptor heap exhausted!");
+		}
 		index = m_currentIndex++;
 	}
 	return { GetCPUHandle(index), GetGPUHandle(index), index };
@@ -37,9 +38,9 @@ UINT DescriptorAllocator::AllocateContiguous(UINT count)
 	if (m_currentIndex + count > m_descriptorCount)
 	{
 		ErrorLogger::Log("Descriptor heap exhausted during contiguous allocation!");
+		throw std::runtime_error("Descriptor heap exhausted during contiguous allocation!");
 	}
 
-	// NOTE: This skips checking the free list (safe if you only use free list for single-slot reuse)
 	UINT startIndex = m_currentIndex;
 	m_currentIndex += count;
 	return startIndex;

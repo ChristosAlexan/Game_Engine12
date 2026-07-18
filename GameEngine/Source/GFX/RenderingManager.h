@@ -12,6 +12,7 @@
 #include "CubeMap.h"
 #include "TLASBuilder.h"
 #include "PhysicsDebugDraw.h"
+#include "MathHelpers.h"
 
 class GameWindow;
 
@@ -37,6 +38,10 @@ namespace ECS
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderPbrMaps(Camera& camera);
 		void RenderGbuffer(Scene* scene, entt::entity& entity, TransformComponent& transformComponent, RenderComponent& renderComponent);
+
+		void CullAndBucketEntities(Scene* scene, const Frustum& frustum);
+
+		void RenderGbufferInstanced(Scene* scene, const Frustum& frustum);
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
 		void CalculateCompute(Scene* scene);
@@ -81,8 +86,11 @@ namespace ECS
 		std::vector<ECS::RTVertexData> rt_vertexData;
 		std::vector<ECS::RTIndexData> rt_indexData;
 		std::vector<ECS::RTMeshDataOffsets> rt_meshDataOffsests;
+		std::unordered_map<BatchKey, BatchEntry, BatchKeyHash> multiBatches;
+		std::vector<DirectX::XMFLOAT4X4> m_visibleInstanceTransforms;
 
 	public:
+		std::vector<entt::entity> individualDraws;
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;
 		float m_gamma;

@@ -39,7 +39,7 @@ PSInput Main(VSInput input)
 {
     PSInput output;
     
-    if(hasAnim)
+    if (hasAnim)
     {
         if (input.vertexID < vertexCount)
         {

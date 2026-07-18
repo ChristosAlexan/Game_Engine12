@@ -50,6 +50,23 @@ public:
         return gpuAddress;
     }
 
+    template <typename T>
+    D3D12_GPU_VIRTUAL_ADDRESS AllocateArray(const T* dataArray, UINT elementCount)
+    {
+        UINT rawSize = sizeof(T) * elementCount;
+        UINT alignedSize = Align(rawSize, 256);
+
+        if (offset + alignedSize > bufferSize)
+            throw std::runtime_error("Upload buffer overflow");
+        memcpy(cpuPtr + offset, dataArray, rawSize);
+
+        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress = gpuPtr + offset;
+
+        offset += alignedSize;
+
+        return gpuAddress;
+    }
+
 private:
     Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer;
     UINT8* cpuPtr = nullptr;
