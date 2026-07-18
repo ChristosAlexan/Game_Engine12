@@ -48,6 +48,9 @@ https://github.com/user-attachments/assets/6e91a4ea-0161-452a-8148-3c3259c7cda5
 
 <img width="1390" height="960" alt="Screenshot 2026-05-23 181026" src="https://github.com/user-attachments/assets/62392d37-6bdc-4716-bb03-6a18334686d8" />
 
+## Ray-tracing
+<img width="32%" alt="rt_reflections" src="https://github.com/user-attachments/assets/a14268bc-2e7e-2422-8141-22ba620d4050" /><img width="32%" alt="rt_ao" src="https://github.com/user-attachments/assets/bda24f88-d2f0-4978-b790-6202fd30f868" /><img width="32%" alt="rt_shadows" src="https://github.com/user-attachments/assets/c0fcf9fd-72c0-4021-8066-f2b6830d771b" />
+
 
 ## Build Instructions
 1. Clone the repository
