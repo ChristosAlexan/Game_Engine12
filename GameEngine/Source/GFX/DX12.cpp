@@ -361,7 +361,6 @@ void DX12::CreateDeviceAndFactory()
             debugController->EnableDebugLayer();
 
 #ifdef ENABLE_GPU_BASED_VALIDATION
-            // Enable GPU-based validation
             debugController->SetEnableGPUBasedValidation(TRUE);
 #endif
         }
@@ -372,10 +371,17 @@ void DX12::CreateDeviceAndFactory()
 #endif
 
     CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory));
+    
+    Microsoft::WRL::ComPtr<IDXGIFactory6> factory6;
+    hr = factory.As(&factory6);
+    COM_ERROR_IF_FAILED(hr, "Failed to query IDXGIFactory6");
 
     Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter;
     for (UINT adapterIndex = 0;
-        DXGI_ERROR_NOT_FOUND != factory->EnumAdapters1(adapterIndex, &adapter);
+        DXGI_ERROR_NOT_FOUND != factory6->EnumAdapterByGpuPreference(
+            adapterIndex,
+            DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+            IID_PPV_ARGS(&adapter));
         ++adapterIndex)
     {
         DXGI_ADAPTER_DESC1 desc;
@@ -386,8 +392,16 @@ void DX12::CreateDeviceAndFactory()
             continue; // skip software adapters
         }
 
+#ifdef _DEBUG
+        std::wstring adapterName(desc.Description);
+        OutputDebugStringW((L"Trying adapter: " + adapterName + L"\n").c_str());
+#endif
+
         hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device));
-        break;
+        if (SUCCEEDED(hr))
+        {
+            break;
+        }
     }
     COM_ERROR_IF_FAILED(hr, "Failed to create device");
 
@@ -398,7 +412,6 @@ void DX12::CreateDeviceAndFactory()
     {
         throw std::runtime_error("Raytracing not supported on this device.");
     }
-
 }
 void DX12::CreateCommandObjects()
 {

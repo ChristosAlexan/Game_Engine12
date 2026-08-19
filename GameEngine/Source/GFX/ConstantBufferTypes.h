@@ -84,8 +84,8 @@ struct CB_RT_MeshData
 
 struct CB_AO_Data
 {
-	float AORadius = 1.25f;
+	float AORadius = 0.2f;
 	float NormalBias = 0.0f;
 	uint32_t OutputSlice = 0;
-	int32_t SampleCount = 12;
+	int32_t SampleCount = 40;
 };
