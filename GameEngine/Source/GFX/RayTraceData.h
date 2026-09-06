@@ -47,19 +47,11 @@ namespace ECS
 		DirectX::XMFLOAT3 padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	};
 
-
-	struct RTMeshDataOffsets
-	{
-		uint32_t vertexOffset;
-		uint32_t indexOffset;
-		DirectX::XMFLOAT2 padding = DirectX::XMFLOAT2(0.0f, 0.0f);
-	};
-
 	struct RTEntityHandle
 	{
 		StructuredBuffer<RTVertexData> rtVertexGpuData;
 		StructuredBuffer<RTIndexData> rtIndexGpuData;
-		StructuredBuffer<RTMeshDataOffsets> rtMeshDataOffsets;
+		StructuredBuffer<struct MeshDataOffsets> rtMeshDataOffsets;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuVertexHandle{};
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuVertexHandle{};

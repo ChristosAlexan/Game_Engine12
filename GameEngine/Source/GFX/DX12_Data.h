@@ -31,7 +31,9 @@ namespace RootSlot
         FxaaParamsPS = 23, // b5 space0: Post-processing parameters
         LightPassTexPS = 24, // t5 space0: Deferred shading compilation target
 		InstanceDataBuffer = 25, // t0 space9: Dynamic array of Transform per instance
-        Count = 26 
+        BindlessTextures = 26,  // t0 space10
+        MeshDataOffsets = 27,  // t3 space11
+        Count = 28
     };
 
     enum class RayTracing : UINT
@@ -42,7 +44,7 @@ namespace RootSlot
         LightsStructuredBuffer = 3,  // t0 space2
         GlobalLightData = 4,  // b4 space0
         CameraData = 5,  // b0 space0
-        BindlessAlbedoTextures = 6,  // t0 space10
+        BindlessTextures = 6,  // t0 space10
         RtVertexData = 7,  // t1 space10
         RtIndexData = 8,  // t2 space10
         RtMeshDataOffsets = 9,  // t3 space10

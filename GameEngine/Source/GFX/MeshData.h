@@ -119,42 +119,13 @@ namespace ECS
         DirectX::XMFLOAT4X4 worldMatrix;
     };
 
-    struct MaterialMeshBatchKey
+    struct MeshDataOffsets
     {
-        ECS::Material* material = nullptr;
-        ECS::GpuMesh* mesh = nullptr;
-
-        bool operator==(const MaterialMeshBatchKey& other) const
-        {
-            return material == other.material &&
-                mesh == other.mesh;
-        }
-    };
-
-    struct BatchKey
-    {
-        GpuMesh* mesh;
-        Material* mat;
-
-        bool operator==(const BatchKey& other) const
-        {
-            return mesh == other.mesh && mat == other.mat;
-        }
-    };
-
-    struct BatchKeyHash
-    {
-        size_t operator()(const BatchKey& k) const
-        {
-            size_t h1 = std::hash<void*>()(k.mesh);
-            size_t h2 = std::hash<void*>()(k.mat);
-            return h1 ^ (h2 * 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
-        }
-    };
-
-    struct BatchEntry
-    {
-        entt::entity representative = entt::null;
-        std::vector<DirectX::XMFLOAT4X4> worldMatrices;
+        uint32_t vertexOffset;
+        uint32_t indexOffset;
+        uint32_t albedoIndex;
+        uint32_t normalIndex;
+        uint32_t metalRoughnessIndex;
+        uint32_t pad;
     };
 }

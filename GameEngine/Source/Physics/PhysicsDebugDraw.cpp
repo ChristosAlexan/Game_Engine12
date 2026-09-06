@@ -34,7 +34,6 @@ namespace PHYSICS
 		psMaterialCB.useAlbedo = false;
 		psMaterialCB.useNormals = false;
 		psMaterialCB.useRoughnessMetal = false;
-		psMaterialCB.padding = 0.0f;
 
 		skinningCB.HasAnim = false;
 		if (dx12.GetCmdList())

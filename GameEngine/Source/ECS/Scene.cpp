@@ -74,6 +74,7 @@ namespace ECS
 	void Scene::Update(float dt, float fps)
 	{
 		GetRenderingManager()->ResetRenderTargets();
+		GetRenderingManager()->UpdateBuffers(this);
 
 		auto group = GetRegistry().group<TransformComponent, RenderComponent>();
 		for (auto [entity, transformComponent, renderComponent] : group.each())
@@ -90,16 +91,13 @@ namespace ECS
 
 		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix()));
 
-		GetRenderingManager()->CullAndBucketEntities(this, frustum);
-
-		for (auto entity : GetRenderingManager()->individualDraws)
+		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			auto& transformComponent = group.get<TransformComponent>(entity);
 			auto& renderComponent = group.get<RenderComponent>(entity);
+
 			GetRenderingManager()->RenderGbuffer(this, entity, transformComponent, renderComponent);
 		}
-
-		GetRenderingManager()->RenderGbufferInstanced(this, frustum);
 
 		if (GetRenderingManager()->m_bEnableDebugDraw)
 			GetRenderingManager()->DebugDraw(this);

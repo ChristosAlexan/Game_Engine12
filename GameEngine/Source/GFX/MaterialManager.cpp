@@ -29,6 +29,7 @@ namespace ECS
 
 
 		material->name = materialDesc.name;
+		material->id = static_cast<UINT>(m_materials.size());
 		material->roughness = materialDesc.roughness;
 		material->metalness = materialDesc.metalness;
 		material->useAlbedoMap = materialDesc.useAlbedoMap;

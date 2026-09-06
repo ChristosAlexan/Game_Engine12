@@ -18,9 +18,8 @@ cbuffer CB_RT_MeshData : register(b5, space0)
     uint totalVertices;
     uint totalIndices;
     uint totalEntities;
-    float padding;
-};
 
+};
 
 struct RTVertexData
 {
@@ -41,7 +40,10 @@ struct RTMeshDataOffsets
 {
     uint vertexOffset;
     uint indexOffset;
-    float2 padding;
+    uint albedoIndex;
+    uint normalIndex;
+    uint metalRoughnessIndex;
+    uint padding;
 };
 
 Texture2D albedoTexture : register(t0, space0);
@@ -49,7 +51,7 @@ Texture2D normalTexture : register(t1, space0);
 Texture2D roughMetalMaskTexture : register(t2, space0);
 Texture2D worldPosDepthTexture : register(t3, space0);
 RWTexture2D<float4> gReflectionOutput : register(u0, space5);
-Texture2D albedoTextures[] : register(t0, space10);
+Texture2D bindlessTextures[] : register(t0, space10);
 StructuredBuffer<RTVertexData> g_vertexData : register(t1, space11);
 StructuredBuffer<RTIndexData> g_indexData : register(t2, space11);
 StructuredBuffer<RTMeshDataOffsets> g_dataOffsets : register(t3, space11);
@@ -116,9 +118,11 @@ void MyClosestHitShader(inout RayPayload payload, in BuiltInTriangleIntersection
     
     float2 interpolatedUV = (v0.uv * w) + (v1.uv * u) + (v2.uv * v);
    
-    float3 color = albedoTextures[entityID].SampleLevel(gSampler, interpolatedUV, 0).rgb;
+    float3 albedo = bindlessTextures[NonUniformResourceIndex(instance.albedoIndex)].SampleLevel(gSampler, interpolatedUV, 0).rgb;
+    float3 normal = bindlessTextures[NonUniformResourceIndex(instance.normalIndex)].SampleLevel(gSampler, interpolatedUV, 0).xyz;
+    float2 metalnessRoughness = bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].SampleLevel(gSampler, interpolatedUV, 0).xy;
     
-    payload.color = float4(color, 1.0);
+    payload.color = float4(albedo, 1.0);
 }
 
 [shader("miss")]

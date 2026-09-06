@@ -42,6 +42,7 @@ namespace ECS
 
     struct Material {
         std::string name;
+		UINT id = 0;
         std::shared_ptr<Texture12> albedoTexture;    // albedo (diffuse) texture
         std::shared_ptr<Texture12> normalTexture;    // normal map
         std::shared_ptr<Texture12> metalRoughnessTexture; // roughness map
@@ -57,5 +58,9 @@ namespace ECS
         bool useNormalMap = false;
         bool useMetalRoughnessMap = false;
 		bool hasTextures = false;
+
+		UINT albedoIndex = 0;
+		UINT normalIndex = 0;
+		UINT metalRoughnessIndex = 0;
     };
 }

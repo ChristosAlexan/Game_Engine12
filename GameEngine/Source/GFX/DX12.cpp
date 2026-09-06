@@ -1056,6 +1056,12 @@ void DX12::InitializeBuffers()
 
     CD3DX12_DESCRIPTOR_RANGE1 lightPassRange;
     lightPassRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0); // t5 space0 lightPassMap
+    
+    CD3DX12_DESCRIPTOR_RANGE1 bindlessTextures;
+    bindlessTextures.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 0, 10); // t0 space10 bindless textures
+
+    CD3DX12_DESCRIPTOR_RANGE1 srvMeshDataOffsetsStructuredBuffer;
+    srvMeshDataOffsetsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 11); // t3 space10 mesh data offsets SRV
 
     CD3DX12_ROOT_PARAMETER1 rootParams[static_cast<UINT>(RootSlot::Raster::Count)];
     // Slot 0 - 4
@@ -1078,7 +1084,7 @@ void DX12::InitializeBuffers()
     rootParams[static_cast<UINT>(RootSlot::Raster::BrdfLUT)].InitAsDescriptorTable(1, &brdfRange, D3D12_SHADER_VISIBILITY_PIXEL);                               // t2 space4
     rootParams[static_cast<UINT>(RootSlot::Raster::GlobalLightData)].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL); // b4 space0
 
-    // Slot 15 - 24
+    // Slot 15 - 27
     rootParams[static_cast<UINT>(RootSlot::Raster::TlasSRV)].InitAsShaderResourceView(0, 5, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);        // t0 space5
     rootParams[static_cast<UINT>(RootSlot::Raster::RtUAVOutput)].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL);                    // u0 space5
     rootParams[static_cast<UINT>(RootSlot::Raster::RtShadowsSRV)].InitAsDescriptorTable(1, &raytracingSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);                  // t0 space6
@@ -1090,6 +1096,8 @@ void DX12::InitializeBuffers()
     rootParams[static_cast<UINT>(RootSlot::Raster::FxaaParamsPS)].InitAsConstantBufferView(5, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);   // b5 space0
     rootParams[static_cast<UINT>(RootSlot::Raster::LightPassTexPS)].InitAsDescriptorTable(1, &lightPassRange, D3D12_SHADER_VISIBILITY_PIXEL);                    // t5 space0
 	rootParams[static_cast<UINT>(RootSlot::Raster::InstanceDataBuffer)].InitAsShaderResourceView(0, 9, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // t0 space9
+    rootParams[static_cast<UINT>(RootSlot::Raster::BindlessTextures)].InitAsDescriptorTable(1, &bindlessTextures, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParams[static_cast<UINT>(RootSlot::Raster::MeshDataOffsets)].InitAsDescriptorTable(1, &srvMeshDataOffsetsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -1097,8 +1105,8 @@ void DX12::InitializeBuffers()
 
 
     // Ray tracing root signatures
-    CD3DX12_DESCRIPTOR_RANGE1 bindlessAbledoTextures;
-    bindlessAbledoTextures.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 0, 10); // t0 space10 bindless albedo textures
+    CD3DX12_DESCRIPTOR_RANGE1 bindlessTexturesRT;
+    bindlessTexturesRT.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, UINT_MAX, 0, 10); // t0 space10 bindless textures
     CD3DX12_DESCRIPTOR_RANGE1 srvRtVertexStructuredBuffer;
     srvRtVertexStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 11); // t1 space10 vertex data SRV for rt reflections
     CD3DX12_DESCRIPTOR_RANGE1 srvRtIndexStructuredBuffer;
@@ -1114,7 +1122,7 @@ void DX12::InitializeBuffers()
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::LightsStructuredBuffer)].InitAsDescriptorTable(1, &srvLightsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::GlobalLightData)].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::CameraData)].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);
-    globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::BindlessAlbedoTextures)].InitAsDescriptorTable(1, &bindlessAbledoTextures, D3D12_SHADER_VISIBILITY_ALL);
+    globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::BindlessTextures)].InitAsDescriptorTable(1, &bindlessTexturesRT, D3D12_SHADER_VISIBILITY_ALL);
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::RtVertexData)].InitAsDescriptorTable(1, &srvRtVertexStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::RtIndexData)].InitAsDescriptorTable(1, &srvRtIndexStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);
     globalRaytracingRootParams[static_cast<UINT>(RootSlot::RayTracing::RtMeshDataOffsets)].InitAsDescriptorTable(1, &srvRtMeshDataOffsetsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);

@@ -190,7 +190,7 @@ void Engine::CreateScenes()
 	m_sceneManager->GetCurrentScene()->LoadPhysics();
 	m_sceneManager->SetupLights();
 	m_sceneManager->GetRenderingManager()->InitializeRenderTargets(m_sceneManager->GetCurrentScene());
-	m_sceneManager->GetRenderingManager()->PopulateRayTracingData(m_sceneManager->GetCurrentScene());
+	m_sceneManager->GetRenderingManager()->PopulateMeshData(m_sceneManager->GetCurrentScene());
 
 	m_sceneManager->GetRenderingManager()->GetDX12().SubmitCommand();
 

@@ -18,18 +18,35 @@ struct GBufferOutput
     float4 worldPosDepth : SV_Target3;
 };
 
+struct MeshDataOffsets
+{
+    uint vertexOffset;
+    uint indexOffset;
+    uint albedoIndex;
+    uint normalIndex;
+    uint metalRoughnessIndex;
+    uint padding;
+};
+
 Texture2D albedoTexture : register(t0, space1);
 Texture2D normalTexture : register(t1, space1);
 Texture2D metalRougnessMaskTexture : register(t2, space1);
+Texture2D bindlessTextures[] : register(t0, space10);
+StructuredBuffer<MeshDataOffsets> g_dataOffsets : register(t3, space11);
 SamplerState gSampler : register(s0);
 
 GBufferOutput Main(PSInput input)
 {
+    MeshDataOffsets instance = g_dataOffsets[meshDataIndex];
+    
     GBufferOutput output;
     float3 worldPos = input.worldPos;
-    float4 albedo = float4(albedoTexture.Sample(gSampler, input.uv).rgb, 1.0f);
-    float3 normal = normalTexture.Sample(gSampler, input.uv).xyz;
+    //float4 albedo = float4(albedoTexture.Sample(gSampler, input.uv).rgb, 1.0f);
+    float4 albedo = float4(bindlessTextures[NonUniformResourceIndex(instance.albedoIndex)].Sample(gSampler, input.uv).rgb, 1.0f);
+    
+    float3 normal = float4(bindlessTextures[NonUniformResourceIndex(instance.normalIndex)].Sample(gSampler, input.uv).rgb, 1.0f).rgb;
     normal = normalize(normal * 2.0f - 1.0f);
+    
     // TBN matrix
     float3 N = normalize(input.normal);
     float3 T = normalize(input.tangent.xyz);
@@ -40,8 +57,8 @@ GBufferOutput Main(PSInput input)
 
     float3 worldNormal = normalize(mul(normal, TBN));
     
-    float metalness = metalRougnessMaskTexture.Sample(gSampler, input.uv).b;
-    float roughness = metalRougnessMaskTexture.Sample(gSampler, input.uv).g;
+    float metalness = float4(bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].Sample(gSampler, input.uv).rgb, 1.0f).b;
+    float roughness = float4(bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].Sample(gSampler, input.uv).rgb, 1.0f).g;
     float depth = input.position.z;
     
     if(hasTextures)

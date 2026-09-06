@@ -20,6 +20,7 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
+    nointerpolation uint meshDataIndex : MESHDATAINDEX;
 };
 
 struct SkinningDataOut
@@ -36,26 +37,29 @@ struct SkinningDataOut
 
 StructuredBuffer<SkinningDataOut> g_skinningData : register(t1, space8);
 
-struct InstanceTransform
+struct InstanceData
 {
     float4x4 worldMatrix;
+    uint meshDataIndex;
+    float3 pad;
 };
-StructuredBuffer<InstanceTransform> g_InstanceTransforms : register(t0, space9);
+StructuredBuffer<InstanceData> g_InstanceTransforms : register(t0, space9);
 
 PSInput Main(VSInput input, uint instanceID : SV_InstanceID)
 {
     PSInput output;
- 
-    float4x4 worldMat = g_InstanceTransforms[instanceID].worldMatrix;
-    
+
+    InstanceData instanceData = g_InstanceTransforms[instanceID];
+    float4x4 worldMat = instanceData.worldMatrix;
+
     output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMat, float4(input.position, 1.0f))));
     output.normal = normalize(mul(worldMat, float4(input.normal, 0.0f)));
     output.tangent = normalize(mul(worldMat, float4(input.tangent.xyz, 0.0f)));
     output.binormal = normalize(mul(worldMat, float4(input.binormal, 0.0f)));
     output.worldPos = mul(worldMat, float4(input.position, 1.0f));
-   
 
     output.uv = input.uv;
- 
+    output.meshDataIndex = instanceData.meshDataIndex;
+
     return output;
 }

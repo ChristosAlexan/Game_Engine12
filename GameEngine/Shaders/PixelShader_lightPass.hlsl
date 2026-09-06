@@ -42,6 +42,7 @@ Texture2D brdfTexture : register(t2, space4);
 Texture2DArray<float> raytracedShadowTexture : register(t3, space4);
 Texture2D<float4> raytracedReflectionsTexture : register(t4, space4);
 Texture2D<float4> raytracedAOTexture : register(t5, space4);
+Texture2D bindlessTextures[] : register(t0, space10);
 
 // space2: Lights
 StructuredBuffer<GPULight> g_Lights : register(t0, space2);
@@ -57,6 +58,7 @@ float4 Main(PSInput input) : SV_TARGET
     float3 ambientStrength = ambientColor;
     
     float4 albedo = albedoTexture.Sample(gSampler, input.uv).rgba;
+    
     float mask = roughMetalMaskTexture.Sample(gSampler, input.uv).b;
 
     if(mask == 0.0f)

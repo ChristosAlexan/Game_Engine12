@@ -18,6 +18,7 @@ namespace ECS
 
     struct RenderComponent 
     {
+        uint32_t meshDataIndex;
         ECS::MESH_TYPE meshType;
         std::shared_ptr<Model> model;
         std::shared_ptr<GpuMesh> mesh;

@@ -27,14 +27,15 @@ struct CB_PS_SimpleShader
 
 struct CB_PS_Material
 {
-	DirectX::XMFLOAT4 color; // 16 bytes
-	float roughness; // 4 bytes
-	float metalness; // 4 bytes
-	bool hasTextures; // 1 byte
-	bool useAlbedo; // 1 byte
-	bool useNormals; // 1 byte
-	bool useRoughnessMetal; // 1 byte
-	float padding; // 4 bytes
+	DirectX::XMFLOAT4 color;
+	float roughness;
+	float metalness;
+	uint32_t hasTextures;
+	uint32_t useAlbedo;
+	uint32_t useNormals;
+	uint32_t useRoughnessMetal;
+	uint32_t meshDataIndex;
+	uint32_t padding[3];
 };
 
 struct CB_Shader_Camera
