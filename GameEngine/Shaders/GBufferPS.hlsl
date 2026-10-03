@@ -8,6 +8,7 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
+    nointerpolation uint meshIndex : MESHINDEX;
 };
 
 struct GBufferOutput
@@ -25,6 +26,8 @@ struct MeshDataOffsets
     uint albedoIndex;
     uint normalIndex;
     uint metalRoughnessIndex;
+    uint hasTextures;
+    uint hasAnimation;
     uint padding;
 };
 
@@ -37,13 +40,12 @@ SamplerState gSampler : register(s0);
 
 GBufferOutput Main(PSInput input)
 {
-    MeshDataOffsets instance = g_dataOffsets[meshDataIndex];
+    MeshDataOffsets instance = g_dataOffsets[input.meshIndex];
     
     GBufferOutput output;
     float3 worldPos = input.worldPos;
-    //float4 albedo = float4(albedoTexture.Sample(gSampler, input.uv).rgb, 1.0f);
+
     float4 albedo = float4(bindlessTextures[NonUniformResourceIndex(instance.albedoIndex)].Sample(gSampler, input.uv).rgb, 1.0f);
-    
     float3 normal = float4(bindlessTextures[NonUniformResourceIndex(instance.normalIndex)].Sample(gSampler, input.uv).rgb, 1.0f).rgb;
     normal = normalize(normal * 2.0f - 1.0f);
     
@@ -61,18 +63,37 @@ GBufferOutput Main(PSInput input)
     float roughness = float4(bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].Sample(gSampler, input.uv).rgb, 1.0f).g;
     float depth = input.position.z;
     
-    if(hasTextures)
+    if (bDrawIndirect)
     {
-        output.albedo = albedo;
-        output.normal = float4(worldNormal, 1.0f);
-        output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
+        if (instance.hasTextures)
+        {
+            output.albedo = albedo;
+            output.normal = float4(worldNormal, 1.0f);
+            output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
+        }
+        else
+        {
+            output.albedo = float4(color.rgb, 1.0f);
+            output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
+            output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        }
     }
     else
     {
-        output.albedo = float4(color.rgb, 1.0f);
-        output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
-        output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        if (hasTextures)
+        {
+            output.albedo = albedo;
+            output.normal = float4(worldNormal, 1.0f);
+            output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
+        }
+        else
+        {
+            output.albedo = float4(color.rgb, 1.0f);
+            output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
+            output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        }
     }
+
     output.worldPosDepth = float4(worldPos, depth);
 
     return output;

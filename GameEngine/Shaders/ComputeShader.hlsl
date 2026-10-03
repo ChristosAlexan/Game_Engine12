@@ -17,7 +17,7 @@ struct SkinningDataOut
     float3 tangent;
     float padding2;
     float3 binormal;
-    float padding3;
+    uint meshIndex;
 };
 
 cbuffer CB_CS_Skinning : register(b0, space8)
@@ -65,4 +65,5 @@ void Main(uint3 dispatchThreadID : SV_DispatchThreadID)
     g_skinningDataOut[dispatchThreadID.x].tangent = skinnedTangent;
     g_skinningDataOut[dispatchThreadID.x].binormal = skinnedBinormal;
     g_skinningDataOut[dispatchThreadID.x].padding2 = 0.0f;
+    g_skinningDataOut[dispatchThreadID.x].meshIndex = vertexID;
 }

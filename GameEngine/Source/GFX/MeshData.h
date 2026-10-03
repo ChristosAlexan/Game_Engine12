@@ -117,6 +117,18 @@ namespace ECS
     struct GBufferInstanceData
     {
         DirectX::XMFLOAT4X4 worldMatrix;
+        uint32_t meshIndex;
+		DirectX::XMFLOAT3 padding;
+    };
+
+    struct InstanceDataHandle
+    {
+        StructuredBuffer<GBufferInstanceData> instanceData;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuInstanceHandle{};
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuInstanceHandle{};
+
+		uint32_t instanceCount = 0;
     };
 
     struct MeshDataOffsets
@@ -126,6 +138,55 @@ namespace ECS
         uint32_t albedoIndex;
         uint32_t normalIndex;
         uint32_t metalRoughnessIndex;
-        uint32_t pad;
+        uint32_t hasTextures;
+		uint32_t pad1;
+        uint32_t pad2;
+    };
+
+    struct MeshDataOffsetsHandle
+    {
+        StructuredBuffer<MeshDataOffsets> meshDataOffsets;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuOffsetsHandle{};
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuOffsetsHandle{};
+    };
+
+    struct VertexData
+    {
+        DirectX::XMFLOAT3 position;
+        float padding1 = 0.0f;
+        DirectX::XMFLOAT2 uv;
+        DirectX::XMFLOAT2 padding2 = DirectX::XMFLOAT2(0.0f, 0.0f);
+    };
+
+    struct IndexData
+    {
+        uint32_t indices;
+        DirectX::XMFLOAT3 padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+    };
+
+    struct IndirectCommand
+    {
+        // Per-Draw Shader Parameter (Root Constant / CBV)
+        // Points to this draw's World Matrix, Material Indices, or Mesh Offset in VRAM
+        uint32_t firstInstance;
+
+        // Hardware Draw Parameters
+        D3D12_DRAW_INDEXED_ARGUMENTS drawArgs;
+    };
+
+    struct IndirectCommandHandle
+    {
+        StructuredBuffer<IndirectCommand> indirectCommands;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuIndirectCommandHandle{};
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuIndirectCommandHandle{};
+    };
+
+    struct SharedMeshInfo 
+    { 
+        uint32_t vertexOffset; 
+        uint32_t indexOffset; 
+        uint32_t indexCount; 
     };
 }

@@ -19,6 +19,7 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
+    nointerpolation uint meshDataIndex : MESHINDEX;
 };
 
 struct SkinningDataOut
@@ -58,7 +59,8 @@ PSInput Main(VSInput input)
         output.tangent = normalize(mul(worldMatrix, float4(input.tangent.xyz, 0.0f)));
         output.worldPos = mul(worldMatrix, float4(input.position, 1.0f));
     }
-
+    
+    output.meshDataIndex = meshDataIndex;
     output.uv = input.uv;
  
     return output;

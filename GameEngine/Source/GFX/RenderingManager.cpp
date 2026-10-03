@@ -102,10 +102,25 @@ namespace ECS
 	// Populate mesh data such as vertex/index buffers, mesh data offsets and bindless textures
 	void RenderingManager::PopulateMeshData(Scene* scene)
 	{
+		m_sharedMeshes.clear();
+		m_meshLookup.clear();
+		m_meshDataOffsests.clear();
+		rt_meshDataOffsests.clear();
+		rt_vertexData.clear();
+		rt_indexData.clear();
+		m_totalEntities = 0;
+		m_totalRTentities = 0;
+
+		auto* assetManager = scene->GetAssetManager();
+		assetManager->globalVertices.clear();
+		assetManager->globalIndices.clear();
+
 		m_bindlessTextures = std::make_unique<Texture12>();
 
 		m_rtEntityHandle = std::make_unique <RTEntityHandle>();
 		m_meshDataOffsetsHandle = std::make_unique<MeshDataOffsetsHandle>();
+		m_instanceDataHandle = std::make_unique<InstanceDataHandle>();
+		m_indirectCommandHandle = std::make_unique<IndirectCommandHandle>();
 
 		m_texturesMapping = std::make_unique<std::map<uint32_t, std::shared_ptr<Texture12>>>();
 
@@ -129,54 +144,89 @@ namespace ECS
 			}
 		}
 		
-
-		uint32_t vertexSize = 0;
-		uint32_t indicesSize = 0;
+		uint32_t vertexSize = 0, indicesSize = 0;
+		uint32_t rtVertexSize = 0, rtIndicesSize = 0;
 
 		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
-			ECS::MeshDataOffsets dataOffsets;
+			auto& cpuMesh = renderComponent.mesh->cpuMesh;
+			const bool isSkeletal = renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH;
 
-			dataOffsets.vertexOffset = vertexSize;
-			dataOffsets.indexOffset = indicesSize;
-			dataOffsets.pad = 0;
+			uint32_t geoVertexOffset = 0, geoIndexOffset = 0;
+
+			if (!isSkeletal)
+			{
+				const void* key = cpuMesh.get();
+				auto it = m_meshLookup.find(key);
+				uint32_t id;
+
+				if (it == m_meshLookup.end())
+				{
+					id = static_cast<uint32_t>(m_sharedMeshes.size());
+					m_sharedMeshes.push_back({ vertexSize, indicesSize, static_cast<uint32_t>(cpuMesh->indices.size()) });
+					m_meshLookup.emplace(key, id);
+
+					assetManager->globalVertices.insert(assetManager->globalVertices.end(), cpuMesh->vertices.begin(), cpuMesh->vertices.end());
+					assetManager->globalIndices.insert(assetManager->globalIndices.end(), cpuMesh->indices.begin(), cpuMesh->indices.end());
+
+					vertexSize += static_cast<uint32_t>(cpuMesh->vertices.size());
+					indicesSize += static_cast<uint32_t>(cpuMesh->indices.size());
+				}
+				else
+					id = it->second;
+
+				renderComponent.sharedMeshID = id;
+				geoVertexOffset = m_sharedMeshes[id].vertexOffset;
+				geoIndexOffset = m_sharedMeshes[id].indexOffset;
+			}
+
+			ECS::MeshDataOffsets dataOffsets = {};
+			dataOffsets.vertexOffset = geoVertexOffset;     // shared offsets for instancing
+			dataOffsets.indexOffset = geoIndexOffset;
 			dataOffsets.albedoIndex = renderComponent.material->albedoIndex;
 			dataOffsets.normalIndex = renderComponent.material->normalIndex;
 			dataOffsets.metalRoughnessIndex = renderComponent.material->metalRoughnessIndex;
+			dataOffsets.hasTextures = (renderComponent.meshType != ECS::MESH_TYPE::LIGHT);
+
 			renderComponent.meshDataIndex = static_cast<UINT>(m_meshDataOffsests.size());
-
-
 			m_meshDataOffsests.push_back(dataOffsets);
-
 			m_totalEntities++;
 
-			if (renderComponent.meshType != ECS::STATIC_MESH && renderComponent.meshType != ECS::MESH_TYPE::SKELETAL_MESH)
-				continue;
-
-			vertexSize += renderComponent.mesh->cpuMesh->vertices.size();
-			indicesSize += renderComponent.mesh->cpuMesh->indices.size();
-	
-			rt_meshDataOffsests.push_back(dataOffsets);
-
-			for (size_t i = 0; i < renderComponent.mesh->cpuMesh->vertices.size(); ++i)
+			// Raytracing data population for static meshes and skeletal meshes
+			if (renderComponent.meshType == ECS::STATIC_MESH || isSkeletal)
 			{
-				ECS::RTVertexData data;
-				data.position = renderComponent.mesh->cpuMesh->vertices[i].pos;
-				data.uv = renderComponent.mesh->cpuMesh->vertices[i].texCoord;
-				data.padding1 = 1.0f;
-				data.padding2 = DirectX::XMFLOAT2(1.0f, 1.0f);
-				rt_vertexData.push_back(data);
-			}
-			for (size_t i = 0; i < renderComponent.mesh->cpuMesh->indices.size(); ++i)
-			{
-				ECS::RTIndexData data;
-				data.indices = renderComponent.mesh->cpuMesh->indices[i];
-				rt_indexData.push_back(data);
+				ECS::MeshDataOffsets rtDataOffsets = {};
+				rtDataOffsets.vertexOffset = rtVertexSize;
+				rtDataOffsets.indexOffset = rtIndicesSize;
+				rtDataOffsets.albedoIndex = renderComponent.material->albedoIndex;
+				rtDataOffsets.normalIndex = renderComponent.material->normalIndex;
+				rtDataOffsets.metalRoughnessIndex = renderComponent.material->metalRoughnessIndex;
+				rtDataOffsets.hasTextures = renderComponent.material->hasTextures;
+				rt_meshDataOffsests.push_back(rtDataOffsets);
+
+				for (const auto& v : cpuMesh->vertices)
+				{
+					ECS::VertexData d;
+					d.position = v.pos; d.uv = v.texCoord;
+					d.padding1 = 1.0f;  d.padding2 = { 1.0f, 1.0f };
+					rt_vertexData.push_back(d);
+				}
+				for (auto idx : cpuMesh->indices)
+				{
+					ECS::IndexData d; d.indices = idx;
+					rt_indexData.push_back(d);
+				}
+				rtVertexSize += static_cast<uint32_t>(cpuMesh->vertices.size());
+				rtIndicesSize += static_cast<uint32_t>(cpuMesh->indices.size());
 			}
 			m_totalRTentities++;
-	
 		}
+
+		m_perMeshInstances.assign(m_sharedMeshes.size(), {});
+
+		// Buffers for indirect drawing
+		assetManager->UploadGlobalBuffers(GetDX12().GetDevice(), GetDX12().GetCmdList());
 
 		if (!m_texturesMapping->empty())
 		{
@@ -209,11 +259,25 @@ namespace ECS
 
 			// For the mesh data offsets, we need to create a separate handle for the rasterization pipeline
 			m_meshDataOffsetsHandle->meshDataOffsets.Initialize(GetDX12().GetDevice(), m_totalEntities);
+
 			allocator = GetDX12().GetDescriptorAllocator()->Allocate();
 			m_meshDataOffsetsHandle->cpuOffsetsHandle = allocator.cpuHandle;
 			m_meshDataOffsetsHandle->gpuOffsetsHandle = allocator.gpuHandle;
 			m_meshDataOffsetsHandle->meshDataOffsets.CreateSRV(GetDX12().GetDevice(), m_meshDataOffsetsHandle->cpuOffsetsHandle);
 			m_meshDataOffsetsHandle->meshDataOffsets.UploadData(GetDX12().GetCmdList(), m_meshDataOffsests);
+
+			m_instanceDataHandle->instanceData.Initialize(GetDX12().GetDevice(), m_totalEntities);
+			m_instanceDataHandle->instanceCount = m_totalEntities;
+			allocator = GetDX12().GetDescriptorAllocator()->Allocate();
+			m_instanceDataHandle->cpuInstanceHandle = allocator.cpuHandle;
+			m_instanceDataHandle->gpuInstanceHandle = allocator.gpuHandle;
+			m_instanceDataHandle->instanceData.CreateSRV(GetDX12().GetDevice(), m_instanceDataHandle->cpuInstanceHandle);
+
+			m_indirectCommandHandle->indirectCommands.Initialize(GetDX12().GetDevice(), m_totalEntities);
+			allocator = GetDX12().GetDescriptorAllocator()->Allocate();
+			m_indirectCommandHandle->cpuIndirectCommandHandle = allocator.cpuHandle;
+			m_indirectCommandHandle->gpuIndirectCommandHandle = allocator.gpuHandle;
+			m_indirectCommandHandle->indirectCommands.CreateSRV(GetDX12().GetDevice(), m_indirectCommandHandle->cpuIndirectCommandHandle);
 
 			m_rtEntityHandle->rtVertexGpuData.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			m_rtEntityHandle->rtIndexGpuData.GetResource()->TransitionState(GetDX12().GetCmdList(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -318,6 +382,7 @@ namespace ECS
 		per_object_CB.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
 		per_object_CB.vertexCount = vertexCount;
 		per_object_CB.HasAnim = renderComponent.hasAnimation;
+		per_object_CB.meshDataIndex = renderComponent.meshDataIndex;
 
 		if (renderComponent.meshType == ECS::MESH_TYPE::LIGHT)
 		{
@@ -336,10 +401,10 @@ namespace ECS
 		psMaterialCB.useNormals = renderComponent.material->useNormalMap;
 		psMaterialCB.useRoughnessMetal = renderComponent.material->useMetalRoughnessMap;
 		psMaterialCB.meshDataIndex = renderComponent.meshDataIndex;
+		psMaterialCB.bDrawIndirect = false;
 
 		psMaterialCB.padding[0] = 0;
 		psMaterialCB.padding[1] = 0;
-		psMaterialCB.padding[2] = 0;
 
 		if (GetDX12().dynamicCB)
 		{
@@ -358,6 +423,80 @@ namespace ECS
 		}
 
 		renderComponent.mesh->DrawIndexed(GetDX12().GetCmdList());
+	}
+
+	void RenderingManager::RenderGbufferIndirect(Scene* scene, const std::vector<IndirectCommand>& indirectCommands, const std::vector<GBufferInstanceData>& gbufferInstanceData)
+	{
+		if (indirectCommands.empty())
+			return;
+
+		auto* assetManager = scene->GetAssetManager();
+
+		if (gbufferInstanceData.size() > m_instanceDataHandle->instanceCount)
+		{
+			m_instanceDataHandle->instanceCount = static_cast<uint32_t>(gbufferInstanceData.size() * 1.5f);
+
+			m_instanceDataHandle->instanceData.Initialize(GetDX12().GetDevice(), m_instanceDataHandle->instanceCount);
+			m_instanceDataHandle->instanceData.CreateSRV(GetDX12().GetDevice(), m_instanceDataHandle->cpuInstanceHandle);
+
+			m_indirectCommandHandle->indirectCommands.Initialize(GetDX12().GetDevice(), m_instanceDataHandle->instanceCount);
+			m_indirectCommandHandle->indirectCommands.CreateSRV(GetDX12().GetDevice(), m_indirectCommandHandle->cpuIndirectCommandHandle);
+		}
+
+		auto* cmdList = GetDX12().GetCmdList();
+	
+		cmdList->SetPipelineState(GetDX12().pipelineState_instanced_Gbuffer.Get());
+		cmdList->SetGraphicsRootSignature(GetDX12().GetRasterRootSignature()); // REQUIRED
+
+		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
+		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);
+
+
+		m_instanceDataHandle->instanceData.UploadData(cmdList, gbufferInstanceData);
+		m_indirectCommandHandle->indirectCommands.UploadData(cmdList, indirectCommands);
+
+		D3D12_RESOURCE_BARRIER barriers[2] = {};
+
+		barriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_instanceDataHandle->instanceData.GetResource()->GetResource(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
+		);
+
+		barriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_indirectCommandHandle->indirectCommands.GetResource()->GetResource(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
+		);
+
+		cmdList->ResourceBarrier(2, barriers);
+
+		m_instanceDataHandle->instanceData.GetResource()->SetCurrentState(D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		m_indirectCommandHandle->indirectCommands.GetResource()->SetCurrentState(D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+
+		cmdList->SetGraphicsRootDescriptorTable(
+			static_cast<UINT>(RootSlot::Raster::InstanceDataBuffer),
+			m_instanceDataHandle->gpuInstanceHandle
+		);
+		cmdList->SetGraphicsRootDescriptorTable(
+			static_cast<UINT>(RootSlot::Raster::MeshDataOffsets),
+			m_meshDataOffsetsHandle->gpuOffsetsHandle
+		);
+
+		UpdateBuffers(scene);
+
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cmdList->IASetVertexBuffers(0, 1, assetManager->globalVertexBuffer.GetBufferViewPtr());
+		cmdList->IASetIndexBuffer(assetManager->globalIndexBuffer.GetBufferViewPtr());
+
+		cmdList->ExecuteIndirect(
+			GetDX12().GetCommandSignature(),
+			static_cast<UINT>(indirectCommands.size()),
+			m_indirectCommandHandle->indirectCommands.GetResource()->GetResource(),
+			0,
+			nullptr,
+			0
+		);
 	}
 
 	void RenderingManager::RenderBRDF()
@@ -614,6 +753,53 @@ namespace ECS
 		FXAA();
 	}
 
+	void RenderingManager::BuildIndirectDraws(Scene* scene, const Frustum& frustum, std::vector<IndirectCommand>& outCommands, std::vector<GBufferInstanceData>& outInstances)
+	{
+		outCommands.clear();
+		outInstances.clear();
+		for (auto& v : m_perMeshInstances) v.clear();
+
+		auto group = scene->GetRegistry().group<TransformComponent, RenderComponent>();
+
+		for (auto [entity, transformComponent, renderComponent] : group.each())
+		{
+			ECS::AABB worldAABB = ComputeWorldAABB(transformComponent.aabb, transformComponent.worldMatrix);
+			if (!IsAABBInFrustum(worldAABB, frustum))
+				continue;
+
+			if (renderComponent.meshType == MESH_TYPE::SKELETAL_MESH)
+			{
+				RenderGbuffer(scene, entity, transformComponent, renderComponent);
+				continue;
+			}
+
+			GBufferInstanceData inst = {};
+			inst.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
+			inst.meshIndex = renderComponent.meshDataIndex;
+			m_perMeshInstances[renderComponent.sharedMeshID].push_back(inst);
+		}
+
+		uint32_t firstInstance = 0;
+		for (size_t meshID = 0; meshID < m_perMeshInstances.size(); ++meshID)
+		{
+			auto& list = m_perMeshInstances[meshID];
+			if (list.empty()) continue;
+
+			const auto& m = m_sharedMeshes[meshID];
+			IndirectCommand cmd = {};
+			cmd.firstInstance = firstInstance;
+			cmd.drawArgs.IndexCountPerInstance = m.indexCount;
+			cmd.drawArgs.InstanceCount = static_cast<UINT>(list.size());
+			cmd.drawArgs.StartIndexLocation = m.indexOffset;
+			cmd.drawArgs.BaseVertexLocation = static_cast<INT>(m.vertexOffset);
+			cmd.drawArgs.StartInstanceLocation = 0;
+			outCommands.push_back(cmd);
+
+			outInstances.insert(outInstances.end(), list.begin(), list.end());
+			firstInstance += static_cast<uint32_t>(list.size());
+		}
+	}
+
 	void RenderingManager::CalculateCompute(Scene* scene)
 	{
 		m_computeSkinning.Compute(scene);
@@ -635,14 +821,25 @@ namespace ECS
 
 		cmdList->SetGraphicsRootSignature(GetDX12().GetRasterRootSignature());
 
+		CB_VS_SimpleShader vsCameraCB = {};
+		vsCameraCB.projectionMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetProjectionMatrix()));
+		vsCameraCB.viewMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(scene->GetCamera().GetViewMatrix()));
+
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraVS), dynamicCB->Allocate(vsCameraCB));
+
 		CB_Shader_Camera psCameraCB = {};
 		psCameraCB.cameraPos = scene->GetCamera().pos;
 		psCameraCB.padding1 = 0.0f;
-
 		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::CameraPS), dynamicCB->Allocate(psCameraCB));
 
 		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::BindlessTextures), m_bindlessTextures->GetGPUHandle());
 		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::MeshDataOffsets), m_meshDataOffsetsHandle->gpuOffsetsHandle);
+
+		CB_PS_Material psMaterialCB = {};
+
+		psMaterialCB.bDrawIndirect = true;
+
+		cmdList->SetGraphicsRootConstantBufferView(static_cast<UINT>(RootSlot::Raster::MaterialBuffer), dynamicCB->Allocate(psMaterialCB));
 	}
 
 	void RenderingManager::DebugDraw(Scene* scene)

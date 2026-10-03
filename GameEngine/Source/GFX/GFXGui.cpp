@@ -71,7 +71,9 @@ void GFXGui::SelectEntity(ECS::SceneManager* sceneManager, UINT screenWidth, UIN
 	{
 		Ray ray = RaycastPicking(screenWidth, screenHeight, camera);
 
-		if (IntersectsAABB(ray, GetWorldAABB(&transform, &renderComponent), m_hitT) && (m_hitT < closestT))
+		ECS::AABB worldAABB = ComputeWorldAABB(transform.aabb, transform.worldMatrix);
+
+		if (IntersectsAABB(ray, worldAABB, m_hitT) && (m_hitT < closestT))
 		{
 			closestT = m_hitT;
 			m_closestEntity = entity;

@@ -40,6 +40,7 @@ public:
 	void CreateRTPSO(IDxcBlob* rayTracingBlob, Microsoft::WRL::ComPtr<ID3D12StateObject>& rtpso);
 	void CreateSBT(D3D12_DISPATCH_RAYS_DESC& dispatchDesc, UINT numHitGroups, ECS::rayTracingResources& rtResources, UINT32 screenWidth, UINT32 screenHeight);
 	void CreateDepthStencilBuffer(const int width, const int height);
+	void CreateIndirectPipeline();
 	void InitializeBuffers();
 	void TransitionBackBufferToRTV();
 	void TransitionBackBufferToPresent();
@@ -63,6 +64,8 @@ public:
 	ID3D12RootSignature* GetGlobalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetLocalRaytracingRootSignature() const;
 	ID3D12RootSignature* GetComputeRootSignature() const;
+	ID3D12CommandSignature* GetCommandSignature() const;
+
 	void DispatchRaytracing(D3D12_DISPATCH_RAYS_DESC& dispatchDesc);
 
 	ECS::rayTracingResources& GetRayTracedShadowsResources();
@@ -108,6 +111,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> sharedSrvHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
+	Microsoft::WRL::ComPtr<ID3D12CommandSignature> m_commandSignature;
 	CD3DX12_RESOURCE_BARRIER m_barrier;
 
 	// SAMPLE DESCS

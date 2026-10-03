@@ -13,7 +13,7 @@ struct CB_VS_Per_Object_Shader
 	DirectX::XMFLOAT4X4 worldMatrix;
 	uint32_t vertexCount;
 	bool HasAnim;
-	uint32_t padding0 = 0;
+	uint32_t meshDataIndex;
 	uint32_t padding1 = 0;
 };
 
@@ -35,7 +35,8 @@ struct CB_PS_Material
 	uint32_t useNormals;
 	uint32_t useRoughnessMetal;
 	uint32_t meshDataIndex;
-	uint32_t padding[3];
+	uint32_t bDrawIndirect;
+	uint32_t padding[2];
 };
 
 struct CB_Shader_Camera

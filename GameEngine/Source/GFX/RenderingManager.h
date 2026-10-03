@@ -38,6 +38,12 @@ namespace ECS
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderPbrMaps(Camera& camera);
 		void RenderGbuffer(Scene* scene, entt::entity& entity, TransformComponent& transformComponent, RenderComponent& renderComponent);
+		void RenderGbufferIndirect(Scene* scene, const std::vector<IndirectCommand>& indirectCommands, const std::vector<GBufferInstanceData>& gbufferInstanceData);
+
+		// Frustum-culls, draws skeletal meshes immediately, and builds instanced indirect commands for the rest.
+		void BuildIndirectDraws(Scene* scene, const Frustum& frustum,   // use whatever type ExtractFrustum returns
+			std::vector<IndirectCommand>& outCommands,
+			std::vector<GBufferInstanceData>& outInstances);
 
 		void RenderBRDF();
 		void DispatchRays(Scene* scene);
@@ -72,17 +78,10 @@ namespace ECS
 		std::unique_ptr<RTEntityHandle> m_rtEntityHandle;
 
 		UINT m_totalEntities = 0;
-		struct MeshDataOffsetsHandle
-		{
-			StructuredBuffer<struct MeshDataOffsets> meshDataOffsets;
 
-			D3D12_CPU_DESCRIPTOR_HANDLE cpuOffsetsHandle{};
-			D3D12_GPU_DESCRIPTOR_HANDLE gpuOffsetsHandle{};
-		};
-
-
-		std::vector<ECS::MeshDataOffsets> m_meshDataOffsests;
-		std::unique_ptr<MeshDataOffsetsHandle> m_meshDataOffsetsHandle;
+		std::vector<SharedMeshInfo> m_sharedMeshes;
+		std::unordered_map<const void*, uint32_t> m_meshLookup;               // cpuMesh -> shared mesh id
+		std::vector<std::vector<GBufferInstanceData>> m_perMeshInstances;     // reused every frame
 
 		HDR_IMAGE hdr_map1;
 		
@@ -95,12 +94,19 @@ namespace ECS
 		// Ray Tracing data
 		UINT m_totalRTentities = 0;
 		std::unique_ptr<std::map<uint32_t, std::shared_ptr<Texture12>>> m_texturesMapping;
-		std::vector<ECS::RTVertexData> rt_vertexData;
-		std::vector<ECS::RTIndexData> rt_indexData;
-		std::vector<ECS::MeshDataOffsets> rt_meshDataOffsests;
+		std::vector<ECS::VertexData> rt_vertexData, raster_vertexData;
+		std::vector<ECS::IndexData> rt_indexData, raster_indexData;
+		std::vector<ECS::MeshDataOffsets> rt_meshDataOffsests, raster_meshDataOffsests;
 		std::vector<DirectX::XMFLOAT4X4> m_visibleInstanceTransforms;
 
+		std::unique_ptr<InstanceDataHandle> m_instanceDataHandle;
+		std::unique_ptr<IndirectCommandHandle> m_indirectCommandHandle;
+
 	public:
+		std::vector<ECS::MeshDataOffsets> m_meshDataOffsests;
+		std::unique_ptr<MeshDataOffsetsHandle> m_meshDataOffsetsHandle;
+
+
 		DirectX::XMFLOAT3 m_ambientColor;
 		float m_exposure;
 		float m_gamma;

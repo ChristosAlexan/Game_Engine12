@@ -159,20 +159,21 @@ inline inline Ray RaycastPicking(UINT screenWidth, UINT screenHeight, Camera& ca
 	return { rayOrigin, rayDir };
 }
 
-inline void GenerateAABB(ECS::AABB& aabb, ECS::RenderComponent* renderComp)
+inline void GenerateAABB(ECS::AABB& aabb, const ECS::RenderComponent* renderComp)
 {
-	DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-	DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
+	using namespace DirectX;
+	XMVECTOR minPos = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 0.0f);
+	XMVECTOR maxPos = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0f);
 
 	for (const auto& vertex : renderComp->mesh->cpuMesh->vertices)
 	{
-		DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
-		min = DirectX::XMVectorMin(min, pos);
-		max = DirectX::XMVectorMax(max, pos);
+		XMVECTOR pos = XMLoadFloat3(&vertex.pos);
+		minPos = XMVectorMin(minPos, pos);
+		maxPos = XMVectorMax(maxPos, pos);
 	}
 
-	aabb.min = min;
-	aabb.max = max;
+	aabb.min = minPos;
+	aabb.max = maxPos;
 }
 
 inline ECS::AABB UpdateAABB(ECS::AABB& aabb, DirectX::XMMATRIX& worldMatrix, ECS::RenderComponent* renderComp)
@@ -207,9 +208,35 @@ inline ECS::AABB UpdateAABB(ECS::AABB& aabb, DirectX::XMMATRIX& worldMatrix, ECS
 	return { newMin, newMax };
 }
 
-inline ECS::AABB GetWorldAABB(ECS::TransformComponent* trans, ECS::RenderComponent* renderComp)
+inline ECS::AABB ComputeWorldAABB(const ECS::AABB& localAABB, const DirectX::XMMATRIX& worldMatrix)
 {
-	return UpdateAABB(trans->aabb, trans->worldMatrix, renderComp);
+	using namespace DirectX;
+
+	XMFLOAT3 minF, maxF;
+	XMStoreFloat3(&minF, localAABB.min);
+	XMStoreFloat3(&maxF, localAABB.max);
+
+	XMVECTOR corners[8] = {
+		XMVectorSet(minF.x, minF.y, minF.z, 1.0f),
+		XMVectorSet(maxF.x, minF.y, minF.z, 1.0f),
+		XMVectorSet(minF.x, maxF.y, minF.z, 1.0f),
+		XMVectorSet(maxF.x, maxF.y, minF.z, 1.0f),
+		XMVectorSet(minF.x, minF.y, maxF.z, 1.0f),
+		XMVectorSet(maxF.x, minF.y, maxF.z, 1.0f),
+		XMVectorSet(minF.x, maxF.y, maxF.z, 1.0f),
+		XMVectorSet(maxF.x, maxF.y, maxF.z, 1.0f),
+	};
+
+	XMVECTOR newMin = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 0.0f);
+	XMVECTOR newMax = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0.0f);
+
+	for (int i = 0; i < 8; ++i) {
+		XMVECTOR cornerWorld = XMVector3TransformCoord(corners[i], worldMatrix);
+		newMin = XMVectorMin(newMin, cornerWorld);
+		newMax = XMVectorMax(newMax, cornerWorld);
+	}
+
+	return { newMin, newMax };
 }
 
 inline PHYSICS::PhysicsTransform TransformToPhysX(const ECS::TransformComponent& transform)

@@ -9,9 +9,7 @@ struct VSInput
     float3 binormal : BINORMAL;
     float4 boneWeights : BONEWEIGHTS;
     uint4 boneIndices : BONEINDICES;
-    uint vertexID : SV_VertexID;
 };
-
 struct PSInput
 {
     float4 position : SV_POSITION;
@@ -20,7 +18,7 @@ struct PSInput
     float4 tangent : TANGENT;
     float3 binormal : BINORMAL;
     float3 worldPos : WORLD_POSITION;
-    nointerpolation uint meshDataIndex : MESHDATAINDEX;
+    nointerpolation uint meshDataIndex : MESHINDEX;
 };
 
 struct SkinningDataOut
@@ -35,31 +33,33 @@ struct SkinningDataOut
     float padding3;
 };
 
-StructuredBuffer<SkinningDataOut> g_skinningData : register(t1, space8);
+cbuffer IndirectDrawArgs : register(b6)
+{
+    uint g_FirstInstance;
+};
 
 struct InstanceData
 {
     float4x4 worldMatrix;
     uint meshDataIndex;
-    float3 pad;
+    float pad[3];
 };
-StructuredBuffer<InstanceData> g_InstanceTransforms : register(t0, space9);
+
+StructuredBuffer<SkinningDataOut> g_skinningData : register(t1, space8);
+StructuredBuffer<InstanceData> g_InstanceData : register(t0, space9);
 
 PSInput Main(VSInput input, uint instanceID : SV_InstanceID)
 {
     PSInput output;
-
-    InstanceData instanceData = g_InstanceTransforms[instanceID];
-    float4x4 worldMat = instanceData.worldMatrix;
-
-    output.position = mul(projectionMatrix, mul(viewMatrix, mul(worldMat, float4(input.position, 1.0f))));
-    output.normal = normalize(mul(worldMat, float4(input.normal, 0.0f)));
-    output.tangent = normalize(mul(worldMat, float4(input.tangent.xyz, 0.0f)));
-    output.binormal = normalize(mul(worldMat, float4(input.binormal, 0.0f)));
-    output.worldPos = mul(worldMat, float4(input.position, 1.0f));
-
+    InstanceData instance = g_InstanceData[g_FirstInstance + instanceID];
+    
+    output.position = mul(projectionMatrix, mul(viewMatrix, mul(instance.worldMatrix, float4(input.position, 1.0f))));
+    output.normal = normalize(mul(instance.worldMatrix, float4(input.normal, 0.0f)));
+    output.tangent = normalize(mul(instance.worldMatrix, float4(input.tangent.xyz, 0.0f)));
+    output.worldPos = mul(instance.worldMatrix, float4(input.position, 1.0f));
+    
+    output.meshDataIndex = instance.meshDataIndex; 
     output.uv = input.uv;
-    output.meshDataIndex = instanceData.meshDataIndex;
-
+ 
     return output;
 }

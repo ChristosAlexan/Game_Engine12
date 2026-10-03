@@ -25,7 +25,7 @@ namespace ECS
 		auto mesh = scene->GetAssetManager()->GetOrLoadMesh(scene, entityDesc, m_registry, id, m_device, m_cmdList);
 		auto material = scene->GetMaterialManager()->GetOrCreateMaterial(entityDesc.materialDesc);
 
-		
+		TransformComponent transformComp = entityDesc.transform;
 		renderComponent.mesh = mesh;
 		renderComponent.material = material;
 		renderComponent.name = entityDesc.name;
@@ -34,11 +34,11 @@ namespace ECS
 		renderComponent.meshType = entityDesc.meshType;
 
 		// Generate AABB from mesh data offline
-		GenerateAABB(entityDesc.transform.aabb, &renderComponent);
+		GenerateAABB(transformComp.aabb, &renderComponent);
 
 		if(renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH)
 		{
-			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc);
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
@@ -70,7 +70,7 @@ namespace ECS
 		}
 		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		{
-			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc.name);
+			renderComponent.model = scene->GetAssetManager()->GetModel(entityDesc);
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
@@ -101,7 +101,7 @@ namespace ECS
 		
 		m_registry->emplace<RenderComponent>(id, renderComponent);
 		m_registry->emplace<EntityDesc>(id, entityDesc);
-		m_registry->emplace<TransformComponent>(id, entityDesc.transform);
+		m_registry->emplace<TransformComponent>(id, transformComp);
 
 		if (entityDesc.hasAnimation)
 		{

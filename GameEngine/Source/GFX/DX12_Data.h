@@ -24,7 +24,7 @@ namespace RootSlot
         RtUAVOutput = 16, // u0 space5: DXR compute output view 
         RtShadowsSRV = 17, // t0 space6: Raytraced shadow maps
         RtShadowsInput = 18, // t3 space4: Raytraced shadow lightpass input
-        SkinningOutput = 19, // u1 space8: Dynamic skinning transform output table
+        SkinningOutput = 19, // t1 space8: Dynamic skinning transform output table
         ShadowsData = 20, // t1 space2: Shadow map array layout
         RtReflections = 21, // t4 space4: Raytraced reflection input view
         RtAmbientOccl = 22, // t5 space4: Raytraced AO input view
@@ -33,7 +33,8 @@ namespace RootSlot
 		InstanceDataBuffer = 25, // t0 space9: Dynamic array of Transform per instance
         BindlessTextures = 26,  // t0 space10
         MeshDataOffsets = 27,  // t3 space11
-        Count = 28
+		IndirectDrawArgs = 28,  // b6 space0
+        Count = 29
     };
 
     enum class RayTracing : UINT

@@ -98,4 +98,3 @@ ECS::MeshData GenerateSkeletalMesh(Model& model, ECS::EntityDesc& entityDesc, EC
 	return model.GetMeshData();
 }
 
-

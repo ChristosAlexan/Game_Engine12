@@ -10,10 +10,24 @@ namespace ECS
 	{
 	}
 
+	static std::string MakeMeshKey(const EntityDesc& d)
+	{
+		switch (d.meshType)
+		{
+		case QUAD:  return "builtin:quad";
+		case CUBE:
+		case LIGHT: return "builtin:cube";                         // lights use the same cube
+		case STATIC_MESH:
+		case SKELETAL_MESH: return d.filePath;                     // same file = same geometry
+		}
+		return d.name;
+	}
+
 	std::shared_ptr<GpuMesh> ECS::AssetManager::GetOrLoadMesh(Scene* scene, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
-		if (m_meshes.contains(entityDesc.name))
-			return m_meshes.at(entityDesc.name);
+		const std::string key = MakeMeshKey(entityDesc);
+		if (m_meshes.contains(key))
+			return m_meshes.at(key);
 
 		MeshData cpuMesh;
 		Model model;
@@ -47,20 +61,26 @@ namespace ECS
 		mesh->cpuMesh = std::make_shared<MeshData>(cpuMesh);
 		mesh->Upload(device, cmdList);
 
-		m_meshes.emplace(entityDesc.name, mesh);
+		m_meshes.emplace(key, mesh);
 
-		return m_meshes.at(entityDesc.name);
+		return m_meshes.at(key);
 	}
 
 	void AssetManager::MapModel(Model& model, EntityDesc& entityDesc)
 	{
-		m_models.emplace(entityDesc.name, std::make_shared<Model>(model));
+		m_models.emplace(MakeMeshKey(entityDesc), std::make_shared<Model>(model));
+	}	
+
+
+	std::shared_ptr<Model> AssetManager::GetModel(const EntityDesc& d)
+	{
+		return m_models.at(MakeMeshKey(d));
 	}
 
-
-	std::shared_ptr<Model> AssetManager::GetModel(const std::string& modelName)
+	void AssetManager::UploadGlobalBuffers(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 	{
-		return m_models.at(modelName);
+		globalVertexBuffer.Initialize(device, cmdList, globalVertices.data(), globalVertices.size());
+		globalIndexBuffer.Initialize(device, cmdList, globalIndices.data(), globalIndices.size());
 	}
 }
 

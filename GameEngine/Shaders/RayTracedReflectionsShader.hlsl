@@ -43,6 +43,8 @@ struct RTMeshDataOffsets
     uint albedoIndex;
     uint normalIndex;
     uint metalRoughnessIndex;
+    uint hasTextures;
+    uint hasAnimation;
     uint padding;
 };
 

@@ -8,7 +8,8 @@ cbuffer CB_PS_Material : register(b1, space0)
     uint useNormals;
     uint useRoughnessMetal;
     uint meshDataIndex;
-    uint3 padding;
+    uint bDrawIndirect;
+    uint2 padding;
 };
 
 cbuffer CB_PS_Camera : register(b2)

@@ -73,6 +73,9 @@ namespace ECS
 
 	void Scene::Update(float dt, float fps)
 	{
+		std::vector<IndirectCommand> indirectCommands;
+		std::vector<GBufferInstanceData> gbufferInstanceData;
+
 		GetRenderingManager()->ResetRenderTargets();
 		GetRenderingManager()->UpdateBuffers(this);
 
@@ -91,13 +94,8 @@ namespace ECS
 
 		auto frustum = ExtractFrustum(DirectX::XMMatrixMultiply(GetCamera().GetViewMatrix(), GetCamera().GetProjectionMatrix()));
 
-		for (auto [entity, transformComponent, renderComponent] : group.each())
-		{
-			auto& transformComponent = group.get<TransformComponent>(entity);
-			auto& renderComponent = group.get<RenderComponent>(entity);
-
-			GetRenderingManager()->RenderGbuffer(this, entity, transformComponent, renderComponent);
-		}
+		GetRenderingManager()->BuildIndirectDraws(this, frustum, indirectCommands, gbufferInstanceData);
+		GetRenderingManager()->RenderGbufferIndirect(this, indirectCommands, gbufferInstanceData);
 
 		if (GetRenderingManager()->m_bEnableDebugDraw)
 			GetRenderingManager()->DebugDraw(this);

@@ -21,10 +21,18 @@ namespace ECS
         AssetManager();
         std::shared_ptr<GpuMesh> GetOrLoadMesh(Scene* scene, EntityDesc& entityDesc, entt::registry* registry, entt::entity& entity, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
         void MapModel(Model& model, EntityDesc& entityDesc);
-        std::shared_ptr<Model> GetModel(const std::string& modelName);
+        std::shared_ptr<Model> GetModel(const EntityDesc& d);
+
+        void UploadGlobalBuffers(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
     public:
         std::unordered_map<std::string, std::shared_ptr<GpuMesh>> m_meshes;
         std::unordered_map<std::string, std::shared_ptr<Model>> m_models;
+
+        std::vector<Vertex> globalVertices;
+        std::vector<uint32_t> globalIndices;
+
+        VertexBuffer12<Vertex> globalVertexBuffer;
+        IndexBuffer12 globalIndexBuffer;
     };
 }
 

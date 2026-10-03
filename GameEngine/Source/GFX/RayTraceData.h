@@ -33,7 +33,7 @@ namespace ECS
 		bool bInit = false;
 	};
 
-	struct RTVertexData
+	/*struct RTVertexData
 	{
 		DirectX::XMFLOAT3 position;
 		float padding1 = 0.0f;
@@ -45,12 +45,12 @@ namespace ECS
 	{
 		uint32_t indices;
 		DirectX::XMFLOAT3 padding = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	};
+	};*/
 
 	struct RTEntityHandle
 	{
-		StructuredBuffer<RTVertexData> rtVertexGpuData;
-		StructuredBuffer<RTIndexData> rtIndexGpuData;
+		StructuredBuffer<struct VertexData> rtVertexGpuData;
+		StructuredBuffer<struct IndexData> rtIndexGpuData;
 		StructuredBuffer<struct MeshDataOffsets> rtMeshDataOffsets;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuVertexHandle{};

@@ -6,7 +6,7 @@
 #include "ErrorLogger.h"
 #include "GFX_MACROS.h"
 #include "DX12_Data.h"
-
+#include "MeshData.h"
 
 #ifdef _DEBUG
 // Pretty-print a state object tree.
@@ -310,6 +310,11 @@ ID3D12RootSignature* DX12::GetComputeRootSignature() const
     return m_computeRootSignature.Get();
 }
 
+ID3D12CommandSignature* DX12::GetCommandSignature() const
+{
+    return m_commandSignature.Get();
+}
+
 void DX12::DispatchRaytracing(D3D12_DISPATCH_RAYS_DESC& dispatchDesc)
 {
     commandList->DispatchRays(&dispatchDesc);
@@ -345,6 +350,7 @@ void DX12::Initialize(HWND hwnd, const int width, const int height)
     InitializeBuffers();
     InitializeShaders();
     InitDescAllocator(sharedSrvHeap.Get());
+    CreateIndirectPipeline();
 
     ResetCommands();
 }
@@ -1002,6 +1008,31 @@ void DX12::CreateDepthStencilBuffer(const int width, const int height)
     );
 }
 
+void DX12::CreateIndirectPipeline()
+{
+	UINT INDIRECT_COMMAND_PARAMETER_INDEX = 28;
+    D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
+    args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+	args[0].Constant.RootParameterIndex = INDIRECT_COMMAND_PARAMETER_INDEX; // IndirectDrawArgs root parameter index
+    args[0].Constant.DestOffsetIn32BitValues = 0;
+    args[0].Constant.Num32BitValuesToSet = 1;
+
+    args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+    D3D12_COMMAND_SIGNATURE_DESC desc = {};
+    desc.ByteStride = sizeof(ECS::IndirectCommand);
+    desc.NumArgumentDescs = 2;
+    desc.pArgumentDescs = args;
+    desc.NodeMask = 0;
+
+    HRESULT hr = GetDevice()->CreateCommandSignature(
+        &desc,
+        GetRasterRootSignature(),
+        IID_PPV_ARGS(&m_commandSignature)
+    );
+    COM_ERROR_IF_FAILED(hr, "Failed to create Indirect Command Signature!");
+}
+
 void DX12::InitializeBuffers()
 {
     dynamicCB = std::make_unique<DynamicUploadBuffer>(device.Get(), 8 * 1024 * 1024); // 8 MB
@@ -1063,6 +1094,9 @@ void DX12::InitializeBuffers()
     CD3DX12_DESCRIPTOR_RANGE1 srvMeshDataOffsetsStructuredBuffer;
     srvMeshDataOffsetsStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 11); // t3 space10 mesh data offsets SRV
 
+    CD3DX12_DESCRIPTOR_RANGE1 srvInstanceDataStructuredBuffer;
+    srvInstanceDataStructuredBuffer.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 9); // t0 space9 instance data SRV
+
     CD3DX12_ROOT_PARAMETER1 rootParams[static_cast<UINT>(RootSlot::Raster::Count)];
     // Slot 0 - 4
     rootParams[static_cast<UINT>(RootSlot::Raster::CameraVS)].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // b0 space0
@@ -1084,7 +1118,7 @@ void DX12::InitializeBuffers()
     rootParams[static_cast<UINT>(RootSlot::Raster::BrdfLUT)].InitAsDescriptorTable(1, &brdfRange, D3D12_SHADER_VISIBILITY_PIXEL);                               // t2 space4
     rootParams[static_cast<UINT>(RootSlot::Raster::GlobalLightData)].InitAsConstantBufferView(4, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL); // b4 space0
 
-    // Slot 15 - 27
+    // Slot 15 - 28
     rootParams[static_cast<UINT>(RootSlot::Raster::TlasSRV)].InitAsShaderResourceView(0, 5, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);        // t0 space5
     rootParams[static_cast<UINT>(RootSlot::Raster::RtUAVOutput)].InitAsDescriptorTable(1, &raytracingUAVRange, D3D12_SHADER_VISIBILITY_ALL);                    // u0 space5
     rootParams[static_cast<UINT>(RootSlot::Raster::RtShadowsSRV)].InitAsDescriptorTable(1, &raytracingSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);                  // t0 space6
@@ -1095,9 +1129,10 @@ void DX12::InitializeBuffers()
     rootParams[static_cast<UINT>(RootSlot::Raster::RtAmbientOccl)].InitAsDescriptorTable(1, &raytracedAOLightPassSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);      // t5 space4
     rootParams[static_cast<UINT>(RootSlot::Raster::FxaaParamsPS)].InitAsConstantBufferView(5, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);   // b5 space0
     rootParams[static_cast<UINT>(RootSlot::Raster::LightPassTexPS)].InitAsDescriptorTable(1, &lightPassRange, D3D12_SHADER_VISIBILITY_PIXEL);                    // t5 space0
-	rootParams[static_cast<UINT>(RootSlot::Raster::InstanceDataBuffer)].InitAsShaderResourceView(0, 9, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX); // t0 space9
+	rootParams[static_cast<UINT>(RootSlot::Raster::InstanceDataBuffer)].InitAsDescriptorTable(1, &srvInstanceDataStructuredBuffer, D3D12_SHADER_VISIBILITY_VERTEX); // t0 space9
     rootParams[static_cast<UINT>(RootSlot::Raster::BindlessTextures)].InitAsDescriptorTable(1, &bindlessTextures, D3D12_SHADER_VISIBILITY_PIXEL);
     rootParams[static_cast<UINT>(RootSlot::Raster::MeshDataOffsets)].InitAsDescriptorTable(1, &srvMeshDataOffsetsStructuredBuffer, D3D12_SHADER_VISIBILITY_ALL);
+    rootParams[static_cast<UINT>(RootSlot::Raster::IndirectDrawArgs)].InitAsConstants(1, 6, 0, D3D12_SHADER_VISIBILITY_ALL);
 
     CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc;
     rootSigDesc.Init_1_1(_countof(rootParams), rootParams, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
