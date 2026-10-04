@@ -73,7 +73,7 @@ GBufferOutput Main(PSInput input)
         }
         else
         {
-            output.albedo = float4(color.rgb, 1.0f);
+            output.albedo = float4(1.0f, 1.0f, 1.0f, 1.0f);
             output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
             output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
         }

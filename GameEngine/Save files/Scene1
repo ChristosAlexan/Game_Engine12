@@ -11,7 +11,6 @@
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "DirectionalLight",
-            "pcfRange": 1,
             "radius": 1.0,
             "strength": 4.0,
             "transform": {
@@ -44,7 +43,6 @@
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "SpotLight",
-            "pcfRange": 1,
             "radius": 20.280000686645508,
             "strength": 1000.0,
             "transform": {
@@ -68,23 +66,22 @@
         },
         {
             "color": [
-                1.0,
-                0.0,
-                0.0
+                0.6629213094711304,
+                0.3167727589607239,
+                0.007448552176356316
             ],
             "cutoff": 5.0,
             "lightType": 2,
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "PointLight",
-            "pcfRange": 1,
-            "radius": 5.849999904632568,
-            "strength": 1000.0,
+            "radius": 5.099999904632568,
+            "strength": 10.0,
             "transform": {
                 "position": [
-                    -5.349801063537598,
-                    3.431393623352051,
-                    -8.531241416931152
+                    -2.2372591495513916,
+                    3.2904622554779053,
+                    -8.745223999023438
                 ],
                 "rotation": [
                     0.0008684361237101257,
@@ -93,7 +90,7 @@
                     -0.033116478472948074
                 ],
                 "scale": [
-                    0.1004890576004982,
+                    0.10049346834421158,
                     0.0999997928738594,
                     0.10003823786973953
                 ]
@@ -110,7 +107,6 @@
             "materialName": "LightMaterial",
             "meshType": 4,
             "name": "PointLight",
-            "pcfRange": 1,
             "radius": 5.800000190734863,
             "strength": 10.0,
             "transform": {

@@ -434,7 +434,8 @@ namespace ECS
 
 		if (gbufferInstanceData.size() > m_instanceDataHandle->instanceCount)
 		{
-			m_instanceDataHandle->instanceCount = static_cast<uint32_t>(gbufferInstanceData.size() * 1.5f);
+			const size_t newSize = static_cast<size_t>(gbufferInstanceData.size() * gbufferInstanceData.size() / 2);
+			m_instanceDataHandle->instanceCount = static_cast<uint32_t>(newSize);
 
 			m_instanceDataHandle->instanceData.Initialize(GetDX12().GetDevice(), m_instanceDataHandle->instanceCount);
 			m_instanceDataHandle->instanceData.CreateSRV(GetDX12().GetDevice(), m_instanceDataHandle->cpuInstanceHandle);
@@ -446,7 +447,7 @@ namespace ECS
 		auto* cmdList = GetDX12().GetCmdList();
 	
 		cmdList->SetPipelineState(GetDX12().pipelineState_instanced_Gbuffer.Get());
-		cmdList->SetGraphicsRootSignature(GetDX12().GetRasterRootSignature()); // REQUIRED
+		cmdList->SetGraphicsRootSignature(GetDX12().GetRasterRootSignature());
 
 		ID3D12DescriptorHeap* heaps[] = { GetDX12().GetSharedSrvHeap() };
 		GetDX12().GetCmdList()->SetDescriptorHeaps(1, heaps);

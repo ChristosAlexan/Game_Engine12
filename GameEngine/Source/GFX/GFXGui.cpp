@@ -26,7 +26,7 @@ bool GFXGui::Initialize(SDL_Window* sdl_window, ID3D12Device* device, ID3D12Comm
 	result = ImGui_ImplSDL3_InitForD3D(sdl_window);
 	if (!result)
 	{
-		ErrorLogger::Log("Failed to initialize ImGui: Win32!");
+		ErrorLogger::Log("Failed to initialize ImGui: SDL3!");
 		return false;
 	}
 	
@@ -97,7 +97,27 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metric
 	const uint32_t min_v = 0;
 	const uint32_t max_v = 4;
 	ImGui::SliderScalar("Vsync", ImGuiDataType_U32, &scene->GetRenderingManager()->GetDX12().m_vsync, &min_v, &max_v, "%u");
-	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f);
+
+	std::string popupId = "AmbientColor_Popup";
+
+	ImGui::SetNextItemWidth(160.0f);
+	ImGui::DragFloat3("AmbientColor", &scene->GetRenderingManager()->m_ambientColor.x, 0.01f, 0.0f, 0.0f, "%.3f");
+	ImGui::SameLine();
+
+	const ImVec4 _ambientColor = ImVec4(scene->GetRenderingManager()->m_ambientColor.x, scene->GetRenderingManager()->m_ambientColor.y, scene->GetRenderingManager()->m_ambientColor.z, 1.0f);
+	if (ImGui::ColorButton("##AmbientColor_Btn", _ambientColor, ImGuiColorEditFlags_NoAlpha, ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))) {
+		ImGui::OpenPopup(popupId.c_str());
+	}
+
+	if (ImGui::BeginPopup(popupId.c_str())) {
+		ImGui::Text("Ambient Color");
+		ImGui::Separator();
+
+		ImGui::ColorPicker3("##AmbientColor_Picker", &scene->GetRenderingManager()->m_ambientColor.x,
+			ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_DisplayRGB);
+
+		ImGui::EndPopup();
+	}
 	ImGui::DragFloat("Exposure", &scene->GetRenderingManager()->m_exposure, 0.01f);
 	ImGui::DragFloat("Gamma", &scene->GetRenderingManager()->m_gamma, 0.01f);
 	if (ImGui::TreeNode("AO Settings"))
@@ -108,6 +128,7 @@ void GFXGui::GeneralGuiSettings(ECS::SceneManager* sceneManager, Metrics& metric
 
 		ImGui::TreePop();
 	}
+
 	if (ImGui::TreeNode("FXAA Settings"))
 	{
 		ImGui::DragFloat("blendStrength", &scene->GetRenderingManager()->fxaaCB.blendStrength, 0.01f);
@@ -212,8 +233,26 @@ void GFXGui::UpdateSelectedEntity(ECS::SceneManager* sceneManager, UINT screenWi
 				{
 					ECS::LightComponent& lightComponent = scene->GetRegistry().get<ECS::LightComponent>(entity);
 					std::string label;
-					label = "Color##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
-					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1, 0);
+	
+					std::string popupId = label + "_ColorPopup";
+
+					ImGui::SetNextItemWidth(160.0f);
+					ImGui::DragFloat3(label.c_str(), &lightComponent.color.x, 0.1f, 0.0f, 0.0f, "%.2f");
+					ImGui::SameLine();
+
+					const ImVec4 _color(lightComponent.color.x, lightComponent.color.y, lightComponent.color.z, 1.0f);
+					if (ImGui::ColorButton((label + "_Btn").c_str(), _color, ImGuiColorEditFlags_NoAlpha)) {
+						ImGui::OpenPopup(popupId.c_str());
+					}
+
+					if (ImGui::BeginPopup(popupId.c_str())) {
+						ImGui::Text("Edit Color: %s", label.c_str());
+						ImGui::Separator();
+
+						ImGui::ColorPicker3((label + "_Picker").c_str(), &lightComponent.color.x, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_DisplayRGB);
+
+						ImGui::EndPopup();
+					}
 					label = "Radius##" + std::to_string(static_cast<uint32_t>(m_closestEntity));
 					ImGui::DragFloat(label.c_str(), &lightComponent.radius, 0.01, 0);
 					label = "Strength##" + std::to_string(static_cast<uint32_t>(m_closestEntity));		
@@ -283,9 +322,11 @@ void GFXGui::BeginRender()
 {
 	ImGui_ImplSDL3_NewFrame();
 	ImGui_ImplDX12_NewFrame();
-
 	ImGui::NewFrame();
-	//ImGui::ShowDemoWindow();
+
+	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+
+	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), dockspaceFlags);
 }
 
 void GFXGui::EndRender(ID3D12GraphicsCommandList* cmdList)
