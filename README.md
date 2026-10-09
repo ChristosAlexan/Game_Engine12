@@ -12,7 +12,7 @@ The engine’s purpose is to serve as a platform for exploring **graphics progra
 - Skeletal animation support with skinned mesh loading via [tinygltf](https://github.com/syoyo/tinygltf)
 - Compute shader skinning
 - Bindless textures
-- Indirect instanced rendering with ExecuteIndirect for static meshes
+- Indirect instanced rendering with ExecuteIndirect for static and skeletal meshes
 - JSON-based scene save/load system
 - Ray traced shadows, ambient occlusion and reflections for static and skinned meshes using DirectX Raytracing (DXR)
 - BLAS refit for animated entities
