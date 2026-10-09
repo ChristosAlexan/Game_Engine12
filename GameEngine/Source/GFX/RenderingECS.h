@@ -19,6 +19,7 @@ namespace ECS
     struct RenderComponent 
     {
         uint32_t meshDataIndex;
+        uint32_t skinnedVertexOffset;
 		uint32_t sharedMeshID;
         ECS::MESH_TYPE meshType;
         std::shared_ptr<Model> model;

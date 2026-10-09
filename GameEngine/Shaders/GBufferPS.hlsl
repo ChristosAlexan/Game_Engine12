@@ -62,36 +62,18 @@ GBufferOutput Main(PSInput input)
     float metalness = float4(bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].Sample(gSampler, input.uv).rgb, 1.0f).b;
     float roughness = float4(bindlessTextures[NonUniformResourceIndex(instance.metalRoughnessIndex)].Sample(gSampler, input.uv).rgb, 1.0f).g;
     float depth = input.position.z;
-    
-    if (bDrawIndirect)
+   
+    if (instance.hasTextures)
     {
-        if (instance.hasTextures)
-        {
-            output.albedo = albedo;
-            output.normal = float4(worldNormal, 1.0f);
-            output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
-        }
-        else
-        {
-            output.albedo = float4(1.0f, 1.0f, 1.0f, 1.0f);
-            output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
-            output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
-        }
+        output.albedo = albedo;
+        output.normal = float4(worldNormal, 1.0f);
+        output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
     }
     else
     {
-        if (hasTextures)
-        {
-            output.albedo = albedo;
-            output.normal = float4(worldNormal, 1.0f);
-            output.roughMetalMask = float4(roughness, metalness, 1.0f, 0.0f);
-        }
-        else
-        {
-            output.albedo = float4(color.rgb, 1.0f);
-            output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
-            output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
-        }
+        output.albedo = float4(1.0f, 1.0f, 1.0f, 1.0f);
+        output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
+        output.roughMetalMask = float4(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     output.worldPosDepth = float4(worldPos, depth);

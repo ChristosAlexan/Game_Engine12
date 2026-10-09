@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderingECS.h"
 #include <entt/entt.hpp>
+#include "MeshData.h"
 
 namespace ECS
 {
@@ -10,6 +11,8 @@ namespace ECS
 	public:
 		AnimationManager();
 		void Update(float dt, Scene* scene, entt::entity& entity, ECS::RenderComponent& renderComponent);
+
+		SkinningOutputData skinningOutputData;
 	};
 
 }

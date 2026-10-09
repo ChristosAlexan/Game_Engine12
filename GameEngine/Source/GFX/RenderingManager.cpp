@@ -9,6 +9,7 @@
 #include "LightManager.h"
 #include "PhysicsManager.h"
 #include "DX12_Data.h"
+#include "AnimationManager.h"
 
 namespace ECS
 {
@@ -111,6 +112,7 @@ namespace ECS
 		m_totalEntities = 0;
 		m_totalRTentities = 0;
 
+		auto* animationManager = scene->GetAnimationManager();
 		auto* assetManager = scene->GetAssetManager();
 		assetManager->globalVertices.clear();
 		assetManager->globalIndices.clear();
@@ -146,6 +148,7 @@ namespace ECS
 		
 		uint32_t vertexSize = 0, indicesSize = 0;
 		uint32_t rtVertexSize = 0, rtIndicesSize = 0;
+		uint32_t skinnedVertexSize = 0;
 
 		auto group = scene->GetRegistry().group<>(entt::get<ECS::TransformComponent, ECS::RenderComponent>);
 		for (auto [entity, transformComponent, renderComponent] : group.each())
@@ -154,9 +157,9 @@ namespace ECS
 			const bool isSkeletal = renderComponent.meshType == ECS::MESH_TYPE::SKELETAL_MESH;
 
 			uint32_t geoVertexOffset = 0, geoIndexOffset = 0;
-
-			if (!isSkeletal)
-			{
+			
+			//if (!isSkeletal)
+			//{
 				const void* key = cpuMesh.get();
 				auto it = m_meshLookup.find(key);
 				uint32_t id;
@@ -176,10 +179,20 @@ namespace ECS
 				else
 					id = it->second;
 
+				if (isSkeletal)
+				{
+					renderComponent.skinnedVertexOffset = skinnedVertexSize;
+					skinnedVertexSize += static_cast<uint32_t>(cpuMesh->vertices.size());
+				}
+				else
+				{
+					renderComponent.skinnedVertexOffset = 0xFFFFFFFF;   // static mesh
+				}
+
 				renderComponent.sharedMeshID = id;
 				geoVertexOffset = m_sharedMeshes[id].vertexOffset;
 				geoIndexOffset = m_sharedMeshes[id].indexOffset;
-			}
+			//}
 
 			ECS::MeshDataOffsets dataOffsets = {};
 			dataOffsets.vertexOffset = geoVertexOffset;     // shared offsets for instancing
@@ -190,6 +203,7 @@ namespace ECS
 			dataOffsets.hasTextures = (renderComponent.meshType != ECS::MESH_TYPE::LIGHT);
 
 			renderComponent.meshDataIndex = static_cast<UINT>(m_meshDataOffsests.size());
+
 			m_meshDataOffsests.push_back(dataOffsets);
 			m_totalEntities++;
 
@@ -222,6 +236,26 @@ namespace ECS
 			}
 			m_totalRTentities++;
 		}
+
+		// Create skinning output buffer for skeletal meshes
+		auto& skinningData = animationManager->skinningOutputData;
+
+		skinningData.skinningVertexBufferFinalTransform.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(),
+			std::max(skinnedVertexSize, 1u), true);
+
+		DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+		skinningData.skinningCpuUavHandleFinalTransform = allocator.cpuHandle;
+		skinningData.skinningGpuUavHandleFinalTransform = allocator.gpuHandle;
+
+		skinningData.skinningVertexBufferFinalTransform.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(),
+			skinningData.skinningCpuUavHandleFinalTransform);
+
+		allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
+		skinningData.skinningCpuSrvHandleFinalTransform = allocator.cpuHandle;
+		skinningData.skinningGpuSrvHandleFinalTransform = allocator.gpuHandle;
+
+		skinningData.skinningVertexBufferFinalTransform.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(),
+			skinningData.skinningCpuSrvHandleFinalTransform);
 
 		m_perMeshInstances.assign(m_sharedMeshes.size(), {});
 
@@ -431,19 +465,6 @@ namespace ECS
 			return;
 
 		auto* assetManager = scene->GetAssetManager();
-
-		if (gbufferInstanceData.size() > m_instanceDataHandle->instanceCount)
-		{
-			const size_t newSize = static_cast<size_t>(gbufferInstanceData.size() * gbufferInstanceData.size() / 2);
-			m_instanceDataHandle->instanceCount = static_cast<uint32_t>(newSize);
-
-			m_instanceDataHandle->instanceData.Initialize(GetDX12().GetDevice(), m_instanceDataHandle->instanceCount);
-			m_instanceDataHandle->instanceData.CreateSRV(GetDX12().GetDevice(), m_instanceDataHandle->cpuInstanceHandle);
-
-			m_indirectCommandHandle->indirectCommands.Initialize(GetDX12().GetDevice(), m_instanceDataHandle->instanceCount);
-			m_indirectCommandHandle->indirectCommands.CreateSRV(GetDX12().GetDevice(), m_indirectCommandHandle->cpuIndirectCommandHandle);
-		}
-
 		auto* cmdList = GetDX12().GetCmdList();
 	
 		cmdList->SetPipelineState(GetDX12().pipelineState_instanced_Gbuffer.Get());
@@ -765,18 +786,19 @@ namespace ECS
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			ECS::AABB worldAABB = ComputeWorldAABB(transformComponent.aabb, transformComponent.worldMatrix);
-			if (!IsAABBInFrustum(worldAABB, frustum))
-				continue;
+			//if (!IsAABBInFrustum(worldAABB, frustum))
+				//continue;
 
-			if (renderComponent.meshType == MESH_TYPE::SKELETAL_MESH)
+			/*if (renderComponent.meshType == MESH_TYPE::SKELETAL_MESH)
 			{
 				RenderGbuffer(scene, entity, transformComponent, renderComponent);
 				continue;
-			}
+			}*/
 
 			GBufferInstanceData inst = {};
 			inst.worldMatrix = MatrixToFloat4x4(DirectX::XMMatrixTranspose(transformComponent.worldMatrix));
 			inst.meshIndex = renderComponent.meshDataIndex;
+			inst.skinnedOffset = renderComponent.skinnedVertexOffset;
 			m_perMeshInstances[renderComponent.sharedMeshID].push_back(inst);
 		}
 
@@ -836,6 +858,9 @@ namespace ECS
 		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::BindlessTextures), m_bindlessTextures->GetGPUHandle());
 		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::MeshDataOffsets), m_meshDataOffsetsHandle->gpuOffsetsHandle);
 
+		auto* AnimationManager = scene->GetAnimationManager();
+
+		cmdList->SetGraphicsRootDescriptorTable(static_cast<UINT>(RootSlot::Raster::SkinningOutput), AnimationManager->skinningOutputData.skinningGpuSrvHandleFinalTransform);
 		CB_PS_Material psMaterialCB = {};
 
 		psMaterialCB.bDrawIndirect = true;

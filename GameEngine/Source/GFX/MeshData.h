@@ -24,13 +24,13 @@ namespace ECS
     struct GPUSkinningBufferVertexDataOutput
     {
         DirectX::XMFLOAT3 position;
-        float padding;
+        float padding = 0.0f;
         DirectX::XMFLOAT3 normal;
-        float padding1;
+        float padding1 = 0.0f;
         DirectX::XMFLOAT3 tangent;
-        float padding2;
+        float padding2 = 0.0f;
         DirectX::XMFLOAT3 binormal;
-        float padding3;
+        float padding3 = 0.0f;
     };
 
     enum MESH_TYPE
@@ -118,7 +118,8 @@ namespace ECS
     {
         DirectX::XMFLOAT4X4 worldMatrix;
         uint32_t meshIndex;
-		DirectX::XMFLOAT3 padding;
+        uint32_t skinnedOffset;
+		DirectX::XMFLOAT2 padding = DirectX::XMFLOAT2(0.0f, 0.0f);
     };
 
     struct InstanceDataHandle
