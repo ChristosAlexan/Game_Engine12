@@ -786,8 +786,8 @@ namespace ECS
 		for (auto [entity, transformComponent, renderComponent] : group.each())
 		{
 			ECS::AABB worldAABB = ComputeWorldAABB(transformComponent.aabb, transformComponent.worldMatrix);
-			//if (!IsAABBInFrustum(worldAABB, frustum))
-				//continue;
+			if (!IsAABBInFrustum(worldAABB, frustum))
+				continue;
 
 			/*if (renderComponent.meshType == MESH_TYPE::SKELETAL_MESH)
 			{
