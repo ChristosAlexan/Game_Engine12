@@ -28,7 +28,6 @@ namespace ECS
         std::string name;
         bool hasAnimation = false;
         bool hasTextures = false;
-        SkinningOutputData skinningOutData; // Data per render component for compute skinning
         std::shared_ptr<BLAS> blas; // BLAS per render component
     };
 }

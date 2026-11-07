@@ -37,7 +37,6 @@ namespace ECS
 		void ResetRenderTargets();
 		void SetRenderTarget(RenderTargetTexture& renderTarget, float* clearColor);
 		void RenderPbrMaps(Camera& camera);
-		void RenderGbuffer(Scene* scene, entt::entity& entity, TransformComponent& transformComponent, RenderComponent& renderComponent);
 		void RenderGbufferIndirect(Scene* scene, const std::vector<IndirectCommand>& indirectCommands, const std::vector<GBufferInstanceData>& gbufferInstanceData);
 
 		// Frustum-culls, draws skeletal meshes immediately, and builds instanced indirect commands for the rest.

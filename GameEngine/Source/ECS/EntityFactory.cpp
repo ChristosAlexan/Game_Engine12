@@ -49,24 +49,6 @@ namespace ECS
 			
 			renderComponent.mesh->vertexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			renderComponent.mesh->indexBuffer.GetResource()->TransitionState(m_cmdList, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-
-			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.Initialize(scene->GetRenderingManager()->GetDX12().GetDevice(), 
-				renderComponent.mesh->cpuMesh->vertices.size(), true);
-
-			DescriptorAllocator::DescriptorHandle allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
-			renderComponent.skinningOutData.skinningCpuUavHandleFinalTransform = allocator.cpuHandle;
-			renderComponent.skinningOutData.skinningGpuUavHandleFinalTransform = allocator.gpuHandle;
-
-			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateUAV(scene->GetRenderingManager()->GetDX12().GetDevice(), 
-				renderComponent.skinningOutData.skinningCpuUavHandleFinalTransform);
-
-			allocator = scene->GetRenderingManager()->GetDX12().GetDescriptorAllocator()->Allocate();
-			renderComponent.skinningOutData.skinningCpuSrvHandleFinalTransform = allocator.cpuHandle;
-			renderComponent.skinningOutData.skinningGpuSrvHandleFinalTransform = allocator.gpuHandle;
-
-			renderComponent.skinningOutData.skinningVertexBufferFinalTransform.CreateSRV(scene->GetRenderingManager()->GetDX12().GetDevice(),
-				renderComponent.skinningOutData.skinningCpuSrvHandleFinalTransform);
-
 		}
 		else if (renderComponent.meshType == ECS::MESH_TYPE::STATIC_MESH)
 		{

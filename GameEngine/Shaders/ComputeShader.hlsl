@@ -24,7 +24,8 @@ cbuffer CB_CS_Skinning : register(b0, space8)
 {
     float4x4 skinningMatrices[100];
     uint vertexCount;
-    uint3 padding;
+    uint outputOffset;
+    uint2 padding;
 };
 
 RWTexture2D<float4> gOutput : register(u0, space8);
@@ -58,12 +59,12 @@ void Main(uint3 dispatchThreadID : SV_DispatchThreadID)
         skinnedBinormal += Weights[i] * mul(skinningMatrices[g_skinningData[vertexID].indices[i]], float4(g_skinningData[vertexID].binormal.xyz, 0.0f)).xyz;
     }
     
-    g_skinningDataOut[dispatchThreadID.x].position = skinnedPos;
-    g_skinningDataOut[dispatchThreadID.x].padding = 0.0f;
-    g_skinningDataOut[dispatchThreadID.x].normal = skinnedNormal;
-    g_skinningDataOut[dispatchThreadID.x].padding1 = 0.0f;
-    g_skinningDataOut[dispatchThreadID.x].tangent = skinnedTangent;
-    g_skinningDataOut[dispatchThreadID.x].binormal = skinnedBinormal;
-    g_skinningDataOut[dispatchThreadID.x].padding2 = 0.0f;
-    g_skinningDataOut[dispatchThreadID.x].meshIndex = vertexID;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].position = skinnedPos;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].padding = 0.0f;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].normal = skinnedNormal;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].padding1 = 0.0f;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].tangent = skinnedTangent;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].binormal = skinnedBinormal;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].padding2 = 0.0f;
+    g_skinningDataOut[outputOffset + dispatchThreadID.x].meshIndex = vertexID;
 }

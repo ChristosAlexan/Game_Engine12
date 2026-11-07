@@ -1,7 +1,7 @@
 #include "BLASBuilder.h"
 #include "COMException.h"
 #include "Vertex.h"
-
+#include "AnimationManager.h"
 
 BLASBuilder::BLASBuilder()
 {
@@ -72,7 +72,7 @@ ECS::BLAS BLASBuilder::Build(ID3D12Device5* device, ID3D12GraphicsCommandList5* 
 	return blas;
 }
 
-void BLASBuilder::Refit(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::RenderComponent& renderComponent)
+void BLASBuilder::Refit(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdList, ECS::RenderComponent& renderComponent, ECS::AnimationManager* animationManager)
 {
 	if (!renderComponent.blas)
 		return;
@@ -80,9 +80,14 @@ void BLASBuilder::Refit(ID3D12Device5* device, ID3D12GraphicsCommandList5* cmdLi
 	auto inputs = renderComponent.blas->inputs;
 	inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 	
+	auto skinningBufferAddr = animationManager->skinningOutputData.skinningVertexBufferFinalTransform.GetGPUAddress();
+
 	auto geometry = renderComponent.blas->geometry;
-	geometry.Triangles.VertexBuffer.StartAddress = renderComponent.skinningOutData.skinningVertexBufferFinalTransform.GetGPUAddress();
-	geometry.Triangles.VertexBuffer.StrideInBytes = sizeof(ECS::GPUSkinningBufferVertexDataOutput); // size of skinning buffer in bytes to properly offset to the next data set. (position, normal, tangent, binormal) each is 16 bytes with padding
+	const UINT64 stride = sizeof(ECS::GPUSkinningBufferVertexDataOutput);
+	const UINT64 offsetBytes = static_cast<UINT64>(renderComponent.skinnedVertexOffset) * stride;
+
+	geometry.Triangles.VertexBuffer.StartAddress = skinningBufferAddr + offsetBytes;
+	geometry.Triangles.VertexBuffer.StrideInBytes = stride;
 	geometry.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc{};

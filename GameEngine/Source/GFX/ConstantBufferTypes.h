@@ -72,7 +72,8 @@ struct CB_CS_AnimationShader
 {
 	DirectX::XMFLOAT4X4 skinningMatrix[100];
 	uint32_t vertexCount;
-	uint32_t padding[3] = { 0,0,0 };
+	uint32_t outputOffset;
+	uint32_t padding[2] = { 0,0};
 };
 
 /************ RAYTRACING SHADERS *******************/
